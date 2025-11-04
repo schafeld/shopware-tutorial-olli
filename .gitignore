@@ -18,3 +18,5 @@
 /install.lock
 /public/asset-manifest.json
 ###< shopware/core ###
+
+.DS_Store

@@ -2,20 +2,29 @@
 
 ## Overview 🚀
 
-This tutorial will guide you through creating your first Shopware 6 plugin called "MyFirstPlugin" (with namespace "OllisPlugin") - a HelloWorld plugin that demonstrates core Shopware concepts including:
+This tutorial will guide you through creating your first Shopware 6 plugin called **"Olli's HelloWorld Plugin"**. 
+
+**Important naming explanation:**
+- **Plugin folder/name**: `MyFirstPlugin` (this is what Shopware creates)
+- **Namespace**: `OllisPlugin` (this is like your company/developer namespace)  
+- **Display name**: "Olli's HelloWorld Plugin" (this is what users see)
+
+This HelloWorld plugin demonstrates core Shopware concepts including:
 - Plugin structure and setup
-- Working with Product entities
+- Working with Product entities  
 - Creating custom controllers and routes
 - Building storefront pages
 - Service injection and repository usage
+- **Plugin configuration system**
 
 ## What We'll Build
 
 A complete HelloWorld plugin that:
-1. Displays a custom "Hello World" page in the storefront
-2. Shows a list of products from your shop
-3. Demonstrates proper Shopware development patterns
-4. Includes proper service configuration
+1. Displays a custom "Hello World" page in the storefront at `/hello-world`
+2. Shows a list of products from your shop with images and details
+3. **Includes configurable text** that can be changed in the admin panel
+4. Demonstrates proper Shopware development patterns
+5. Includes proper service configuration and lifecycle management
 
 ## Prerequisites ✅
 
@@ -34,10 +43,10 @@ A complete HelloWorld plugin that:
 4. **Test both your plugin AND core functionality** after installation
 
 ### Signs Your Plugin Broke Core Functionality:
-- Product/category pages show 500 errors
+- Product/category pages show 500 errors (white screen with error message)
 - Error: "Definition for entity 'ProductDefinition' does not exist"
-- Core routes like `/Clothing/` stop working
-- DAL validation shows massive errors for core entities
+- Core routes like `/Clothing/` stop working (show 404 or 500 errors)
+- Shopware's database system shows massive errors for core entities
 
 ---
 
@@ -130,19 +139,27 @@ We'll create a HelloWorld controller that displays products:
 namespace OllisPlugin\Storefront\Controller;
 
 use OllisPlugin\Service\ProductService;
-use Shopware\Core\Framework\Context;
+use Shopware\Core\PlatformRequest;
+use Shopware\Core\System\SalesChannel\SalesChannelContext;
+use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Shopware\Storefront\Controller\StorefrontController;
+use Shopware\Storefront\Framework\Routing\StorefrontRouteScope;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route(defaults: ['_routeScope' => ['storefront']])]
+#[Route(defaults: [PlatformRequest::ATTRIBUTE_ROUTE_SCOPE => [StorefrontRouteScope::ID]])]
 class HelloWorldController extends StorefrontController
 {
     private ProductService $productService;
+    private SystemConfigService $systemConfigService;
 
-    public function __construct(ProductService $productService)
-    {
+    public function __construct(
+        ProductService $productService,
+        SystemConfigService $systemConfigService
+    ) {
         $this->productService = $productService;
+        $this->systemConfigService = $systemConfigService;
     }
 
     #[Route(
@@ -150,15 +167,22 @@ class HelloWorldController extends StorefrontController
         name: 'frontend.hello.world',
         methods: ['GET']
     )]
-    public function helloWorld(Context $context): Response
+    public function helloWorld(Request $request, SalesChannelContext $context): Response
     {
         // Get some products to display
-        $products = $this->productService->getActiveProducts($context, 5);
+        $products = $this->productService->getActiveProducts($context->getContext(), 5);
+        
+        // Get the configurable text from system configuration
+        $configText = $this->systemConfigService->get(
+            'MyFirstPlugin.config.textField',
+            $context->getSalesChannel()->getId()
+        );
         
         return $this->renderStorefront('@MyFirstPlugin/storefront/page/hello-world.html.twig', [
             'message' => 'Hello World from Olli\'s Plugin!',
             'products' => $products,
-            'totalProducts' => count($products)
+            'totalProducts' => count($products),
+            'configText' => $configText ?? 'This plugin demonstrates working with Product entities.'
         ]);
     }
 }
@@ -251,6 +275,7 @@ Update the services.xml to register your new controller:
         <!-- HelloWorld Controller -->
         <service id="OllisPlugin\Storefront\Controller\HelloWorldController" public="true">
             <argument type="service" id="OllisPlugin\Service\ProductService"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
             </call>
@@ -261,7 +286,43 @@ Update the services.xml to register your new controller:
 
 ---
 
-## Step 7: Create the Storefront Template
+## Step 7: Add Plugin Configuration
+
+Let's add a configuration option that allows admins to customize text in our plugin.
+
+### File: `src/Resources/config/config.xml`
+
+Create this new file to define configuration options:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
+
+    <card>
+        <title>HelloWorld Plugin Configuration</title>
+
+        <input-field type="text">
+            <name>textField</name>
+            <label>Hero section text</label>
+            <helpText>This text will appear in the hero section of the HelloWorld page</helpText>
+            <defaultValue>This plugin demonstrates working with Product entities.</defaultValue>
+        </input-field>
+    </card>
+
+</config>
+```
+
+**What this does:**
+- Creates a configuration page in Settings → Extensions → MyFirstPlugin
+- Adds a text field that admins can edit
+- Sets a default value for the text
+- Includes helpful description text
+
+---
+
+## Step 8: Create the Storefront Template
 
 Create the template directory and HelloWorld page:
 
@@ -284,7 +345,8 @@ src/Resources/views/storefront/page/hello-world.html.twig
                     <h1 class="display-4">🎉 {{ message }}</h1>
                     <p class="lead">Welcome to your first Shopware 6 plugin!</p>
                     <hr class="my-4">
-                    <p class="mb-0">This plugin demonstrates working with Product entities.</p>
+                    <!-- This text comes from the plugin configuration -->
+                    <p class="mb-0">{{ configText }}</p>
                 </div>
 
                 <!-- Products Section -->
@@ -372,7 +434,18 @@ src/Resources/views/storefront/page/hello-world.html.twig
                                     <li>Repository usage</li>
                                     <li>Template rendering</li>
                                     <li>Entity associations</li>
+                                    <li>System configuration</li>
                                 </ul>
+                                
+                                <hr class="my-3">
+                                
+                                <p class="small mb-2">
+                                    <strong>Configuration:</strong><br>
+                                    The text in the hero section can be configured in Settings → Extensions → MyFirstPlugin
+                                </p>
+                                <p class="small mb-0">
+                                    <strong>Current value:</strong> "{{ configText }}"
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -385,7 +458,7 @@ src/Resources/views/storefront/page/hello-world.html.twig
 
 ---
 
-## Step 8: Installation & Activation Commands
+## Step 9: Installation & Activation Commands
 
 Now let's install and activate your plugin:
 
@@ -402,17 +475,32 @@ bin/console cache:clear
 
 ---
 
-## Step 9: Test Your Plugin
+## Step 10: Test Your Plugin
 
 1. **Visit your HelloWorld page**: http://127.0.0.1:8000/hello-world
 2. **Expected result**: A styled page showing:
    - Welcome message
-   - List of products from your shop
+   - Configurable text in the hero section  
+   - List of products from your shop with images
    - Plugin information sidebar
+
+## Step 11: Test Plugin Configuration
+
+1. **Open Shopware Admin**: Go to your admin panel (usually http://127.0.0.1:8000/admin)
+2. **Navigate to Settings**: Settings → System → Extensions
+3. **Find your plugin**: Look for "Olli's HelloWorld Plugin" 
+4. **Click the settings icon** (gear icon) next to your plugin
+5. **Edit the text**: Change "Hero section text" to something like "Welcome to my custom plugin!"
+6. **Save**: Click the save button
+7. **Test the change**: Refresh http://127.0.0.1:8000/hello-world to see your custom text
+
+**Troubleshooting configuration:**
+- If you don't see the settings icon, make sure the plugin is activated
+- If changes don't appear, clear cache: `bin/console cache:clear`
 
 ---
 
-## Step 10: Development Workflow
+## Step 12: Development Workflow
 
 When making changes to your plugin:
 
@@ -434,28 +522,26 @@ bin/console cache:clear
 
 ### 🚨 CRITICAL: Core Functionality Broken (Products/Categories Don't Work)
 
-**Error**: "Definition for entity 'ProductDefinition' does not exist" or 500 errors on product/category pages.
+**What happened**: If your shop's product pages suddenly show 500 errors or "Definition for entity 'ProductDefinition' does not exist", your plugin accidentally broke Shopware's core functionality.
 
-**Cause**: Plugin generator created custom entity definitions that override Shopware's core entities.
+**Why this happens**: The plugin generator sometimes creates files that override Shopware's built-in product system.
 
-**Solution**:
+**How to fix**:
 ```bash
-# 1. Remove problematic Core entity overrides
+# 1. Remove problematic files that override core functionality  
 rm -rf custom/plugins/MyFirstPlugin/src/Core/
 
-# 2. Clean services.xml - remove any core entity definition services
-# Remove lines like: <service id="OllisPlugin\Core\Content\Product\ProductDefinition">
+# 2. Edit services.xml and remove any lines that look like this:
+# <service id="OllisPlugin\Core\Content\Product\ProductDefinition">
 
-# 3. Clean routes.xml - remove Core route imports
-# Remove: <import resource="../../Core/**/*Route.php" type="attribute" />
+# 3. Edit routes.xml and remove this line if it exists:
+# <import resource="../../Core/**/*Route.php" type="attribute" />
 
-# 4. Update plugin and clear cache
+# 4. Reload your plugin
 bin/console plugin:update MyFirstPlugin
-rm -rf var/cache/*
 bin/console cache:clear
 
-# 5. Validate DAL to confirm fix
-bin/console dal:validate
+# 5. Test that product pages work again
 ```
 
 ### Plugin Not Found
@@ -480,12 +566,19 @@ bin/console plugin:list
 - Check if products are active
 - Verify database connection
 
-### Database Constraint Violations on Plugin Reinstall
-```bash
-# Clean up leftover custom fields manually
-mysql -h 127.0.0.1 -P 60233 -u shopware -pshopware -D shopware -e "DELETE FROM custom_field WHERE name LIKE 'swag_%';"
-mysql -h 127.0.0.1 -P 60233 -u shopware -pshopware -D shopware -e "DELETE FROM custom_field_set WHERE name LIKE 'swag_%';"
-```
+### Plugin Configuration Not Showing
+**Problem**: You don't see the configuration options in Settings → Extensions
+**Solution**: 
+- Make sure the plugin is activated (not just installed)
+- Check that `config.xml` exists in `src/Resources/config/`
+- Run `bin/console plugin:update MyFirstPlugin` and `bin/console cache:clear`
+
+### Configuration Changes Not Appearing  
+**Problem**: You changed the text in admin but it doesn't show on the page
+**Solution**:
+- Clear cache: `bin/console cache:clear`  
+- Make sure you saved the configuration in the admin panel
+- Check browser cache (try hard refresh: Ctrl+F5 or Cmd+Shift+R)
 
 ---
 
@@ -504,15 +597,18 @@ Congratulations! You've built your first Shopware plugin. Here's what you can ex
 
 ## Key Concepts Learned ✅
 
-- ✅ Plugin structure and generation
-- ✅ **Plugin cleanup and avoiding core entity overrides** 
+- ✅ **Plugin naming system** (folder name vs namespace vs display name)
+- ✅ Plugin structure and generation  
+- ✅ **Plugin cleanup and avoiding core entity overrides**
 - ✅ Service injection and dependency injection
-- ✅ Repository patterns and entity queries
+- ✅ Repository patterns and entity queries  
 - ✅ Custom controllers and routing
+- ✅ **System configuration integration** (`config.xml`)
+- ✅ **SystemConfigService usage** (reading configuration values)
 - ✅ Storefront template creation
-- ✅ Twig template syntax
-- ✅ Plugin lifecycle management
-- ✅ Troubleshooting core functionality breaks
+- ✅ Twig template syntax and variables
+- ✅ Plugin lifecycle management (install/activate/deactivate)
+- ✅ Troubleshooting common plugin issues
 
 ## Plugin Development Best Practices 🎯
 
@@ -550,31 +646,33 @@ Your **cleaned** plugin should look like this (note: NO Core/ directory):
 custom/plugins/MyFirstPlugin/
 ├── composer.json
 └── src/
-    ├── MyFirstPlugin.php
+    ├── MyFirstPlugin.php        # Main plugin class
     ├── Storefront/
     │   └── Controller/
-    │       └── HelloWorldController.php
+    │       └── HelloWorldController.php  # Our HelloWorld page controller
     ├── Service/
-    │   └── ProductService.php
+    │   └── ProductService.php   # Service to get products
     └── Resources/
         ├── config/
-        │   ├── services.xml      # Clean, no core entity overrides
-        │   └── routes.xml        # No Core route imports
+        │   ├── services.xml      # Service definitions (clean!)
+        │   ├── routes.xml        # Route imports (clean!)
+        │   └── config.xml        # Plugin configuration schema
         └── views/
             └── storefront/
                 └── page/
-                    └── hello-world.html.twig
+                    └── hello-world.html.twig  # Our template
 ```
 
 ### ✅ Verification Checklist
 
 Before considering your plugin complete:
 
-- [ ] **Plugin works**: `/hello-world` page loads correctly
-- [ ] **Core functionality intact**: Product pages like `/Clothing/` still work
+- [ ] **HelloWorld page works**: Visit http://127.0.0.1:8000/hello-world and see the page
+- [ ] **Products display**: The page shows a list of products from your shop
+- [ ] **Configuration works**: You can change the hero text via Settings → Extensions → MyFirstPlugin  
+- [ ] **Core functionality intact**: Product pages like `/Clothing/` still work normally
 - [ ] **No Core/ directory**: `custom/plugins/MyFirstPlugin/src/Core/` does not exist
-- [ ] **Clean DAL validation**: `bin/console dal:validate` shows no critical errors for core entities
-- [ ] **All routes registered**: `bin/console debug:router | grep -E "(hello|product|category)"` shows expected routes
+- [ ] **Plugin shows in admin**: "Olli's HelloWorld Plugin" appears in Extensions list
 
 **Great job! You've successfully created your first Shopware 6 plugin without breaking core functionality! 🎉**
 

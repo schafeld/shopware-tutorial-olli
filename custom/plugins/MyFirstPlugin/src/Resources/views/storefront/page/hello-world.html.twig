@@ -1,0 +1,122 @@
+{% sw_extends '@Storefront/storefront/base.html.twig' %}
+
+{% block base_content %}
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-12">
+                <!-- Hero Section -->
+                <div class="jumbotron bg-primary text-white text-center p-5 mb-5">
+                    <h1 class="display-4">🎉 {{ message }}</h1>
+                    <p class="lead">Welcome to your first Shopware 6 plugin!</p>
+                    <hr class="my-4">
+                    <p class="mb-0">This plugin demonstrates working with Product entities.</p>
+                </div>
+
+                <!-- Products Section -->
+                <div class="row">
+                    <div class="col-md-8">
+                        <h2>Featured Products</h2>
+                        <p class="text-muted">Showing {{ totalProducts }} products from your shop</p>
+                        
+                        {% if products|length > 0 %}
+                            <div class="row">
+                                {% for product in products %}
+                                    <div class="col-md-6 mb-4">
+                                        <div class="card h-100">
+                                            {% if product.cover %}
+                                                <img src="{{ product.cover.media.url }}" 
+                                                     class="card-img-top" 
+                                                     alt="{{ product.name }}"
+                                                     style="height: 200px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                                     style="height: 200px;">
+                                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                            
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ product.name }}</h5>
+                                                <p class="card-text">
+                                                    <small class="text-muted">
+                                                        Product #: {{ product.productNumber }}
+                                                    </small>
+                                                </p>
+                                                {% if product.manufacturer %}
+                                                    <p class="card-text">
+                                                        <strong>Brand:</strong> {{ product.manufacturer.name }}
+                                                    </p>
+                                                {% endif %}
+                                                <p class="card-text">
+                                                    <span class="badge badge-{{ product.active ? 'success' : 'danger' }}">
+                                                        {{ product.active ? 'Active' : 'Inactive' }}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            
+                                            <div class="card-footer">
+                                                <a href="{{ seoUrl('frontend.detail.page', {'productId': product.id}) }}" 
+                                                   class="btn btn-primary btn-sm">
+                                                    View Product
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <h4>No Products Found</h4>
+                                <p>It looks like your shop doesn't have any active products yet.</p>
+                                <p class="mb-0">Add some products in the administration panel to see them here!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Sidebar -->
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Plugin Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled">
+                                    <li><strong>Plugin Name:</strong> MyFirstPlugin</li>
+                                    <li><strong>Route:</strong> /hello-world</li>
+                                    <li><strong>Products Shown:</strong> {{ totalProducts }}</li>
+                                    <li><strong>Shopware Version:</strong> 6.7.3.1</li>
+                                </ul>
+                                
+                                <hr>
+                                
+                                <h6>What This Demonstrates:</h6>
+                                <ul class="small">
+                                    <li>Custom controller routing</li>
+                                    <li>Service injection</li>
+                                    <li>Repository usage</li>
+                                    <li>Template rendering</li>
+                                    <li>Entity associations</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <h6>Development Info</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small">
+                                    This HelloWorld plugin was created following the tutorial in:
+                                    <code>AI_DOCUMENTS/TUTORIALS/PLUGIN-HELLO-WORLD.md</code>
+                                </p>
+                                <p class="small mb-0">
+                                    <strong>Next steps:</strong> Try adding more functionality like API endpoints, admin modules, or custom entities!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -7,6 +7,4 @@
 
     <import resource="../../Storefront/Controller/**/*Controller.php" type="attribute" />
 
-    <import resource="../../Core/**/*Route.php" type="attribute" />
-
 </routes>

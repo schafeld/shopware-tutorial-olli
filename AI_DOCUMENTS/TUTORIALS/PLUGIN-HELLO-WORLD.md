@@ -23,6 +23,22 @@ A complete HelloWorld plugin that:
 - Basic PHP and Twig knowledge
 - Terminal/command line access
 
+## ⚠️ IMPORTANT WARNINGS
+
+**Before You Start**: The Shopware plugin generator can create problematic files that break core functionality. This tutorial includes mandatory cleanup steps to prevent breaking your shop.
+
+### Common Pitfalls to Avoid:
+1. **Never override core entities** (ProductDefinition, CategoryDefinition, etc.)
+2. **Always clean up generated Core/ directories** that contain entity overrides
+3. **Remove problematic service registrations** for core entities
+4. **Test both your plugin AND core functionality** after installation
+
+### Signs Your Plugin Broke Core Functionality:
+- Product/category pages show 500 errors
+- Error: "Definition for entity 'ProductDefinition' does not exist"
+- Core routes like `/Clothing/` stop working
+- DAL validation shows massive errors for core entities
+
 ---
 
 ## Step 1: Plugin Generation (COMPLETED ✅)
@@ -38,9 +54,53 @@ bin/console plugin:create OllisPlugin
 
 This created the basic plugin structure at `custom/plugins/MyFirstPlugin/` with namespace `OllisPlugin`
 
+> ⚠️ **CRITICAL WARNING**: The Shopware plugin generator often creates overly complex examples that can **break core functionality**. After generation, you may need to remove unnecessary files that override core entities. See the "Cleanup Generated Files" section below.
+
 ---
 
-## Step 2: Explore Generated Structure
+## Step 2: Cleanup Generated Files (CRITICAL 🚨)
+
+**IMPORTANT**: The plugin generator may have created files that override Shopware's core entities, which can break your entire shop. You MUST remove these problematic files before proceeding.
+
+### Remove Problematic Core Entity Overrides
+
+```bash
+# Remove any Core entity definitions that override Shopware's built-in entities
+rm -rf custom/plugins/MyFirstPlugin/src/Core/
+
+# This removes files like ProductDefinition.php that would break product functionality
+```
+
+### Clean Up services.xml
+
+Check `src/Resources/config/services.xml` and remove any lines that register core entity definitions:
+
+```xml
+<!-- REMOVE lines like this that override core entities: -->
+<service id="OllisPlugin\Core\Content\Product\ProductDefinition">
+    <tag name="shopware.entity.definition" entity="product" />
+</service>
+```
+
+### Clean Up routes.xml
+
+Check `src/Resources/config/routes.xml` and remove references to deleted Core files:
+
+```xml
+<!-- REMOVE this line if it exists: -->
+<import resource="../../Core/**/*Route.php" type="attribute" />
+```
+
+### Update Plugin After Cleanup
+
+```bash
+bin/console plugin:update MyFirstPlugin
+bin/console cache:clear
+```
+
+---
+
+## Step 3: Explore Generated Structure
 
 Let's examine what Shopware generated for you:
 
@@ -58,7 +118,7 @@ custom/plugins/MyFirstPlugin/
 
 ---
 
-## Step 3: Create Your First Controller
+## Step 4: Create Your First Controller
 
 We'll create a HelloWorld controller that displays products:
 
@@ -106,7 +166,7 @@ class HelloWorldController extends StorefrontController
 
 ---
 
-## Step 4: Enhance the ProductService
+## Step 5: Enhance the ProductService
 
 Update the generated ProductService to be more useful:
 
@@ -169,7 +229,7 @@ class ProductService
 
 ---
 
-## Step 5: Update Service Configuration
+## Step 6: Update Service Configuration
 
 Update the services.xml to register your new controller:
 
@@ -201,7 +261,7 @@ Update the services.xml to register your new controller:
 
 ---
 
-## Step 6: Create the Storefront Template
+## Step 7: Create the Storefront Template
 
 Create the template directory and HelloWorld page:
 
@@ -325,7 +385,7 @@ src/Resources/views/storefront/page/hello-world.html.twig
 
 ---
 
-## Step 7: Installation & Activation Commands
+## Step 8: Installation & Activation Commands
 
 Now let's install and activate your plugin:
 
@@ -342,7 +402,7 @@ bin/console cache:clear
 
 ---
 
-## Step 8: Test Your Plugin
+## Step 9: Test Your Plugin
 
 1. **Visit your HelloWorld page**: http://127.0.0.1:8000/hello-world
 2. **Expected result**: A styled page showing:
@@ -352,7 +412,7 @@ bin/console cache:clear
 
 ---
 
-## Step 9: Development Workflow
+## Step 10: Development Workflow
 
 When making changes to your plugin:
 
@@ -372,6 +432,32 @@ bin/console cache:clear
 
 ## Troubleshooting 🔧
 
+### 🚨 CRITICAL: Core Functionality Broken (Products/Categories Don't Work)
+
+**Error**: "Definition for entity 'ProductDefinition' does not exist" or 500 errors on product/category pages.
+
+**Cause**: Plugin generator created custom entity definitions that override Shopware's core entities.
+
+**Solution**:
+```bash
+# 1. Remove problematic Core entity overrides
+rm -rf custom/plugins/MyFirstPlugin/src/Core/
+
+# 2. Clean services.xml - remove any core entity definition services
+# Remove lines like: <service id="OllisPlugin\Core\Content\Product\ProductDefinition">
+
+# 3. Clean routes.xml - remove Core route imports
+# Remove: <import resource="../../Core/**/*Route.php" type="attribute" />
+
+# 4. Update plugin and clear cache
+bin/console plugin:update MyFirstPlugin
+rm -rf var/cache/*
+bin/console cache:clear
+
+# 5. Validate DAL to confirm fix
+bin/console dal:validate
+```
+
 ### Plugin Not Found
 ```bash
 bin/console plugin:refresh
@@ -382,6 +468,7 @@ bin/console plugin:list
 - Check controller routing syntax
 - Verify services.xml configuration
 - Clear cache: `bin/console cache:clear`
+- Ensure controller is in `Storefront/Controller/` directory
 
 ### Template Not Found
 - Check template path: `@MyFirstPlugin/storefront/page/hello-world.html.twig`
@@ -392,6 +479,13 @@ bin/console plugin:list
 - Add products via administration panel
 - Check if products are active
 - Verify database connection
+
+### Database Constraint Violations on Plugin Reinstall
+```bash
+# Clean up leftover custom fields manually
+mysql -h 127.0.0.1 -P 60233 -u shopware -pshopware -D shopware -e "DELETE FROM custom_field WHERE name LIKE 'swag_%';"
+mysql -h 127.0.0.1 -P 60233 -u shopware -pshopware -D shopware -e "DELETE FROM custom_field_set WHERE name LIKE 'swag_%';"
+```
 
 ---
 
@@ -411,18 +505,46 @@ Congratulations! You've built your first Shopware plugin. Here's what you can ex
 ## Key Concepts Learned ✅
 
 - ✅ Plugin structure and generation
+- ✅ **Plugin cleanup and avoiding core entity overrides** 
 - ✅ Service injection and dependency injection
 - ✅ Repository patterns and entity queries
 - ✅ Custom controllers and routing
 - ✅ Storefront template creation
 - ✅ Twig template syntax
 - ✅ Plugin lifecycle management
+- ✅ Troubleshooting core functionality breaks
+
+## Plugin Development Best Practices 🎯
+
+### For HelloWorld/Simple Plugins:
+- **Keep it minimal** - Only create what you actually need
+- **Use existing entities** - Don't create custom Product/Category definitions
+- **Work with repositories** - Use `product.repository` service, don't override entities
+- **Test core functionality** - Always verify product/category pages still work
+
+### Safe Plugin Structure for Beginners:
+```
+custom/plugins/MyPlugin/
+├── src/
+│   ├── Storefront/Controller/     # Your controllers
+│   ├── Service/                   # Your business logic
+│   └── Resources/
+│       ├── config/services.xml    # Service definitions
+│       ├── config/routes.xml      # Route imports
+│       └── views/                 # Your templates
+```
+
+### What NOT to Create for Simple Plugins:
+- ❌ `src/Core/Content/Product/` - Overrides core Product entity
+- ❌ `src/Core/Content/Category/` - Overrides core Category entity  
+- ❌ Custom entity definitions for existing core entities
+- ❌ Complex entity relationships on first plugin
 
 ---
 
 ## Complete File Structure
 
-Your plugin should now look like this:
+Your **cleaned** plugin should look like this (note: NO Core/ directory):
 
 ```
 custom/plugins/MyFirstPlugin/
@@ -436,11 +558,35 @@ custom/plugins/MyFirstPlugin/
     │   └── ProductService.php
     └── Resources/
         ├── config/
-        │   └── services.xml
+        │   ├── services.xml      # Clean, no core entity overrides
+        │   └── routes.xml        # No Core route imports
         └── views/
             └── storefront/
                 └── page/
                     └── hello-world.html.twig
 ```
 
-**Great job! You've successfully created your first Shopware 6 plugin! 🎉**
+### ✅ Verification Checklist
+
+Before considering your plugin complete:
+
+- [ ] **Plugin works**: `/hello-world` page loads correctly
+- [ ] **Core functionality intact**: Product pages like `/Clothing/` still work
+- [ ] **No Core/ directory**: `custom/plugins/MyFirstPlugin/src/Core/` does not exist
+- [ ] **Clean DAL validation**: `bin/console dal:validate` shows no critical errors for core entities
+- [ ] **All routes registered**: `bin/console debug:router | grep -E "(hello|product|category)"` shows expected routes
+
+**Great job! You've successfully created your first Shopware 6 plugin without breaking core functionality! 🎉**
+
+---
+
+## 🎓 Graduation: You're Ready For More Complex Plugins!
+
+Now that you understand the fundamentals and common pitfalls, you can safely explore:
+- Creating custom entities (that don't conflict with core ones)
+- Building administration panels  
+- Adding API endpoints
+- Event subscribers and hooks
+- Complex entity relationships
+
+**Remember**: Always start simple, test thoroughly, and never override core entities unless you have a very specific advanced use case!

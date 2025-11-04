@@ -27,7 +27,8 @@ class MyFirstPlugin extends Plugin
             return;
         }
 
-        // Remove or deactivate the data created by the plugin
+        // Remove all data created by the plugin
+        $this->getCustomFieldsInstaller()->cleanup($uninstallContext->getContext());
     }
 
     public function activate(ActivateContext $activateContext): void
@@ -41,7 +42,8 @@ class MyFirstPlugin extends Plugin
     public function deactivate(DeactivateContext $deactivateContext): void
     {
         // Deactivate entities, such as a new payment method
-        // Or remove previously created entities
+        // Remove relations but keep the custom field definitions
+        $this->getCustomFieldsInstaller()->removeRelations($deactivateContext->getContext());
     }
 
     public function update(UpdateContext $updateContext): void

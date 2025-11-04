@@ -46,6 +46,9 @@ class CustomFieldsInstaller
 
     public function install(Context $context): void
     {
+        // First cleanup any existing custom fields to prevent conflicts
+        $this->cleanup($context);
+        
         $this->customFieldSetRepository->upsert([
             self::CUSTOM_FIELDSET
         ], $context);
@@ -53,12 +56,53 @@ class CustomFieldsInstaller
 
     public function addRelations(Context $context): void
     {
+        $customFieldSetIds = $this->getCustomFieldSetIds($context);
+        
+        if (empty($customFieldSetIds)) {
+            return; // No custom field sets to relate
+        }
+        
         $this->customFieldSetRelationRepository->upsert(array_map(function (string $customFieldSetId) {
             return [
                 'customFieldSetId' => $customFieldSetId,
                 'entityName' => 'product',
             ];
-        }, $this->getCustomFieldSetIds($context)), $context);
+        }, $customFieldSetIds), $context);
+    }
+
+    public function removeRelations(Context $context): void
+    {
+        $customFieldSetIds = $this->getCustomFieldSetIds($context);
+        
+        if (empty($customFieldSetIds)) {
+            return;
+        }
+
+        // Find and delete relations for this plugin's custom field sets
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('entityName', 'product'));
+        $criteria->addFilter(new EqualsFilter('customFieldSetId', $customFieldSetIds[0]));
+        
+        $relationIds = $this->customFieldSetRelationRepository->searchIds($criteria, $context)->getIds();
+        
+        if (!empty($relationIds)) {
+            $deleteData = array_map(fn($id) => ['id' => $id], $relationIds);
+            $this->customFieldSetRelationRepository->delete($deleteData, $context);
+        }
+    }
+
+    public function cleanup(Context $context): void
+    {
+        // Remove relations first
+        $this->removeRelations($context);
+        
+        // Then remove the custom field set (which will cascade delete custom fields)
+        $customFieldSetIds = $this->getCustomFieldSetIds($context);
+        
+        if (!empty($customFieldSetIds)) {
+            $deleteData = array_map(fn($id) => ['id' => $id], $customFieldSetIds);
+            $this->customFieldSetRepository->delete($deleteData, $context);
+        }
     }
 
     /**

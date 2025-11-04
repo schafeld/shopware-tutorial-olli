@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
+
+    <card>
+        <title>HelloWorld Plugin Configuration</title>
+
+        <input-field type="text">
+            <name>textField</name>
+            <label>Hero section text</label>
+            <helpText>This text will appear in the hero section of the HelloWorld page</helpText>
+            <defaultValue>This plugin demonstrates working with Product entities.</defaultValue>
+        </input-field>
+    </card>
+
+</config>

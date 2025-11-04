@@ -37,6 +37,7 @@
         <!-- HelloWorld Controller -->
         <service id="OllisPlugin\Storefront\Controller\HelloWorldController" public="true">
             <argument type="service" id="OllisPlugin\Service\ProductService"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
             </call>

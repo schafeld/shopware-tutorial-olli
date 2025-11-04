@@ -9,7 +9,8 @@
                     <h1 class="display-4">🎉 {{ message }}</h1>
                     <p class="lead">Welcome to your first Shopware 6 plugin!</p>
                     <hr class="my-4">
-                    <p class="mb-0">This plugin demonstrates working with Product entities.</p>
+                    <!-- Configurable text from plugin configuration -->
+                    <p class="mb-0">{{ configText }}</p>
                 </div>
 
                 <!-- Products Section -->
@@ -96,7 +97,18 @@
                                     <li>Repository usage</li>
                                     <li>Template rendering</li>
                                     <li>Entity associations</li>
+                                    <li>System configuration</li>
                                 </ul>
+                                
+                                <hr class="my-3">
+                                
+                                <p class="small mb-2">
+                                    <strong>Configuration:</strong><br>
+                                    The text in the hero section can be configured in Settings → Extensions → MyFirstPlugin
+                                </p>
+                                <p class="small mb-0">
+                                    <strong>Current value:</strong> "{{ configText }}"
+                                </p>
                             </div>
                         </div>
 

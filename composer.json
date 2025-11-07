@@ -70,6 +70,7 @@
         }
     },
     "require-dev": {
-        "frosh/development-helper": "^3.0"
+        "frosh/development-helper": "^3.0",
+        "symfony/web-profiler-bundle": "^7.3"
     }
 }

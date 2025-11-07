@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "865d02d6724f9f7b6970bf66c26f45ce",
+    "content-hash": "e49d9cbb94cfff2797bbb051bf50bc10",
     "packages": [
         {
             "name": "async-aws/core",
@@ -11366,7 +11366,68 @@
             "time": "2024-10-15T19:20:02+00:00"
         }
     ],
-    "packages-dev": [],
+    "packages-dev": [
+        {
+            "name": "frosh/development-helper",
+            "version": "3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/FriendsOfShopware/FroshDevelopmentHelper.git",
+                "reference": "e42395d19e8f653818e812e62ce330bd9b5d998c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/FriendsOfShopware/FroshDevelopmentHelper/zipball/e42395d19e8f653818e812e62ce330bd9b5d998c",
+                "reference": "e42395d19e8f653818e812e62ce330bd9b5d998c",
+                "shasum": ""
+            },
+            "require": {
+                "shopware/core": "~6.6.0 || ~6.7.0"
+            },
+            "type": "shopware-platform-plugin",
+            "extra": {
+                "label": {
+                    "de-DE": "Hilfreiche Tools für die Entwicklung",
+                    "en-GB": "Helpful development tools"
+                },
+                "copyright": "FriendsOfShopware",
+                "description": {
+                    "de-DE": "Stellt Hilfsfunktionen für die Entwicklung von Plugins in Shopware 6 bereit. Ideal für Entwickler um in eigenen Developer- oder Test-Umgebungen Shopware 6 debuggen zu können.",
+                    "en-GB": "Provides help functions for the development of plugins in Shopware 6. Ideal for developers to debug Shopware 6 in their own developer or test environments."
+                },
+                "supportLink": {
+                    "de-DE": "https://github.com/FriendsOfShopware/FroshDevelopmentHelper/issues",
+                    "en-GB": "https://github.com/FriendsOfShopware/FroshDevelopmentHelper/issues"
+                },
+                "manufacturerLink": {
+                    "de-DE": "https://github.com/FriendsOfShopware/FroshDevelopmentHelper",
+                    "en-GB": "https://github.com/FriendsOfShopware/FroshDevelopmentHelper"
+                },
+                "shopware-plugin-class": "Frosh\\DevelopmentHelper\\FroshDevelopmentHelper"
+            },
+            "autoload": {
+                "psr-4": {
+                    "Frosh\\DevelopmentHelper\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "FriendsOfShopware",
+                    "homepage": "https://friendsofshopware.com"
+                }
+            ],
+            "description": "Development Helper",
+            "support": {
+                "issues": "https://github.com/FriendsOfShopware/FroshDevelopmentHelper/issues",
+                "source": "https://github.com/FriendsOfShopware/FroshDevelopmentHelper/tree/3.0.0"
+            },
+            "time": "2025-04-20T17:08:40+00:00"
+        }
+    ],
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {},

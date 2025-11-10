@@ -1,0 +1,12 @@
+{% sw_extends '@Storefront/storefront/base.html.twig' %}
+
+{% block base_body_inner %}
+    <div data-my-custom-theme-plugin="true">
+        {{ parent() }}
+    </div>
+{% endblock %}
+
+{% block base_body_script %}
+    {{ parent() }}
+    <script type="text/javascript" src="{{ asset('js/my-custom-theme/my-custom-theme.js', 'theme') }}" defer></script>
+{% endblock %}

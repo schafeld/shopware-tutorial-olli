@@ -3,7 +3,7 @@ import Plugin from 'src/plugin-system/plugin.class';
 export default class MyCustomThemePlugin extends Plugin {
     init() {
         // Test if JavaScript is working
-        console.log('🎯 MyCustomTheme JavaScript plugin is running!');
+        console.log('🎯 MyCustomTheme JavaScript plugin is running...!');
         console.log('Location: ', window.location.pathname);
 
         // Add a visual indicator

@@ -60,15 +60,41 @@ custom/plugins/YourPlugin/
 
 We'll create a "Learning Bundle" plugin that demonstrates basic concepts.
 
+**🎯 Recommended Method: Using the Plugin Generator**
+
+Shopware provides a convenient command to generate the complete plugin structure:
+
 ```bash
 # Navigate to your Shopware installation
 cd /Users/oliverschafeld/workspace/shopware-experiments/shopware-tutorial-olli
 
+# Generate plugin using Shopware's plugin generator
+bin/console plugin:create LearningBundle
+
+# Optional: Add -c flag to also create a demo configuration file
+# bin/console plugin:create LearningBundle -c
+```
+
+This command will automatically create:
+- The plugin directory structure (`custom/plugins/LearningBundle/`)
+- The main plugin class (`src/LearningBundle.php`)
+- A properly configured `composer.json` file
+- The `src/` directory
+
+**📚 Alternative: Manual Creation (Educational)**
+
+If you want to understand the structure better, you can also create it manually:
+
+```bash
 # Create plugin directory
 mkdir -p custom/plugins/LearningBundle/src
 ```
 
+> **💡 Tip:** For this tutorial, we recommend using the generator command for speed, but understanding the manual structure is valuable for debugging and customization.
+
 ### Step 2: Create composer.json
+
+> **Note:** If you used `bin/console plugin:create LearningBundle`, this file was already generated for you. You may want to review and customize it according to your needs.
 
 Create `custom/plugins/LearningBundle/composer.json`:
 
@@ -107,6 +133,8 @@ Create `custom/plugins/LearningBundle/composer.json`:
 ```
 
 ### Step 3: Create Main Plugin Class
+
+> **Note:** If you used `bin/console plugin:create LearningBundle`, this file was already generated for you with a basic structure. The version below includes additional lifecycle methods for educational purposes.
 
 Create `custom/plugins/LearningBundle/src/LearningBundle.php`:
 
@@ -597,6 +625,7 @@ Tomorrow we'll dive into:
 
 ## Additional Resources
 
+- [Shopware Plugin Base Guide](https://developer.shopware.com/docs/guides/plugins/plugins/plugin-base-guide.html) - Official guide including `plugin:create` command
 - [Shopware Plugin Development Documentation](https://developer.shopware.com/docs/guides/plugins/plugins/)
 - [Symfony Service Container](https://symfony.com/doc/current/service_container.html)
 - [Symfony Console Commands](https://symfony.com/doc/current/console.html)

@@ -50,7 +50,6 @@ custom/plugins/YourPlugin/
 
 📖 **Read these resources:**
 - [Plugin Base Guide](https://developer.shopware.com/docs/guides/plugins/plugins/plugin-base-guide)
-- [Plugin Fundamentals](https://developer.shopware.com/docs/guides/plugins/plugins/plugin-fundamentals/plugin-fundamentals)
 - [Plugin Lifecycle](https://developer.shopware.com/docs/guides/plugins/plugins/plugin-fundamentals/plugin-lifecycle)
 
 ---

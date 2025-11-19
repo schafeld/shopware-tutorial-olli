@@ -10,6 +10,28 @@ class MessageService
     private LoggerInterface $logger;
     private SystemConfigService $systemConfigService;
 
+    // translations array for welcome messages
+    private const TRANSLATIONS = [
+        'en' => [
+            'welcome' => 'Welcome to the Shopware Development department',
+            'goodbye' => 'Goodbye',
+            'hello' => 'Hello',
+            'today_is' => 'Today is',
+        ],
+        'de' => [
+            'welcome' => 'Willkommen zur Shopware-Entwicklungsabteilung',
+            'goodbye' => 'Auf Wiedersehen',
+            'hello' => 'Hallo',
+            'today_is' => 'Heute ist',
+        ],
+        'es' => [
+            'welcome' => 'Bienvenido al departamento de desarrollo de Shopware',
+            'goodbye' => 'Adiós',
+            'hello' => 'Hola',
+            'today_is' => 'Hoy es',
+        ],
+    ];
+
     public function __construct(
         LoggerInterface $logger, 
         SystemConfigService $systemConfigService)
@@ -20,14 +42,22 @@ class MessageService
 
     public function generateWelcomeMessage(string $name): string
     {
-        $prefix = $this->systemConfigService->getString('LearningBundle.config.welcomePrefix') ?? 'Welcome to Shopware development';
+        // Get the selected language from configuration, default: en
+        $language = $this->systemConfigService->get('LearningBundle.config.greetingLanguage') ?? 'en';
+
+        // Get the welcome prefix based on selected language, with fallback to config or hard-coded default
+        $prefix = self::TRANSLATIONS[$language]['welcome'] ?? $this->systemConfigService->getString('LearningBundle.config.welcomePrefix') ?? 'Welcome to Shopware development';
 
         $format = $this->systemConfigService->getString('LearningBundle.config.messageFormat') ??'simple';
 
+        // Use the custom message that can be entered in the dashboard as 'custom'.
+        $customMessage = $prefix = $this->systemConfigService->getString('LearningBundle.config.welcomePrefix') ?? 'Welcome to Shopware development';
+
         $message = match($format) {
-            'detailed' => sprintf('%s, dear %s! We are thrilled to have you on board. Today is %s.', $prefix, $name, date('Y-m-d')),
-            'custom' => sprintf('[CUSTOM] %s, %s! Enjoy your Shopware journey.', $prefix, $name),
-            default => sprintf('%s, %s!', $prefix, $name),
+            'simple'    => sprintf(' %s, %s! ' . $this->getGreeting('goodbye') . '.', $this->getGreeting('welcome'), $name),
+            'detailed'  => sprintf('%s, ' . $this->getGreeting('hello') . ' %s! ' . $this->getGreeting('today_is') . ' %s. ' . $this->getGreeting('goodbye') . '.' , $this->getGreeting('welcome'), $name, date('Y-m-d')),
+            'custom'    => sprintf('%s! ' . $customMessage , $name),
+            default     => sprintf($this->getGreeting('hello') . '%s, %s! ', $this->getGreeting('welcome'), $name),
         };
 
         // Check if logging is enabled
@@ -38,10 +68,20 @@ class MessageService
                 'name' => $name,
                 'message' => $message,
                 'format' => $format,
+                'language' => $language,
             ]);
         }   
         
         return $message;
+    }
+
+    /**
+     * Get a greeting in the configured language
+     */
+    public function getGreeting(string $type = 'hello'): string
+    {
+        $language = $this->systemConfigService->get('LearningBundle.config.greetingLanguage') ?? 'en';
+        return self::TRANSLATIONS[$language][$type] ?? self::TRANSLATIONS['en'][$type];
     }
 
     public function getPluginInfo(): array
@@ -54,7 +94,8 @@ class MessageService
                 'Message Generation',
                 'Logging',
                 'Service Container',
-                'Configuration Management'
+                'Configuration Management',
+                'Multi-language Support',
             ]
         ];
     }

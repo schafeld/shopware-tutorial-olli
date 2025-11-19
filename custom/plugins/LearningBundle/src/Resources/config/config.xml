@@ -6,19 +6,52 @@
     <card>
         <title>Basic Configuration</title>
         <title lang="de-DE">Basis Konfiguration</title>
+        <title lang="en-GB">Basic Configuration</title>
 
         <input-field>
             <name>welcomePrefix</name>
-            <label>Welcome Message Prefix</label>
-            <label lang="de-DE">Willkommensnachricht Präfix</label>
+            <label>Welcome Message Prefix (Custom selected)</label>
+            <label lang="de-DE">Willkommensnachricht Präfix (Benutzerdefiniert)</label>
+            <label lang="en-GB">Welcome Message Prefix (Custom)</label>
             <defaultValue>Welcome to Shopware Development</defaultValue>
-            <helpText>This prefix will be used in welcome messages</helpText>
+            <helpText>This prefix will be used in custom welcome messages</helpText>
+        </input-field>
+
+        <!-- New language selection for greeting message -->
+        <input-field type="single-select">
+            <name>greetingLanguage</name>
+            <label>Greeting Language</label>
+            <label lang="de-DE">Begrüßungssprache</label>
+            <label lang="en-GB">Greeting Language</label>
+            <options>
+                <option>
+                    <id>de</id>
+                    <name>German</name>
+                    <name lang="de-DE">Deutsch</name>
+                    <name lang="en-GB">German</name>
+                </option>
+                <option>
+                    <id>en</id>
+                    <name>English</name>
+                    <name lang="de-DE">Englisch</name>
+                    <name lang="en-GB">English</name>
+                </option>
+                <option>
+                    <id>es</id>
+                    <name>Spanish</name>
+                    <name lang="de-DE">Spanisch</name>
+                    <name lang="en-GB">Spanish</name>
+                </option>
+            </options>
+            <defaultValue>en</defaultValue>
+            <helpText>Select the language for greeting messages</helpText>
         </input-field>
 
         <input-field type="bool">
             <name>enableLogging</name>
             <label>Enable Logging</label>
             <label lang="de-DE">Logging aktivieren</label>
+            <label lang="en-GB">Enable Logging</label>
             <defaultValue>true</defaultValue>
         </input-field>
 
@@ -26,6 +59,7 @@
             <name>maxMessages</name>
             <label>Maximum Messages per Day</label>
             <label lang="de-DE">Maximale Nachrichten pro Tag</label>
+            <label lang="en-GB">Maximum Messages per Day</label>
             <defaultValue>100</defaultValue>
         </input-field>
     </card>
@@ -38,21 +72,25 @@
             <name>messageFormat</name>
             <label>Message Format</label>
             <label lang="de-DE">Nachrichtenformat</label>
+            <label lang="en-GB">Message Format</label>
             <options>
                 <option>
                     <id>simple</id>
                     <name>Simple</name>
                     <name lang="de-DE">Einfach</name>
+                    <name lang="en-GB">Simple</name>
                 </option>
                 <option>
                     <id>detailed</id>
                     <name>Detailed</name>
                     <name lang="de-DE">Detailliert</name>
+                    <name lang="en-GB">Detailed</name>
                 </option>
                 <option>
                     <id>custom</id>
                     <name>Custom</name>
                     <name lang="de-DE">Benutzerdefiniert</name>
+                    <name lang="en-GB">Custom</name>
                 </option>
             </options>
             <defaultValue>simple</defaultValue>

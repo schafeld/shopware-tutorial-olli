@@ -8,6 +8,7 @@
         <!-- Register MessageService from onboarding week 3 day 1 tutorial -->
         <service id="Learning\Bundle\Service\MessageService">
             <argument type="service" id="logger"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
         </service>
 
         <!-- Register custom command from onboarding week 3 day 1 tutorial -->

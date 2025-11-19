@@ -4,12 +4,58 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
 
     <card>
-        <title>Minimal configuration</title>
+        <title>Basic Configuration</title>
+        <title lang="de-DE">Basis Konfiguration</title>
 
-        <input-field type="text">
-            <name>textField</name>
-            <label>Test field with default value</label>
-            <defaultValue>test</defaultValue>
+        <input-field>
+            <name>welcomePrefix</name>
+            <label>Welcome Message Prefix</label>
+            <label lang="de-DE">Willkommensnachricht Präfix</label>
+            <defaultValue>Welcome to Shopware Development</defaultValue>
+            <helpText>This prefix will be used in welcome messages</helpText>
+        </input-field>
+
+        <input-field type="bool">
+            <name>enableLogging</name>
+            <label>Enable Logging</label>
+            <label lang="de-DE">Logging aktivieren</label>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="int">
+            <name>maxMessages</name>
+            <label>Maximum Messages per Day</label>
+            <label lang="de-DE">Maximale Nachrichten pro Tag</label>
+            <defaultValue>100</defaultValue>
+        </input-field>
+    </card>
+
+    <card>
+        <title>Advanced Settings</title>
+        <title lang="de-DE">Erweiterte Einstellungen</title>
+
+        <input-field type="single-select">
+            <name>messageFormat</name>
+            <label>Message Format</label>
+            <label lang="de-DE">Nachrichtenformat</label>
+            <options>
+                <option>
+                    <id>simple</id>
+                    <name>Simple</name>
+                    <name lang="de-DE">Einfach</name>
+                </option>
+                <option>
+                    <id>detailed</id>
+                    <name>Detailed</name>
+                    <name lang="de-DE">Detailliert</name>
+                </option>
+                <option>
+                    <id>custom</id>
+                    <name>Custom</name>
+                    <name lang="de-DE">Benutzerdefiniert</name>
+                </option>
+            </options>
+            <defaultValue>simple</defaultValue>
         </input-field>
     </card>
 

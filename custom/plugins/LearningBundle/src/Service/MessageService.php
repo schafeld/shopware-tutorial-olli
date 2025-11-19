@@ -3,25 +3,43 @@
 namespace Learning\Bundle\Service;
 
 use Psr\Log\LoggerInterface;
+use Shopware\Core\System\SystemConfig\SystemConfigService;
 
 class MessageService
 {
     private LoggerInterface $logger;
+    private SystemConfigService $systemConfigService;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct(
+        LoggerInterface $logger, 
+        SystemConfigService $systemConfigService)
     {
         $this->logger = $logger;
+        $this->systemConfigService = $systemConfigService;
     }
 
     public function generateWelcomeMessage(string $name): string
     {
-        $message = sprintf('Welcome to Shopware development, %s!', $name);
-        
-        // Log the message
-        $this -> logger -> info('Generated welcome message: ' ,[
-            'name'=> $name,
-            'message'=> $message,
-        ]);
+        $prefix = $this->systemConfigService->getString('LearningBundle.config.welcomePrefix') ?? 'Welcome to Shopware development';
+
+        $format = $this->systemConfigService->getString('LearningBundle.config.messageFormat') ??'simple';
+
+        $message = match($format) {
+            'detailed' => sprintf('%s, dear %s! We are thrilled to have you on board. Today is %s.', $prefix, $name, date('Y-m-d')),
+            'custom' => sprintf('[CUSTOM] %s, %s! Enjoy your Shopware journey.', $prefix, $name),
+            default => sprintf('%s, %s!', $prefix, $name),
+        };
+
+        // Check if logging is enabled
+        $enableLogging = $this->systemConfigService->getBool('LearningBundle.config.enableLogging') ?? true;
+
+        if ($enableLogging) {
+            $this->logger->info('Generated welcome message for {name}', [
+                'name' => $name,
+                'message' => $message,
+                'format' => $format,
+            ]);
+        }   
         
         return $message;
     }
@@ -35,7 +53,8 @@ class MessageService
             'features' => [
                 'Message Generation',
                 'Logging',
-                'Service Container'
+                'Service Container',
+                'Configuration Management'
             ]
         ];
     }

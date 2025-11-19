@@ -28,25 +28,56 @@ This folder contains complete, working solutions for all exercises in the Shopwa
 
 ---
 
-### 📝 Day 3: Database, Migrations, and Custom Entities
-**Status:** Solutions outline available
+### ✅ Day 3: Database, Migrations, and Custom Entities
+**File:** `DAY_3_SOLUTIONS.md`
 
-**Exercises:** (Solutions available on request)
-1. Product Ratings System - Complete DAL implementation
-2. Customer Wishlists - Many-to-many relationships
-3. Product Comparison - Complex entity associations
+**Exercises Covered:**
+1. **Product Rating System** - Complete DAL implementation with migrations, entities, and services
+2. **Customer Wishlists** - Many-to-many relationships with unique constraints
+3. **Product Comparison** - Session-based tracking with complex associations
 
-**Key Concepts:**
-- Database migrations with foreign keys
-- Entity definitions and collections
-- Repository CRUD operations
-- Complex queries with Criteria
-- Association handling
+**Key Learnings:** Database migrations with foreign keys, entity definitions and collections, repository CRUD operations, complex queries with Criteria API, association handling
 
 ---
 
-### 📝 Day 4: API Architecture
-**Status:** Solutions outline available
+### ✅ Day 4: API Architecture
+**File:** `DAY_4_SOLUTIONS.md`
+
+**Exercises Covered:**
+1. **Wishlist API** - Complete Store API with POST/GET/DELETE endpoints
+2. **Product Comparison Admin API** - Statistics and analytics endpoints
+3. **Rate Limiting** - Custom rate limiter with request tracking
+
+**Key Learnings:** Store API vs Admin API, route definitions, OpenAPI documentation, authentication, rate limiting, API testing with cURL and Postman
+
+---
+
+### ✅ Day 5: Debugging and Error Analysis
+**File:** `DAY_5_SOLUTIONS.md`
+
+**Exercises Covered:**
+1. **Performance Profiler** - Timing and memory tracking with stack traces
+2. **Error Report Command** - Log file analysis with error categorization
+3. **Health Check Endpoint** - System monitoring with multiple checks
+
+**Key Learnings:** Performance profiling, log analysis, health checks, error monitoring, debugging tools, system diagnostics
+
+---
+
+### ✅ Day 6: Testing and Caching
+**File:** `DAY_6_SOLUTIONS.md`
+
+**Exercises Covered:**
+1. **Test Coverage (80%+)** - Comprehensive unit and integration tests
+2. **API Integration Tests** - Full HTTP endpoint testing
+3. **Cache Warmup Command** - Automated cache preloading
+
+**Key Learnings:** Unit testing with mocks, integration testing, API testing, test coverage, cache strategies, performance optimization
+
+---
+
+### 📝 Day 7: Final Project
+**Status:** Coming soon
 
 **Exercises:** (Solutions available on request)
 1. Wishlist API Endpoints - Store API implementation

@@ -1,0 +1,36 @@
+{
+    "name": "learning-bundle/learning-bundle",
+    "description": "learning-bundle/learning-bundle",
+    "type": "shopware-platform-plugin",
+    "version": "1.0.0",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Oliver Schafeld"
+        }
+    ],
+    "require": {
+        "shopware/core": "~6.7.0"
+    },
+    "extra": {
+        "shopware-plugin-class": "Learning\\Bundle\\LearningBundle",
+        "label": {
+            "de-DE": "Lern-Plugin",
+            "en-GB": "Learning Bundle"
+        },
+        "description": {
+            "de-DE": "Ein Plugin zum Lernen der Shopware 6 Entwicklung",
+            "en-GB": "A plugin for learning Shopware 6 development"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Learning\\Bundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Learning\\Bundle\\Tests\\": "tests/"
+        }
+    }
+}

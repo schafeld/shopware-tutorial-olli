@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <!-- Register MessageService from onboarding week 3 day 1 tutorial -->
+        <service id="Learning\Bundle\Service\MessageService">
+            <argument type="service" id="logger"/>
+        </service>
+
+        <!-- Register custom command from onboarding week 3 day 1 tutorial -->
+        <service id="Learning\Bundle\Command\TestMessageCommand">
+            <argument type="service" id="Learning\Bundle\Service\MessageService"/>
+            <tag name="console.command"/>
+        </service>
+    </services>
+</container>

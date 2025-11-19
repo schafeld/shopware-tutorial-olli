@@ -1,19 +1,22 @@
-# Shopware 6 Advanced Plugin Development - Week-Long Course
+# Shopware 6 Advanced Plugin Development - Onboarding Course
 
 ## 📚 Course Overview
 
-This comprehensive 7-day course takes you from Shopware plugin basics to building production-ready features. Designed for web developers with PHP experience who want to master Shopware 6 plugin development.
+This comprehensive course takes you from Shopware plugin basics to building production-ready features. **Specially designed for junior developers** with some PHP experience but limited Shopware/Symfony exposure.
 
-**Total Duration:** ~40 hours (5-7 hours per day)  
-**Skill Level:** Intermediate to Advanced  
-**Prerequisites:** PHP, basic Symfony knowledge, working Shopware 6 installation
+**Total Duration:** 2-3 weeks (70-100 hours with breaks)  
+**Skill Level:** Beginner to Intermediate  
+**Prerequisites:** Basic PHP knowledge, working Shopware 6 installation, patience and curiosity!
+
+> **💡 Important Note for Beginners:** This course has been adjusted with **realistic timeframes** for junior developers. Don't worry if you need the full time (or even more) for each day - everyone learns at their own pace!
 
 ---
 
 ## 🎯 Course Structure
 
 ### [Day 1: Plugin Basics and Structure](./DAY_1_PLUGIN_BASICS.md)
-**Duration:** 4-6 hours
+**Duration:** 1-2 days (8-12 hours with breaks)  
+**Difficulty:** ⭐⭐ Beginner-friendly
 
 Learn the fundamentals of Shopware plugin development:
 - Plugin architecture and file structure
@@ -28,10 +31,13 @@ Learn the fundamentals of Shopware plugin development:
 - Implement services with DI
 - Add configuration options
 
+**✅ Complete Solutions Available:** [DAY_1_SOLUTIONS.md](./SOLUTIONS/DAY_1_SOLUTIONS.md)
+
 ---
 
 ### [Day 2: Event System and Dependency Injection](./DAY_2_EVENTS_AND_DI.md)
-**Duration:** 5-7 hours
+**Duration:** 1.5-2 days (10-14 hours with breaks)  
+**Difficulty:** ⭐⭐⭐ Intermediate
 
 Master event-driven architecture:
 - Shopware's event system
@@ -47,10 +53,13 @@ Master event-driven architecture:
 - Decorate existing services
 - Implement event-driven features
 
+**✅ Complete Solutions Available:** [DAY_2_SOLUTIONS.md](./SOLUTIONS/DAY_2_SOLUTIONS.md)
+
 ---
 
 ### [Day 3: Database, Migrations, and Custom Entities](./DAY_3_DATABASE_AND_MIGRATIONS.md)
-**Duration:** 6-8 hours
+**Duration:** 2-3 days (14-20 hours with breaks)  
+**Difficulty:** ⭐⭐⭐⭐ Advanced - Take your time!
 
 Work with Shopware's Data Abstraction Layer:
 - Database migrations
@@ -66,10 +75,13 @@ Work with Shopware's Data Abstraction Layer:
 - Query data efficiently
 - Manage database schema changes
 
+**📝 Solution Outlines Available** - Request complete solutions if needed
+
 ---
 
 ### [Day 4: API Architecture](./DAY_4_API_ARCHITECTURE.md)
-**Duration:** 5-7 hours
+**Duration:** 1.5-2 days (10-14 hours with breaks)  
+**Difficulty:** ⭐⭐⭐ Intermediate
 
 Build and consume Shopware APIs:
 - Store API vs Admin API
@@ -85,10 +97,13 @@ Build and consume Shopware APIs:
 - Implement proper error handling
 - Document APIs with OpenAPI
 
+**📝 Solution Outlines Available** - Request complete solutions if needed
+
 ---
 
 ### [Day 5: Debugging and Error Analysis](./DAY_5_DEBUGGING.md)
-**Duration:** 4-6 hours
+**Duration:** 1 day (6-8 hours with breaks)  
+**Difficulty:** ⭐⭐ Essential Skills
 
 Master debugging techniques:
 - Shopware logging system

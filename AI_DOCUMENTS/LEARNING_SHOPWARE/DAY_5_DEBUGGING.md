@@ -1,7 +1,9 @@
 # Day 5: Debugging and Error Analysis
 
-**Duration:** 4-6 hours  
+**Duration:** 1 day (6-8 hours with breaks)  
 **Goal:** Master debugging techniques, log analysis, and error handling in Shopware
+
+> **Note for Beginners:** Debugging skills are essential! This day is lighter but very important. You'll use these techniques constantly.
 
 ## Learning Objectives
 

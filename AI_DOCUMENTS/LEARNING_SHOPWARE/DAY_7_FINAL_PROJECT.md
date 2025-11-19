@@ -1,7 +1,9 @@
-# Day 7: Final Project - Build a Complete Feature
+# Day 7-10: Final Project - Build a Complete Feature
 
-**Duration:** 6-8 hours  
-**Goal:** Build a complete, production-ready feature using everything learned this week
+**Duration:** 3-4 days (20-28 hours with breaks)  
+**Goal:** Build a complete, production-ready feature using everything learned
+
+> **Note for Beginners:** This is a comprehensive project! Budget 3-4 full days. Work incrementally, test frequently, and don't hesitate to review previous days' materials.
 
 ## Project Overview
 

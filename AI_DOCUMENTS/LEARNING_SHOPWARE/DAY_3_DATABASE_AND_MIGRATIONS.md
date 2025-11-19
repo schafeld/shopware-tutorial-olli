@@ -1,7 +1,9 @@
 # Day 3: Database, Migrations, and Custom Entities
 
-**Duration:** 6-8 hours  
+**Duration:** 2-3 days (14-20 hours with breaks)  
 **Goal:** Master database operations, create custom entities, and work with repositories
+
+> **Note for Beginners:** This is the most complex day! Database and entity work requires careful attention. Budget 2-3 full days and don't worry if you need to revisit concepts multiple times.
 
 ## Learning Objectives
 

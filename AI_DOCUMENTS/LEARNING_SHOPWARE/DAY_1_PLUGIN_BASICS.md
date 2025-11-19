@@ -1,7 +1,9 @@
 # Day 1: Plugin Basics and Structure
 
-**Duration:** 4-6 hours  
+**Duration:** 1-2 days (8-12 hours with breaks)  
 **Goal:** Understand Shopware plugin structure and create your first functional plugin
+
+> **Note for Beginners:** Take your time with this lesson. It's perfectly normal to need 1-2 full days to understand these concepts if you're new to Shopware and Symfony. Don't rush!
 
 ## Learning Objectives
 
@@ -528,16 +530,35 @@ Now go to **Administration > Settings > System > Plugins > LearningBundle** and 
 
 ---
 
-## Part 5: Exercises (60 minutes)
+## Part 5: Exercises (2-3 hours)
 
-### Exercise 1: Add New Configuration
+> **💡 Tip:** Try to complete these exercises on your own first. Complete solutions are available in `SOLUTIONS/DAY_1_SOLUTIONS.md`.
+
+### Exercise 1: Add New Configuration (30-45 min)
 Add a new configuration field for "Greeting Language" (English, German, Spanish) and implement multilingual greetings.
 
-### Exercise 2: Create a Counter Service
+**Hints:**
+- Add a new `single-select` field to `config.xml`
+- Modify `MessageService::generateWelcomeMessage()` to check the language setting
+- Use a simple array with translations
+
+### Exercise 2: Create a Counter Service (45-60 min)
 Create a new service that counts how many messages have been generated and stores the count in a file.
 
-### Exercise 3: Add Validation
+**Hints:**
+- Create `CounterService.php` in `Service/` directory
+- Use `file_get_contents()` and `file_put_contents()` for file operations
+- Store the file in `var/` directory (e.g., `var/learning_counter.txt`)
+- Inject this service into `MessageService`
+
+### Exercise 3: Add Validation (30-45 min)
 Add validation to ensure the name parameter is not empty and contains only letters.
+
+**Hints:**
+- Create a `ValidationService` or add validation to `MessageService`
+- Use `preg_match()` to validate the name contains only letters
+- Throw an exception if validation fails
+- Update the command to catch and display validation errors
 
 ---
 

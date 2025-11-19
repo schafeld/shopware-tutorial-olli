@@ -1,7 +1,9 @@
 # Day 2: Event System and Dependency Injection
 
-**Duration:** 5-7 hours  
-**Goal:** Master Shopware's event system, create subscribers, and understand advanced DI patterns
+**Duration:** 1.5-2 days (10-14 hours with breaks)  
+**Goal:** Master Shopware's event-driven architecture, create subscribers, and understand advanced DI patterns
+
+> **Note for Beginners:** Event systems can be tricky at first. Expect to spend extra time understanding how events flow through the system. Use logging extensively to see what's happening!
 
 ## Learning Objectives
 
@@ -666,30 +668,57 @@ class MyService
 
 ---
 
-## Part 7: Practical Exercises (90 minutes)
+## Part 7: Practical Exercises (3-4 hours)
 
-### Exercise 1: Product View Counter
+> **💡 Tip:** Complete solutions available in `SOLUTIONS/DAY_2_SOLUTIONS.md`.
+
+### Exercise 1: Product View Counter (60-75 min)
 
 Create a subscriber that counts how many times each product page is viewed.
 
 **Requirements:**
-- Subscribe to storefront product page loaded event
+- Subscribe to `ProductPageLoadedEvent`
 - Log product ID and timestamp
-- Store count in memory (we'll add database in Day 3)
+- Store count in a file in `var/` directory (format: `productId => count`)
+- Create a command to display top 10 viewed products
 
-### Exercise 2: Discount Event System
+**Hints:**
+- Event class: `Shopware\Storefront\Page\Product\ProductPageLoadedEvent`
+- Use JSON file to store data: `var/product_views.json`
+- Remember to serialize/deserialize the array
 
-Create a custom event system for discounts:
-- Create `DiscountAppliedEvent` with discount details
+### Exercise 2: Discount Event System (75-90 min)
+
+Create a custom event system for discounts.
+
+**Requirements:**
+- Create `DiscountAppliedEvent` with discount details (code, amount, customerId)
 - Create subscriber that logs all discount applications
-- Dispatch event when discount is applied in cart
+- Create a service that simulates applying a discount
+- Dispatch the custom event when discount is applied
+- Create a command to test: `learning:apply-discount {code} {amount}`
 
-### Exercise 3: Service Chain
+**Hints:**
+- Event should extend `Symfony\Contracts\EventDispatcher\Event`
+- Include `ShopwareEvent` interface if you need Context
+- Subscriber should implement `EventSubscriberInterface`
 
-Create a chain of 3 services where each one decorates the previous:
-1. Base service: Returns product name
-2. First decorator: Adds price
-3. Second decorator: Adds stock status
+### Exercise 3: Service Chain with Decoration (90-120 min)
+
+Create a chain of decorated services that build product information.
+
+**Requirements:**
+1. Create `ProductInfoService` interface with `getInfo(string $productId): string`
+2. Base service `BaseProductInfoService`: Returns "Product: {name}"
+3. First decorator `PriceProductInfoDecorator`: Adds " - Price: {price}"
+4. Second decorator `StockProductInfoDecorator`: Adds " - Stock: {stock}"
+5. Create command to test: `learning:product-info {productId}`
+
+**Hints:**
+- Each decorator should call the decorated service first
+- Register decorators in order in `services.xml`
+- Use `product.repository` to fetch product data
+- Remember the `.inner` argument for decorated services
 
 ---
 

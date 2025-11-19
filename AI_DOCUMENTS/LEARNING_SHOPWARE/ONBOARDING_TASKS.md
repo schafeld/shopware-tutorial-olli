@@ -17,4 +17,6 @@ Ideal learning goals:
 - Introduction to integration tests
 - Review and documentation of work results
 
-These lessons should not take longer than a week.
+These lessons should not take longer than a week. Keep the tasks manageable for someone onboarding to a *Junior* PHP developer without much experience in Shopware or Symfony.
+Older tutorials (e.g. for Shopware 6.4) make use of custom tools like `bin/console <task>` or `./psh.phar`, mention their Shopware 6.7 equivalents or replacement techniques.
+ 

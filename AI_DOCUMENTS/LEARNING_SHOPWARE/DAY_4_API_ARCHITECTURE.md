@@ -1,7 +1,9 @@
 # Day 4: API Architecture - Sales Channel & Admin APIs
 
-**Duration:** 5-7 hours  
+**Duration:** 1.5-2 days (10-14 hours with breaks)  
 **Goal:** Master Shopware's API architecture and create custom API endpoints
+
+> **Note for Beginners:** API development builds on Days 1-3. Make sure you're comfortable with services and repositories before starting. Testing APIs takes time!
 
 ## Learning Objectives
 

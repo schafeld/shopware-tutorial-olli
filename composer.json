@@ -47,7 +47,12 @@
             "symfony/runtime": true
         },
         "optimize-autoloader": true,
-        "sort-packages": true
+        "sort-packages": true,
+        "audit": {
+            "abandoned": "report",
+            "ignore": ["PKSA-w3qy-s9h7-2hqr", "PKSA-365x-2zjk-pt47", "PKSA-hr4y-jwk2-1yb9"]
+        },
+        "platform-check": false
     },
     "scripts": {
         "auto-scripts": {
@@ -68,5 +73,8 @@
                 "flex://defaults"
             ]
         }
+    },
+    "require-dev": {
+        "symfony/web-profiler-bundle": "^7.3"
     }
 }

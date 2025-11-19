@@ -1,14 +1,15 @@
-# Shopware 6 Advanced Plugin Development - Onboarding Course
+# Shopware 6 Frontend-Focused Development - Onboarding Course
 
 ## 📚 Course Overview
 
-This comprehensive course takes you from Shopware plugin basics to building production-ready features. **Specially designed for junior developers** with some PHP experience but limited Shopware/Symfony exposure.
+This comprehensive course takes you from Shopware basics to building production-ready **storefront features**. **Specially designed for frontend developers** transitioning to Shopware, with emphasis on **Twig templates, JavaScript, and SCSS** while covering essential backend concepts.
 
-**Total Duration:** 2-3 weeks (70-100 hours with breaks)  
+**Total Duration:** 2-3 weeks (80-110 hours with breaks)  
 **Skill Level:** Beginner to Intermediate  
-**Prerequisites:** Basic PHP knowledge, working Shopware 6 installation, patience and curiosity!
+**Focus:** 60% Frontend (Twig/JS/CSS), 40% Backend (PHP/API)  
+**Prerequisites:** HTML/CSS/JavaScript, basic PHP knowledge, working Shopware 6 installation
 
-> **💡 Important Note for Beginners:** This course has been adjusted with **realistic timeframes** for junior developers. Don't worry if you need the full time (or even more) for each day - everyone learns at their own pace!
+> **💡 Important Note for Frontend Developers:** This course emphasizes storefront development with **lots of practical Twig and JavaScript work**. You'll learn backend concepts through building visible frontend features!
 
 ---
 
@@ -54,6 +55,29 @@ Master event-driven architecture:
 - Implement event-driven features
 
 **✅ Complete Solutions Available:** [DAY_2_SOLUTIONS.md](./SOLUTIONS/DAY_2_SOLUTIONS.md)
+
+---
+
+### [Day 2.5: Storefront Development - Twig & JavaScript](./DAY_2.5_STOREFRONT_DEVELOPMENT.md) 🎨
+**Duration:** 1.5-2 days (10-14 hours with breaks)  
+**Difficulty:** ⭐⭐⭐ Frontend Focus!
+
+Master Shopware storefront customization:
+- Twig template system and inheritance
+- Template blocks and extends
+- Page objects and variables
+- Custom JavaScript plugins
+- SCSS/CSS styling
+- AJAX and localStorage
+- Browser debugging
+
+**Key Outcomes:**
+- Extend and customize templates
+- Create interactive JavaScript features
+- Style with SCSS
+- Debug frontend issues
+
+**✅ Complete Solutions Available:** [DAY_2.5_SOLUTIONS.md](./SOLUTIONS/DAY_2.5_SOLUTIONS.md)
 
 ---
 

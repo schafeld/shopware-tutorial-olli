@@ -112,7 +112,11 @@ class CustomerSubscriber implements EventSubscriberInterface
     public function onCustomerLogout(CustomerLogoutEvent $event): void
     {
         $this->logger->info('Customer logged out', [
-            'context_token' => $event->getContextToken(),
+            // `getContextToken` doesn't exist
+            // 'context_token' => $event->getContextToken(),
+            // function isn't used anyway?
+            'customer_id' => $customer->getId(),
+            'email' => $customer->getEmail(),
         ]);
     }
 }
@@ -208,6 +212,12 @@ Register in `services.xml`:
 ---
 
 ## Part 3: Advanced Event Handling (90 minutes)
+
+> **Real-World Use Cases:**
+>
+> - **Order Events:** Send confirmation emails, notify warehouse systems, update ERP, trigger fulfillment processes
+> - **Cart Events:** Apply automatic discounts, enforce purchase limits, add free gift products, track abandoned carts
+> - **State Machine Events:** Integrate with shipping providers, update accounting systems, send SMS notifications
 
 ### Step 1: Order State Change Subscriber
 
@@ -336,16 +346,83 @@ class CartSubscriber implements EventSubscriberInterface
 }
 ```
 
+Register both subscribers in `services.xml`:
+
+```xml
+<!-- Order State Subscriber -->
+<service id="Learning\Bundle\Subscriber\OrderSubscriber">
+    <argument type="service" id="logger"/>
+    <tag name="kernel.event_subscriber"/>
+</service>
+
+<!-- Cart Subscriber -->
+<service id="Learning\Bundle\Subscriber\CartSubscriber">
+    <argument type="service" id="logger"/>
+    <tag name="kernel.event_subscriber"/>
+</service>
+```
+
+### Testing Part 3: Advanced Event Handling
+
+```bash
+# Clear cache first
+bin/console cache:clear
+
+# Verify subscribers are registered
+bin/console debug:event-dispatcher | grep -E "(OrderSubscriber|CartSubscriber)"
+
+# Watch logs in real-time
+tail -f var/log/dev.log | grep -E "(Order|Cart|Item being added)"
+```
+
+**Manual Testing Steps:**
+
+1. **Test Cart Events:**
+   - Open your storefront in a browser
+   - Browse to any product page
+   - Add a product to cart (triggers `BeforeLineItemAddedEvent`)
+   - Check logs: `grep "Item being added" var/log/dev.log`
+   - First cart creation also triggers `CartCreatedEvent`
+
+2. **Test Order State Events:**
+   - Log into Administration (usually `http://localhost/admin`)
+   - Go to Orders → Overview
+   - Create a test order or select existing one
+   - Change order state (Open → In Progress → Completed)
+   - Check logs: `grep "Order state changed" var/log/dev.log`
+   - Alternative: Use demo data if available
+
+3. **Programmatic Testing with CLI:**
+
+   ```bash
+   # Create a test command to trigger events
+   bin/console debug:event-dispatcher state_machine.order.state_changed
+   ```
+
+> **💡 Testing Tip:** If you don't have test orders, install demo data:
+>
+> ```bash
+> bin/console framework:demodata --products=10 --orders=5
+> ```
+
 ---
 
 ## Part 4: Service Decoration (75 minutes)
+
+> **Real-World Use Cases:**
+>
+> - **Price Calculators:** Add custom pricing logic (B2B discounts, loyalty points, regional pricing)
+> - **Product Loaders:** Enrich product data from external sources (reviews, stock from ERP)
+> - **Email Services:** Add custom headers, tracking pixels, or modify templates
+> - **Search Services:** Add custom filters, boost certain products, integrate AI recommendations
 
 ### Theory: Service Decoration
 
 Service decoration allows you to extend or modify existing Shopware services without changing core code.
 
 **Pattern:**
-```
+
+```text
 Original Service → Your Decorator → Rest of System
 ```
 
@@ -419,9 +496,65 @@ In `services.xml`:
 </service>
 ```
 
+### Testing Part 4: Service Decoration
+
+```bash
+# Clear cache
+bin/console cache:clear
+
+# Verify decoration is active
+bin/console debug:container Shopware\\Core\\Checkout\\Cart\\Price\\QuantityPriceCalculator --show-arguments
+
+# Look for your decorator in the output
+# You should see Learning\Bundle\Service\Decorator\CustomPriceCalculator
+
+# Watch price calculation logs
+tail -f var/log/dev.log | grep "Calculating price"
+```
+
+**Manual Testing Steps:**
+
+1. **Trigger Price Calculations:**
+   - Open storefront
+   - Add any product to cart
+   - Change quantity in cart
+   - Proceed to checkout
+   - Each action triggers price calculations
+
+2. **Check Logs:**
+
+   ```bash
+   # See all price calculations
+   grep -A 2 "Calculating price" var/log/dev.log
+   
+   # Count how many times prices were calculated
+   grep -c "Price calculated" var/log/dev.log
+   ```
+
+3. **Verify Decorator Chain:**
+
+   ```bash
+   # If you have multiple decorators, verify the order
+   bin/console debug:container --show-arguments QuantityPriceCalculator
+   ```
+
+> **⚠️ Important:** Service decoration affects ALL price calculations. In production:
+>
+> - Add feature flags to enable/disable decoration
+> - Include performance monitoring
+> - Add comprehensive error handling
+> - Consider caching decorated results
+
 ---
 
 ## Part 5: Create Custom Events (60 minutes)
+
+> **Real-World Use Cases:**
+>
+> - **Business Events:** Trigger workflows when business milestones occur (customer VIP status reached, inventory low)
+> - **Integration Events:** Notify external systems (CRM updates, analytics tracking, webhook dispatching)
+> - **Workflow Events:** Chain multiple plugin actions (after product import → update search → clear cache)
+> - **Audit Events:** Track custom business activities for compliance and reporting
 
 ### Step 1: Create Custom Event Class
 
@@ -584,6 +717,109 @@ Update service registration for MessageService:
 </service>
 ```
 
+### Testing Part 5: Custom Events
+
+```bash
+# Clear cache
+bin/console cache:clear
+
+# Verify custom event subscriber is registered
+bin/console debug:event-dispatcher Learning\\Bundle\\Event\\CustomWelcomeEvent
+
+# Test the event flow
+tail -f var/log/dev.log | grep -E "(Welcome message|Generated at)"
+```
+
+**Testing with CLI Command:**
+
+Create a test command: `custom/plugins/LearningBundle/src/Command/TestWelcomeCommand.php`
+
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Command;
+
+use Learning\Bundle\Service\MessageService;
+use Shopware\Core\Framework\Context;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+class TestWelcomeCommand extends Command
+{
+    protected static $defaultName = 'learning:test-welcome';
+    private MessageService $messageService;
+
+    public function __construct(MessageService $messageService)
+    {
+        parent::__construct();
+        $this->messageService = $messageService;
+    }
+
+    protected function configure(): void
+    {
+        $this->setDescription('Test custom welcome event')
+            ->addArgument('name', InputArgument::OPTIONAL, 'Customer name', 'Test User');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $name = $input->getArgument('name');
+        $message = $this->messageService->generateWelcomeMessage($name, Context::createDefaultContext());
+        
+        $output->writeln('<info>Generated message:</info>');
+        $output->writeln($message);
+        
+        return Command::SUCCESS;
+    }
+}
+```
+
+Register the command in `services.xml`:
+
+```xml
+<service id="Learning\Bundle\Command\TestWelcomeCommand">
+    <argument type="service" id="Learning\Bundle\Service\MessageService"/>
+    <tag name="console.command"/>
+</service>
+```
+
+**Run Tests:**
+
+```bash
+# Clear cache
+bin/console cache:clear
+
+# Test the custom event
+bin/console learning:test-welcome "John Doe"
+
+# Expected output: "Welcome to Shopware Development, John Doe! [Generated at HH:MM:SS]"
+
+# Verify in logs
+grep "Welcome message generated" var/log/dev.log | tail -1
+```
+
+**What to Verify:**
+
+1. ✅ Original message is generated by `MessageService`
+2. ✅ `CustomWelcomeEvent` is dispatched
+3. ✅ `WelcomeMessageSubscriber` catches event and modifies message
+4. ✅ Final message includes timestamp
+5. ✅ All activity is logged
+
+> **💡 Pro Tip:** Use custom events to make your plugin extensible! Other developers can subscribe to your events and add their own logic without modifying your code.
+
+**Example Use Case Chain:**
+
+```text
+Your Plugin dispatches CustomWelcomeEvent
+    → Plugin A: Adds customer loyalty points info
+    → Plugin B: Adds personalized product recommendations
+    → Plugin C: Tracks event for analytics
+    → Final enriched message returned
+```
+
 ---
 
 ## Part 6: Dependency Injection Patterns (45 minutes)
@@ -622,6 +858,7 @@ class MyService
 ```
 
 In `services.xml`:
+
 ```xml
 <service id="MyService">
     <call method="setLogger">
@@ -655,12 +892,14 @@ class MyService
 ### Best Practices
 
 ✅ **DO:**
+
 - Use constructor injection for required dependencies
 - Type-hint interfaces, not concrete classes
 - Keep constructors focused (max 5-7 dependencies)
 - Make services stateless when possible
 
 ❌ **DON'T:**
+
 - Use service locator pattern unless absolutely necessary
 - Create circular dependencies
 - Inject the entire container
@@ -677,12 +916,14 @@ class MyService
 Create a subscriber that counts how many times each product page is viewed.
 
 **Requirements:**
+
 - Subscribe to `ProductPageLoadedEvent`
 - Log product ID and timestamp
 - Store count in a file in `var/` directory (format: `productId => count`)
 - Create a command to display top 10 viewed products
 
 **Hints:**
+
 - Event class: `Shopware\Storefront\Page\Product\ProductPageLoadedEvent`
 - Use JSON file to store data: `var/product_views.json`
 - Remember to serialize/deserialize the array
@@ -692,6 +933,7 @@ Create a subscriber that counts how many times each product page is viewed.
 Create a custom event system for discounts.
 
 **Requirements:**
+
 - Create `DiscountAppliedEvent` with discount details (code, amount, customerId)
 - Create subscriber that logs all discount applications
 - Create a service that simulates applying a discount
@@ -699,6 +941,7 @@ Create a custom event system for discounts.
 - Create a command to test: `learning:apply-discount {code} {amount}`
 
 **Hints:**
+
 - Event should extend `Symfony\Contracts\EventDispatcher\Event`
 - Include `ShopwareEvent` interface if you need Context
 - Subscriber should implement `EventSubscriberInterface`
@@ -708,6 +951,7 @@ Create a custom event system for discounts.
 Create a chain of decorated services that build product information.
 
 **Requirements:**
+
 1. Create `ProductInfoService` interface with `getInfo(string $productId): string`
 2. Base service `BaseProductInfoService`: Returns "Product: {name}"
 3. First decorator `PriceProductInfoDecorator`: Adds " - Price: {price}"
@@ -715,6 +959,7 @@ Create a chain of decorated services that build product information.
 5. Create command to test: `learning:product-info {productId}`
 
 **Hints:**
+
 - Each decorator should call the decorated service first
 - Register decorators in order in `services.xml`
 - Use `product.repository` to fetch product data
@@ -758,6 +1003,7 @@ bin/console debug:container --show-arguments Shopware\\Core\\Checkout\\Cart\\Pri
 ## Key Takeaways
 
 ✅ **You've learned:**
+
 - Event-driven architecture in Shopware
 - Creating and registering event subscribers
 - Listening to business, lifecycle, and cart events
@@ -769,17 +1015,20 @@ bin/console debug:container --show-arguments Shopware\\Core\\Checkout\\Cart\\Pri
 ## Common Issues
 
 **Problem:** Event subscriber not firing
+
 - Check `<tag name="kernel.event_subscriber"/>`
 - Verify event class name
 - Clear cache
 - Check if event is actually dispatched
 
 **Problem:** Circular dependency error
+
 - Review service dependencies
 - Consider using setter injection
 - Break circular reference with event system
 
 **Problem:** Decorated service not working
+
 - Check `decorates` attribute in services.xml
 - Ensure `.inner` argument is first
 - Clear cache completely

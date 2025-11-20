@@ -2,6 +2,8 @@
 
 > **Note:** These are complete, working solutions. Try to solve the exercises yourself first before looking at these!
 
+🤓 **Developer Note:** The AI time estimates are very inaccurate. There's no way someone without any Symfony or Shopware experience solves theses exercises that quickly. Even copying the solution (typing to learn, changing tiny details, not just tabbing through code completion) and debugging typos easily takes two or three times longer than in these estimates.
+
 ---
 
 ## Exercise 1: Add Multilingual Configuration (30-45 min)
@@ -493,8 +495,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class CounterCommand extends Command
 {
-    protected static $defaultName = 'learning:counter';
-
     private CounterService $counterService;
 
     public function __construct(CounterService $counterService)
@@ -506,6 +506,7 @@ class CounterCommand extends Command
     protected function configure(): void
     {
         $this
+            ->setName('learning:counter')
             ->setDescription('Manage the message counter')
             ->addOption('show', 's', InputOption::VALUE_NONE, 'Show counter statistics')
             ->addOption('reset', 'r', InputOption::VALUE_NONE, 'Reset counter to zero')

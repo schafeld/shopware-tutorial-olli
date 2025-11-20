@@ -580,6 +580,9 @@ bin/console learning:test-message "Max"
 bin/console learning:test-message "Anna"
 # Output: Welcome to Shopware Development, Anna! (Message #3)
 
+# For the curious: The logging strings with the names should now be in the Symfony log:
+tail ./var/log/dev.log
+
 # Check counter again
 bin/console learning:counter --show
 # Output: Total Messages: 3

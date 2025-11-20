@@ -372,7 +372,10 @@ bin/console cache:clear
 bin/console debug:event-dispatcher | grep -E "(OrderSubscriber|CartSubscriber)"
 
 # Watch logs in real-time
+# too verbose:
 tail -f var/log/dev.log | grep -E "(Order|Cart|Item being added)"
+# this triggers only when an item is added to cart:
+tail -f var/log/dev.log | grep -E "Item being added)"
 ```
 
 **Manual Testing Steps:**

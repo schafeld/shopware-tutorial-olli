@@ -9,6 +9,7 @@ class MessageService
 {
     private LoggerInterface $logger;
     private SystemConfigService $systemConfigService;
+    private CounterService $counterService;
 
     // translations array for welcome messages
     private const TRANSLATIONS = [
@@ -34,14 +35,20 @@ class MessageService
 
     public function __construct(
         LoggerInterface $logger, 
-        SystemConfigService $systemConfigService)
+        SystemConfigService $systemConfigService,
+        CounterService $counterService
+        )
     {
         $this->logger = $logger;
         $this->systemConfigService = $systemConfigService;
+        $this -> counterService = $counterService;
     }
 
     public function generateWelcomeMessage(string $name): string
     {
+        // Increment the the counter each time a message is generated
+        $messageNumber = $this -> counterService -> incrementCount();
+
         // Get the selected language from configuration, default: en
         $language = $this->systemConfigService->get('LearningBundle.config.greetingLanguage') ?? 'en';
 
@@ -55,9 +62,9 @@ class MessageService
 
         $message = match($format) {
             'simple'    => sprintf(' %s, %s! ' . $this->getGreeting('goodbye') . '.', $this->getGreeting('welcome'), $name),
-            'detailed'  => sprintf('%s, ' . $this->getGreeting('hello') . ' %s! ' . $this->getGreeting('today_is') . ' %s. ' . $this->getGreeting('goodbye') . '.' , $this->getGreeting('welcome'), $name, date('Y-m-d')),
+            'detailed'  => sprintf('%s. ' . $this->getGreeting('hello') . ' %s! ' . $this->getGreeting('today_is') . ' %s. ' . $this->getGreeting('goodbye') . '.' , $this->getGreeting('welcome'), $name, date('Y-m-d')),
             'custom'    => sprintf('%s! ' . $customMessage , $name),
-            default     => sprintf($this->getGreeting('hello') . '%s, %s! ', $this->getGreeting('welcome'), $name),
+            default     => sprintf($prefix. ', %s! ', $name),
         };
 
         // Check if logging is enabled
@@ -69,6 +76,7 @@ class MessageService
                 'message' => $message,
                 'format' => $format,
                 'language' => $language,
+                'message_number' => $messageNumber,
             ]);
         }   
         
@@ -86,6 +94,9 @@ class MessageService
 
     public function getPluginInfo(): array
     {
+
+        $stats = $this->counterService->getStatistics();
+        
         return [
             'name' => 'LearningBundle',
             'version' => '1.0.0',
@@ -96,7 +107,9 @@ class MessageService
                 'Service Container',
                 'Configuration Management',
                 'Multi-language Support',
-            ]
+                'Message Counter',
+            ],
+            'total_messages_generated' => $stats['count'],
         ];
     }
 }

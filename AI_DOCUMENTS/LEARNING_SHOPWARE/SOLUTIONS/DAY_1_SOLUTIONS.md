@@ -691,6 +691,8 @@ class ValidationException extends \Exception
 }
 ```
 
+This custom exception is actually required only in Exercise 3 (see below).
+
 ### Step 3: Register ValidationService
 
 Update `services.xml`:
@@ -812,7 +814,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class TestMessageCommand extends Command
 {
-    protected static $defaultName = 'learning:test-message';
+    // protected static $defaultName = 'learning:test-message'; // deprecated
 
     private MessageService $messageService;
 
@@ -824,7 +826,9 @@ class TestMessageCommand extends Command
 
     protected function configure(): void
     {
-        $this->setDescription('Test the MessageService')
+        $this
+            ->setName('learning:test-message') // this is the way!
+            ->setDescription('Test the MessageService')
             ->addArgument('name', InputArgument::OPTIONAL, 'Your name', 'Developer');
     }
 

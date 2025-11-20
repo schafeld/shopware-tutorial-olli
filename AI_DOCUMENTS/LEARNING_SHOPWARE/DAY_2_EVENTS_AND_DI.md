@@ -789,7 +789,7 @@ bin/console debug:container --show-arguments Shopware\\Core\\Checkout\\Cart\\Pri
 ## Additional Resources
 
 - [Symfony Event Dispatcher](https://symfony.com/doc/current/components/event_dispatcher.html)
-- [Shopware Events Reference](https://developer.shopware.com/docs/resources/references/core-reference/events-reference)
+- [Shopware Events Reference](https://developer.shopware.com/docs/resources/guidelines/code/events.html#events)
 - [Service Decoration](https://symfony.com/doc/current/service_container/service_decoration.html)
 - [Dependency Injection Best Practices](https://symfony.com/doc/current/service_container/injection_types.html)
 

@@ -42,7 +42,7 @@ Action → Event Dispatched → Subscribers Execute → Result
 ### Official Documentation
 
 📖 **Read these resources:**
-- [Add Subscriber](https://developer.shopware.com/docs/guides/plugins/plugins/plugin-fundamentals/add-plugin-subscriber)
+- [Add Subscriber](https://developer.shopware.com/docs/guides/plugins/plugins/plugin-fundamentals/listening-to-events.html#creating-your-own-subscriber)
 - [Listening to Events](https://developer.shopware.com/docs/guides/plugins/plugins/plugin-fundamentals/listening-to-events)
 - [Business Events](https://docs.shopware.com/en/shopware-6-en/settings/Business-Events)
 - [Symfony Event Dispatcher](https://symfony.com/doc/current/components/event_dispatcher.html)

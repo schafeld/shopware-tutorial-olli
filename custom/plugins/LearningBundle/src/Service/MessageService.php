@@ -4,12 +4,14 @@ namespace Learning\Bundle\Service;
 
 use Psr\Log\LoggerInterface;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
+use Learning\Bundle\Exception\ValidationException;
 
 class MessageService
 {
     private LoggerInterface $logger;
     private SystemConfigService $systemConfigService;
     private CounterService $counterService;
+    private ValidationService $validationService; // how to use this?
 
     // translations array for welcome messages
     private const TRANSLATIONS = [
@@ -36,16 +38,33 @@ class MessageService
     public function __construct(
         LoggerInterface $logger, 
         SystemConfigService $systemConfigService,
-        CounterService $counterService
+        CounterService $counterService,
+        ValidationService $validationService
         )
     {
         $this->logger = $logger;
         $this->systemConfigService = $systemConfigService;
         $this -> counterService = $counterService;
+        $this->validationService = $validationService;
     }
 
+    /**
+     * @throws ValidationException
+     */    
     public function generateWelcomeMessage(string $name): string
     {
+
+        // Validate and sanitize the name input
+        try {
+            $name = $this -> validationService -> processName($name);
+        } catch (ValidationException $e) {
+            $this -> logger -> warning('Validation failed for name: {name}', [
+                'name' => $name,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+
         // Increment the the counter each time a message is generated
         $messageNumber = $this -> counterService -> incrementCount();
 

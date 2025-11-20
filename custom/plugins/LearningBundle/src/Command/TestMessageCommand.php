@@ -2,6 +2,7 @@
 
 namespace Learning\Bundle\Command;
 
+use Learning\Bundle\Exception\ValidationException;
 use Learning\Bundle\Service\MessageService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -32,16 +33,26 @@ class TestMessageCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $name = (string) $input->getArgument('name');
 
-        // Test message generation
-        $message = $this->messageService->generateWelcomeMessage($name);
-        $io->success($message);
+        try {
+            // Test message generation
+            $message = $this->messageService->generateWelcomeMessage($name);
+            $io->success($message);
 
-        // Display plugin info
-        $info = $this->messageService->getPluginInfo();
-        $io->section('Plugin Information');
-        $io->listing($info['features']);
+            // Display plugin info
+            $info = $this->messageService->getPluginInfo();
+            $io->section('Plugin Information');
+            $io->listing($info['features']);
+            $io -> text(sprintf('Total messages generated: %d', $info['total_messages_generated']));
 
-        return Command::SUCCESS;
+            return Command::SUCCESS;
+
+        } catch (ValidationException $e) {
+            $io->error('Validation error: ' . $e->getMessage());
+            $io -> note('Please provide a valid name consisting of alphabetic characters only.');
+            return Command::FAILURE;
+        } catch (\Throwable $e) {
+            $io->error('An unexpected error occurred: ' . $e->getMessage());
+            return Command::FAILURE;
+        }   
     }
-
 }

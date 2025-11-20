@@ -22,12 +22,18 @@
             <argument type="service" id="logger"/>
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <argument type="service" id="Learning\Bundle\Service\CounterService"/>
+            <argument type="service" id="Learning\Bundle\Service\ValidationService"/>
         </service>
 
         <!-- Register custom command from onboarding week 3 day 1 tutorial -->
         <service id="Learning\Bundle\Command\TestMessageCommand">
             <argument type="service" id="Learning\Bundle\Service\MessageService"/>
             <tag name="console.command"/>
+        </service>
+
+        <!-- Register ValidationService -->
+        <service id="Learning\Bundle\Service\ValidationService">
+            <!-- No dependencies -->
         </service>
     </services>
 </container>

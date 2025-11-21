@@ -628,15 +628,22 @@ class MessageService
 {
     private LoggerInterface $logger;
     private SystemConfigService $systemConfigService;
+    private CounterService $counterService;
+    private ValidationService $validationService;
     private EventDispatcherInterface $eventDispatcher;
 
     public function __construct(
-        LoggerInterface $logger,
+        LoggerInterface $logger, 
         SystemConfigService $systemConfigService,
+        CounterService $counterService,
+        ValidationService $validationService,
         EventDispatcherInterface $eventDispatcher
-    ) {
+        )
+    {
         $this->logger = $logger;
         $this->systemConfigService = $systemConfigService;
+        $this -> counterService = $counterService;
+        $this->validationService = $validationService;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -764,7 +771,8 @@ class TestWelcomeCommand extends Command
 
     protected function configure(): void
     {
-        $this->setDescription('Test custom welcome event')
+        $this->setName('learning:test-welcome')
+            ->setDescription('Test custom welcome event')
             ->addArgument('name', InputArgument::OPTIONAL, 'Customer name', 'Test User');
     }
 

@@ -439,24 +439,26 @@ Create `custom/plugins/LearningBundle/src/Service/Decorator/CustomPriceCalculato
 namespace Learning\Bundle\Service\Decorator;
 
 use Psr\Log\LoggerInterface;
+use Shopware\Core\Checkout\Cart\Price\QuantityPriceCalculator;
 use Shopware\Core\Checkout\Cart\Price\Struct\CalculatedPrice;
 use Shopware\Core\Checkout\Cart\Price\Struct\QuantityPriceDefinition;
-use Shopware\Core\Checkout\Cart\Tax\Struct\CalculatedTaxCollection;
-use Shopware\Core\Checkout\Cart\Tax\Struct\TaxRuleCollection;
-use Shopware\Core\Framework\DataAbstractionLayer\Pricing\Price;
-use Shopware\Core\Framework\DataAbstractionLayer\Pricing\PriceCollection;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
 /**
  * This is an example decorator - use with caution in production!
+ * 
+ * IMPORTANT: Decorators MUST extend the class they decorate to maintain type compatibility.
+ * This ensures that any service expecting QuantityPriceCalculator will accept our decorator.
  */
-class CustomPriceCalculator
+class CustomPriceCalculator extends QuantityPriceCalculator
 {
-    private $decoratedService;
+    private QuantityPriceCalculator $decoratedService;
     private LoggerInterface $logger;
 
-    public function __construct($decoratedService, LoggerInterface $logger)
-    {
+    public function __construct(
+        QuantityPriceCalculator $decoratedService,
+        LoggerInterface $logger
+    ) {
         $this->decoratedService = $decoratedService;
         $this->logger = $logger;
     }

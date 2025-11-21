@@ -59,5 +59,12 @@
             <argument type="service" id="logger"/>
             <tag name="kernel.event_subscriber"/>
         </service>
+
+        <!-- Example of service decoration -->
+        <service id="Learning\Bundle\Service\Decorator\CustomPriceCalculator" 
+            decorates="Shopware\Core\Checkout\Cart\Price\QuantityPriceCalculator">
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="logger"/>
+        </service>
     </services>
 </container>

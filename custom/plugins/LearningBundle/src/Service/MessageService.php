@@ -2,18 +2,37 @@
 
 namespace Learning\Bundle\Service;
 
+use Learning\Bundle\Event\CustomWelcomeEvent;
 use Psr\Log\LoggerInterface;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Learning\Bundle\Exception\ValidationException;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class MessageService
 {
     private LoggerInterface $logger;
     private SystemConfigService $systemConfigService;
     private CounterService $counterService;
-    private ValidationService $validationService; // how to use this?
+    private ValidationService $validationService;
+    private EventDispatcherInterface $eventDispatcher;
 
-    // translations array for welcome messages
+    public function __construct(
+        LoggerInterface $logger, 
+        SystemConfigService $systemConfigService,
+        CounterService $counterService,
+        ValidationService $validationService,
+        EventDispatcherInterface $eventDispatcher
+        )
+    {
+        $this->logger = $logger;
+        $this->systemConfigService = $systemConfigService;
+        $this -> counterService = $counterService;
+        $this->validationService = $validationService;
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
+        // translations array for welcome messages
     private const TRANSLATIONS = [
         'en' => [
             'welcome' => 'Welcome to the Shopware Development department',
@@ -35,23 +54,10 @@ class MessageService
         ],
     ];
 
-    public function __construct(
-        LoggerInterface $logger, 
-        SystemConfigService $systemConfigService,
-        CounterService $counterService,
-        ValidationService $validationService
-        )
-    {
-        $this->logger = $logger;
-        $this->systemConfigService = $systemConfigService;
-        $this -> counterService = $counterService;
-        $this->validationService = $validationService;
-    }
-
     /**
      * @throws ValidationException
      */    
-    public function generateWelcomeMessage(string $name): string
+    public function generateWelcomeMessage(string $name, Context $context): string
     {
 
         // Validate and sanitize the name input
@@ -86,6 +92,13 @@ class MessageService
             default     => sprintf($prefix. ', %s! ', $name),
         };
 
+        // Dispatch a custom event - other plugins can modify the message
+        $event = new CustomWelcomeEvent($name, $message, $context);
+        $this->eventDispatcher->dispatch($event);
+
+        // Get potentially modified message from event
+        $finalMessage = $event->getMessage();
+
         // Check if logging is enabled
         $enableLogging = $this->systemConfigService->getBool('LearningBundle.config.enableLogging') ?? true;
 
@@ -99,7 +112,7 @@ class MessageService
             ]);
         }   
         
-        return $message;
+        return $finalMessage;
     }
 
     /**

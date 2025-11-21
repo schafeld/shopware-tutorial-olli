@@ -23,6 +23,7 @@
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <argument type="service" id="Learning\Bundle\Service\CounterService"/>
             <argument type="service" id="Learning\Bundle\Service\ValidationService"/>
+            <argument type="service" id="Symfony\Contracts\EventDispatcher\EventDispatcherInterface"/>
         </service>
 
         <!-- Register custom command from onboarding week 3 day 1 tutorial -->
@@ -65,6 +66,16 @@
             decorates="Shopware\Core\Checkout\Cart\Price\QuantityPriceCalculator">
             <argument type="service" id=".inner"/>
             <argument type="service" id="logger"/>
+        </service>
+
+        <service id="Learning\Bundle\Subscriber\WelcomeMessageSubscriber">
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Register TestWelcomeCommand to test custom events -->
+        <service id="Learning\Bundle\Command\TestWelcomeCommand">
+            <argument type="service" id="Learning\Bundle\Service\MessageService"/>
+            <tag name="console.command"/>
         </service>
     </services>
 </container>

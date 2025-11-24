@@ -1125,7 +1125,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class ProductInfoCommand extends Command
 {
-    protected static $defaultName = 'learning:product-info';
+    // protected static $defaultName = 'learning:product-info'; // deprecated
 
     private ProductInfoServiceInterface $productInfoService;
     private EntityRepository $productRepository;
@@ -1142,6 +1142,7 @@ class ProductInfoCommand extends Command
     protected function configure(): void
     {
         $this
+            ->setName('learning:product-info') // this is how to set the command name
             ->setDescription('Get decorated product information')
             ->addArgument('product-id', InputArgument::OPTIONAL, 'Product ID or product number')
             ->addOption('list', 'l', InputOption::VALUE_NONE, 'List first 10 products');

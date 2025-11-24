@@ -116,5 +116,40 @@
             <argument type="service" id="Learning\Bundle\Service\DiscountService"/>
             <tag name="console.command"/>
         </service>
+
+        <!-- Base Product Info Service -->
+        <service id="Learning\Bundle\Service\ProductInfo\BaseProductInfoService">
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <!-- First Decorator: Add Price -->
+        <service id="Learning\Bundle\Service\ProductInfo\PriceProductInfoDecorator"
+                decorates="Learning\Bundle\Service\ProductInfo\BaseProductInfoService"
+                decoration-priority="100">
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <!-- Second Decorator: Add Stock -->
+        <service id="Learning\Bundle\Service\ProductInfo\StockProductInfoDecorator"
+                decorates="Learning\Bundle\Service\ProductInfo\BaseProductInfoService"
+                decoration-priority="50">
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <!-- Alias for easy injection -->
+        <service id="Learning\Bundle\Service\ProductInfo\ProductInfoServiceInterface"
+                alias="Learning\Bundle\Service\ProductInfo\BaseProductInfoService"/>
+
+        <!-- Product Info Command -->
+        <service id="Learning\Bundle\Command\ProductInfoCommand">
+            <argument type="service" id="Learning\Bundle\Service\ProductInfo\ProductInfoServiceInterface"/>
+            <argument type="service" id="product.repository"/>
+            <tag name="console.command"/>
+        </service>
     </services>
 </container>

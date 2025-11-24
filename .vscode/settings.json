@@ -1,0 +1,33 @@
+{
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/var/cache": true,
+    "**/var/log": true,
+    "**/public/bundles": true,
+    "**/public/media": true,
+    "**/public/thumbnail": true
+  },
+  "files.watcherExclude": {
+    "**/var/cache/**": true,
+    "**/var/log/**": true,
+    "**/node_modules/**": true
+  },
+  "files.associations": {
+    "*.twig": "twig"
+  },
+  "search.quickOpen.includeSymbols": true,
+  "search.quickOpen.includeHistory": true,
+  "workbench.editor.revealIfOpen": true,
+  // Make Shopware core templates searchable
+  "search.useIgnoreFiles": false,
+  "search.followSymlinks": true,
+  // File explorer settings
+  "files.exclude": {
+    "**/.git": false,
+    "**/.DS_Store": true,
+    "**/node_modules": false,
+    "vendor/shopware": false
+  }
+}

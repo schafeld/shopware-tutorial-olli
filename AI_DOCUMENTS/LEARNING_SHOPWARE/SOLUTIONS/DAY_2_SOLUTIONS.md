@@ -226,7 +226,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class TopProductsCommand extends Command
 {
-    protected static $defaultName = 'learning:top-products';
+    // protected static $defaultName = 'learning:top-products'; // deprecated
 
     private ProductViewCounterService $viewCounterService;
     private EntityRepository $productRepository;
@@ -243,6 +243,7 @@ class TopProductsCommand extends Command
     protected function configure(): void
     {
         $this
+            ->setName('learning:top-products') // this is the way to set a default name
             ->setDescription('Show top viewed products')
             ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Number of products to show', 10)
             ->addOption('reset', 'r', InputOption::VALUE_NONE, 'Reset all view counts');

@@ -77,5 +77,25 @@
             <argument type="service" id="Learning\Bundle\Service\MessageService"/>
             <tag name="console.command"/>
         </service>
+
+        <!-- Product View Counter Service -->
+        <service id="Learning\Bundle\Service\ProductViewCounterService">
+            <argument type="service" id="logger"/>
+            <argument type="string">%kernel.project_dir%</argument>
+        </service>
+
+        <!-- Product View Subscriber -->
+        <service id="Learning\Bundle\Subscriber\ProductViewSubscriber">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewCounterService"/>
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Top Products Command -->
+        <service id="Learning\Bundle\Command\TopProductsCommand">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewCounterService"/>
+            <argument type="service" id="product.repository"/>
+            <tag name="console.command"/>
+        </service>
     </services>
 </container>

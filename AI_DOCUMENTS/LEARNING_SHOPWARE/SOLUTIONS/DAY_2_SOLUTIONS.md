@@ -694,7 +694,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class ApplyDiscountCommand extends Command
 {
-    protected static $defaultName = 'learning:apply-discount';
+    // protected static $defaultName = 'learning:apply-discount';
 
     private DiscountService $discountService;
 
@@ -707,6 +707,7 @@ class ApplyDiscountCommand extends Command
     protected function configure(): void
     {
         $this
+            ->setName('learning:apply-discount') // this is how to set the command name
             ->setDescription('Simulate applying a discount')
             ->addArgument('code', InputArgument::REQUIRED, 'Discount code')
             ->addArgument('amount', InputArgument::REQUIRED, 'Discount amount')

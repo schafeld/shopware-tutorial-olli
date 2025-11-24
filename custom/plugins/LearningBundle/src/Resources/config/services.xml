@@ -97,5 +97,24 @@
             <argument type="service" id="product.repository"/>
             <tag name="console.command"/>
         </service>
+
+        <!-- Discount Service -->
+        <service id="Learning\Bundle\Service\DiscountService">
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="logger"/>
+            <argument type="string">%kernel.project_dir%</argument>
+        </service>
+
+        <!-- Discount Subscriber -->
+        <service id="Learning\Bundle\Subscriber\DiscountSubscriber">
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Apply Discount Command -->
+        <service id="Learning\Bundle\Command\ApplyDiscountCommand">
+            <argument type="service" id="Learning\Bundle\Service\DiscountService"/>
+            <tag name="console.command"/>
+        </service>
     </services>
 </container>

@@ -91,13 +91,13 @@ bin/console cache:clear
 
 ### Step 4: Add Product Information Block
 
-Create `src/Resources/views/storefront/page/product-detail/buy-widget.html.twig`:
+Create `/custom/plugins/LearningBundle/src/Resources/views/storefront/component/buy-widget/buy-widget.html.twig`:
 
 ```twig
-{% sw_extends '@Storefront/storefront/page/product-detail/buy-widget.html.twig' %}
+{% sw_extends '@Storefront/storefront/component/buy-widget/buy-widget.html.twig' %}
 
 {# Add custom product info after price #}
-{% block page_product_detail_buy_price %}
+{% block buy_widget_price %}
     {{ parent() }}
     
     <div class="learning-product-info mt-3 p-3 bg-light rounded">
@@ -116,6 +116,13 @@ Create `src/Resources/views/storefront/page/product-detail/buy-widget.html.twig`
     </div>
 {% endblock %}
 ```
+
+The AI-generated exercise was again faulty, i.e. had the wrong block names and file locations.
+Here's how the actual template to extend from and modify was found:
+
+- Look for CSS class `product-detail-price-container` to find the template for price display on a PDP.
+- Found the class in `vendor/shopware/storefront/Resources/views/storefront/component/buy-widget/buy-widget.html.twig` in block `buy_widget_price`.
+- Proper location for template modifer is thus: `vendor/shopware/storefront/Resources/views/storefront/component/buy-widget/buy-widget.html.twig`
 
 ### Step 5: Explore Block Structure
 

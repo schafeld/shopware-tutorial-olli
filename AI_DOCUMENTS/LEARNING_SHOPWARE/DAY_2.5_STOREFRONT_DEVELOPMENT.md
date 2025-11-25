@@ -705,9 +705,6 @@ Create `scss/component/_product-info.scss`:
 Create `scss/base.scss`:
 
 ```scss
-// Import Shopware variables
-@import "~@shopware/storefront/src/scss/abstract/variables";
-
 // Import components
 @import "component/product-info";
 

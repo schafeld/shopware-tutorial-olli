@@ -117,7 +117,7 @@ Create `/custom/plugins/LearningBundle/src/Resources/views/storefront/component/
 {% endblock %}
 ```
 
-The AI-generated exercise was again faulty, i.e. had the wrong block names and file locations.
+**🤓 Developer notes:** The AI-generated exercise was again faulty, i.e. had the wrong block names and file locations.
 Here's how the actual template to extend from and modify was found:
 
 - Look for CSS class `product-detail-price-container` to find the template for price display on a PDP.

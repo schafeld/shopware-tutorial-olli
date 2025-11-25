@@ -1,0 +1,40 @@
+.learning-product-info {
+    border-left: 4px solid $primary;
+    
+    h6 {
+        color: $primary;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    ul {
+        li {
+            padding: 0.25rem 0;
+            
+            strong {
+                color: $dark;
+            }
+            
+            .badge {
+                font-size: 0.75rem;
+            }
+        }
+    }
+}
+
+.learning-product-banner {
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    animation: slideDown 0.3s ease-out;
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}

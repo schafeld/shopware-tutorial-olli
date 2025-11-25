@@ -1,0 +1,13 @@
+// Import components
+@import "component/product-info";
+
+// Custom animations
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+// Global custom styles
+.learning-section {
+    animation: fadeIn 0.5s ease-in;
+}

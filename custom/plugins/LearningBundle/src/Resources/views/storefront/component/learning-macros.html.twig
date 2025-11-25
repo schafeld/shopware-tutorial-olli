@@ -1,0 +1,34 @@
+{# Reusable Twig macros #}
+
+{% macro badge(label, variant='primary') %}
+    <span class="badge bg-{{ variant }}">{{ label }}</span>
+{% endmacro %}
+
+{% macro productCard(product) %}
+    <div class="card h-100">
+        {% if product.cover %}
+            <img src="{{ product.cover.url }}" 
+                class="card-img-top" 
+                alt="{{ product.name }}">
+        {% endif %}
+        <div class="card-body">
+            <h5 class="card-title">{{ product.name }}</h5>
+            {% if product.description %}
+                <p class="card-text">{{ product.description|striptags|slice(0,100) }}...</p>
+            {% endif %}
+            <p class="card-text">
+                <strong>{{ product.calculatedPrice.totalPrice|currency }}</strong>
+            </p>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro availabilityBadge(product) %}
+    {% if product.available and product.stock > 0 %}
+        {{ _self.badge('In Stock', 'success') }}
+    {% elseif product.stock > 0 %}
+        {{ _self.badge('Limited Stock', 'warning') }}
+    {% else %}
+        {{ _self.badge('Out of Stock', 'danger') }}
+    {% endif %}
+{% endmacro %}

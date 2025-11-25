@@ -1,3 +1,6 @@
+{# The macro is made in step 3#}
+{% import '@LearningBundle/storefront/component/learning-macros.html.twig' as macros %}
+
 {# Custom component to display product information #}
 <div class="learning-product-info card mb-4">
     <div class="card-header">
@@ -42,6 +45,16 @@
                         {% endif %}
                     </td>
                 </tr>
+
+                {# The macro is made in step 3 #}
+                <tr>
+                    <td><strong>Stock:</strong></td>
+                    <td>
+                        {{ product.stock }} 
+                        {{ macros.availabilityBadge(product) }}
+                    </td>
+                </tr>
+
             </tbody>
         </table>
         

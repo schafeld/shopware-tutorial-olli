@@ -19,7 +19,7 @@
 ## Prerequisites
 
 - Completed Days 1-4
-- IDE installed (PHPStorm recommended)
+- VS Code installed with PHP Debug extension
 - Basic understanding of debugging concepts
 
 ---
@@ -400,20 +400,71 @@ php -v | grep Xdebug
 # Should show: with Xdebug v3.x.x
 ```
 
-### Step 3: Configure PHPStorm
+### Step 3: Configure VS Code
 
-**Settings > PHP > Debug:**
-- Port: 9003
-- Check "Can accept external connections"
-- Uncheck "Break at first line in PHP scripts"
+**Install PHP Debug Extension:**
+```bash
+# Install the PHP Debug extension by Xdebug
+# In VS Code: Cmd+Shift+X, search for "PHP Debug" by Xdebug
+```
 
-**Settings > PHP > Servers:**
-- Add new server
-- Name: shopware-tutorial
-- Host: localhost
-- Port: 8000
-- Debugger: Xdebug
-- Map your project root
+**Create `.vscode/launch.json`:**
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Listen for Xdebug",
+            "type": "php",
+            "request": "launch",
+            "port": 9003
+        },
+        {
+            "name": "Launch currently open script",
+            "type": "php",
+            "request": "launch",
+            "program": "${file}",
+            "cwd": "${fileDirname}",
+            "port": 0,
+            "runtimeArgs": [
+                "-dxdebug.start_with_request=yes"
+            ],
+            "env": {
+                "XDEBUG_MODE": "debug,develop",
+                "XDEBUG_CONFIG": "client_port=${port}"
+            }
+        },
+        {
+            "name": "Launch Built-In web server",
+            "type": "php",
+            "request": "launch",
+            "runtimeArgs": [
+                "-dxdebug.mode=debug",
+                "-dxdebug.start_with_request=yes",
+                "-S",
+                "localhost:8000"
+            ],
+            "program": "",
+            "cwd": "${workspaceRoot}",
+            "port": 9003,
+            "serverReadyAction": {
+                "pattern": "Development Server \\(http://localhost:([0-9]+)\\) started",
+                "uriFormat": "http://localhost:%s",
+                "action": "openExternally"
+            }
+        }
+    ]
+}
+```
+
+**Path Mapping (if using Docker):**
+
+Add to your launch configuration:
+```json
+"pathMappings": {
+    "/var/www/html": "${workspaceFolder}"
+}
+```
 
 ### Step 4: Set Breakpoints and Debug
 
@@ -467,9 +518,14 @@ class DebugTestCommand extends Command
 
 **Debug the command:**
 
+1. Set a breakpoint in VS Code by clicking left of the line number
+2. Start debugging with F5 or click "Run and Debug" in the sidebar
+3. Select "Listen for Xdebug" configuration
+4. Run the command in terminal:
+
 ```bash
 # Set XDEBUG_SESSION environment variable
-export XDEBUG_SESSION=PHPSTORM
+export XDEBUG_SESSION=vscode
 
 # Run command
 php -dxdebug.mode=debug bin/console learning:debug-test
@@ -480,9 +536,21 @@ XDEBUG_SESSION=1 bin/console learning:debug-test
 
 **Debug web requests:**
 
-1. Start "Listen for PHP Debug Connections" in PHPStorm
-2. Add `?XDEBUG_SESSION_START=PHPSTORM` to URL
-3. Or use browser extension (Xdebug Helper)
+1. Start debugging in VS Code (F5) and select "Listen for Xdebug"
+2. Set breakpoints in your PHP files
+3. Add `?XDEBUG_SESSION_START=vscode` to your URL
+4. Or use browser extension (Xdebug Helper for Chrome/Firefox)
+5. Refresh the page - VS Code will pause at your breakpoints
+
+**VS Code Debugging Tips:**
+- F5: Start/Continue debugging
+- F10: Step over
+- F11: Step into
+- Shift+F11: Step out
+- Cmd+Shift+F5: Restart debugging
+- Shift+F5: Stop debugging
+- Hover over variables to see their values
+- Use the Debug Console to evaluate expressions
 
 ### Step 5: Debug Configuration for Docker
 
@@ -495,6 +563,21 @@ services:
       PHP_IDE_CONFIG: "serverName=shopware-tutorial"
       XDEBUG_CONFIG: "client_host=host.docker.internal client_port=9003"
       XDEBUG_MODE: "debug,develop"
+```
+
+**VS Code Docker Path Mapping:**
+
+In your `.vscode/launch.json`, add path mappings:
+```json
+{
+    "name": "Listen for Xdebug (Docker)",
+    "type": "php",
+    "request": "launch",
+    "port": 9003,
+    "pathMappings": {
+        "/var/www/html": "${workspaceFolder}"
+    }
+}
 ```
 
 ---
@@ -804,7 +887,8 @@ When encountering issues:
 
 - [Symfony Debugging](https://symfony.com/doc/current/debugging.html)
 - [Xdebug Documentation](https://xdebug.org/docs/)
-- [PHPStorm Debugging Guide](https://www.jetbrains.com/help/phpstorm/debugging.html)
+- [VS Code PHP Debugging](https://code.visualstudio.com/docs/languages/php#_debugging)
+- [PHP Debug Extension](https://marketplace.visualstudio.com/items?itemName=xdebug.php-debug)
 - [Monolog Documentation](https://github.com/Seldaek/monolog/tree/main/doc)
 - [PHP Error Handling](https://www.php.net/manual/en/language.exceptions.php)
 

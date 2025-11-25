@@ -1,0 +1,11 @@
+{% sw_extends '@Storefront/storefront/page/content/product-detail.html.twig' %}
+
+{# Add a custom banner above product details #}
+{% block page_content %}
+    <div class="learning-product-banner alert alert-info">
+        <strong>🎉 Welcome!</strong> This is a custom banner added by LearningBundle plugin.
+    </div>
+
+    {# Keep original content #}
+    {{ parent() }}
+{% endblock %}

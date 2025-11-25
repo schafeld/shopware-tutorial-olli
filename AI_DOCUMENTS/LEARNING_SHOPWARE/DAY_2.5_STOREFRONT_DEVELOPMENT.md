@@ -222,25 +222,33 @@ Create `src/Resources/views/storefront/component/product/learning-info.html.twig
 
 ### Step 2: Include Your Component
 
-Create `src/Resources/views/storefront/page/content/product-detail.html.twig`:
+To add the component within the proper page width constraints, create `src/Resources/views/storefront/page/content/detail.html.twig`:
 
-> **Note:** The actual file is `page/content/product-detail.html.twig`, not `page/product-detail/index.html.twig`. Available blocks are: `base_head`, `base_main_inner`, `page_content`, `cms_breadcrumb`, `cms_content`, and `page_content_blocks`.
+> **Important:** To keep the component within the CMS section container (matching the width of product content), extend the `detail.html.twig` template and use the `page_content_sections_inner` block. This ensures proper alignment with the rest of the page content.
 
 ```twig
-{% sw_extends '@Storefront/storefront/page/content/product-detail.html.twig' %}
+{% sw_extends '@Storefront/storefront/page/content/detail.html.twig' %}
 
-{# Add custom component after the CMS content #}
-{% block cms_content %}
+{# Add custom component after all CMS sections #}
+{% block page_content_sections_inner %}
     {{ parent() }}
     
-    {# Include our custom component - appears below product details #}
-    {% sw_include '@LearningBundle/storefront/component/product/learning-info.html.twig' with {
-        product: page.product
-    } %}
+    {# Add our custom component in a properly styled section #}
+    <section class="cms-section cms-section-default">
+        <div class="cms-section-default">
+            <div class="container">
+                {% sw_include '@LearningBundle/storefront/component/product/learning-info.html.twig' with {
+                    product: page.product
+                } %}
+            </div>
+        </div>
+    </section>
 {% endblock %}
 ```
 
-**Where it appears:** This will display below all the product content (images, description, buy button, etc.) on any product detail page.
+**Where it appears:** This will display below all CMS sections (after the product images, description, buy button, etc.) within a properly styled container that matches the main content width.
+
+**Alternative (full-width):** If you want the component to appear outside the container at full page width, create `src/Resources/views/storefront/page/content/product-detail.html.twig` instead and use the `cms_content` block. Available blocks in that template are: `base_head`, `base_main_inner`, `page_content`, `cms_breadcrumb`, `cms_content`, and `page_content_blocks`.
 
 ### Step 3: Create Macro for Reusability
 

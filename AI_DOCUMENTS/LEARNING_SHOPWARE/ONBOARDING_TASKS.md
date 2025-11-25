@@ -22,4 +22,4 @@ The task focus should touch important full-stack topics, but the development foc
 
 ----
 
-🤓 **Developer's note:** A word of warning. Time estimates of tutorials are often off. Initial time estimates by generative AI can be *way off*. As was initially the case here. So, don't be demoralised by the "Seven Days" concept. These lessons and exercises can easily keep you busy for 2 to 3 work weeks if you type (i.e. mistype and debug) by hand and do some rerading to understand what you're learning. 
+🤓 **Developer's note:** A word of warning. Time estimates of tutorials are often off. Initial time estimates by generative AI can be *way off*. As was initially the case here. So, don't be demoralised by the "Seven Days" concept. These lessons and exercises can easily keep you busy for 2 to 3 work weeks if you type (i.e. mistype and debug) by hand and do some reading to understand what you're learning.

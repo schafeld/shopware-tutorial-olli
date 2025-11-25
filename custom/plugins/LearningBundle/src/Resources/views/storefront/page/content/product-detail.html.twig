@@ -10,3 +10,16 @@
     {{ parent() }}
 {% endblock %}
 
+{# data attribute binding for tracking #}
+{# The trackingUrl endpoint doesn't exist yet, so there'll be an error 404 #}
+{% block base_main_inner %}
+    <div data-product-view-tracker
+         data-product-id="{{ page.product.id }}"
+         data-product-view-tracker-options="{{ {
+             trackingUrl: 'store-api/learning/product-view',
+             trackingDelay: 2000
+             }|json_encode }}">
+             
+             {{ parent() }}
+    </div>
+{% endblock %}

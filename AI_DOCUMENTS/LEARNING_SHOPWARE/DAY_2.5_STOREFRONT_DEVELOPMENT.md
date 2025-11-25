@@ -140,19 +140,20 @@ grep -r "{% block" vendor/shopware/storefront/Resources/views/storefront/page/pr
 
 ## Part 3: Working with Twig Variables (75 minutes)
 
+### Goal
+Learn to access and display product data from the page object on the **Product Detail Page (PDP)**. You'll create a reusable component that shows technical product information and include it on the product detail page.
+
 ### Understanding Page Objects
 
 Every storefront page has a page object with data:
 
 ```twig
-{# In product-detail/index.html.twig #}
-
-{# The page object contains: #}
-{{ page.product }}           {# ProductEntity #}
+{# On product detail pages, the page object contains: #}
+{{ page.product }}           {# ProductEntity - the main product data #}
 {{ page.configuratorSettings }} {# Product variants #}
 {{ page.reviews }}           {# Product reviews #}
-{{ context }}                {# SalesChannelContext #}
-{{ context.customer }}       {# Current customer #}
+{{ context }}                {# SalesChannelContext - store/session info #}
+{{ context.customer }}       {# Current customer (if logged in) #}
 {{ context.salesChannel }}   {# Sales channel info #}
 ```
 
@@ -221,20 +222,25 @@ Create `src/Resources/views/storefront/component/product/learning-info.html.twig
 
 ### Step 2: Include Your Component
 
-Update `page/product-detail/index.html.twig`:
+Create `src/Resources/views/storefront/page/content/product-detail.html.twig`:
+
+> **Note:** The actual file is `page/content/product-detail.html.twig`, not `page/product-detail/index.html.twig`. Available blocks are: `base_head`, `base_main_inner`, `page_content`, `cms_breadcrumb`, `cms_content`, and `page_content_blocks`.
 
 ```twig
-{% sw_extends '@Storefront/storefront/page/product-detail/index.html.twig' %}
+{% sw_extends '@Storefront/storefront/page/content/product-detail.html.twig' %}
 
-{% block page_product_detail_content %}
+{# Add custom component after the CMS content #}
+{% block cms_content %}
     {{ parent() }}
     
-    {# Include our custom component #}
+    {# Include our custom component - appears below product details #}
     {% sw_include '@LearningBundle/storefront/component/product/learning-info.html.twig' with {
         product: page.product
     } %}
 {% endblock %}
 ```
+
+**Where it appears:** This will display below all the product content (images, description, buy button, etc.) on any product detail page.
 
 ### Step 3: Create Macro for Reusability
 
@@ -374,12 +380,12 @@ PluginManager.register('ProductViewTracker', ProductViewTrackerPlugin, '[data-pr
 
 ### Step 4: Add Plugin to Template
 
-Update `page/product-detail/index.html.twig`:
+Update `src/Resources/views/storefront/page/content/product-detail.html.twig`:
 
 ```twig
-{% sw_extends '@Storefront/storefront/page/product-detail/index.html.twig' %}
+{% sw_extends '@Storefront/storefront/page/content/product-detail.html.twig' %}
 
-{% block page_product_detail %}
+{% block base_main_inner %}
     <div data-product-view-tracker
          data-product-id="{{ page.product.id }}"
          data-product-view-tracker-options='{{ {

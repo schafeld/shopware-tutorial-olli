@@ -61,10 +61,10 @@ mkdir -p src/Resources/views/storefront
 
 ### Step 2: Extend Product Detail Page
 
-Create `src/Resources/views/storefront/page/product-detail/index.html.twig`:
+Create `src/Resources/views/storefront/page/product-detail.html.twig`:
 
 ```twig
-{% sw_extends '@Storefront/storefront/page/product-detail/index.html.twig' %}
+{% sw_extends '@Storefront/storefront/page/product-detail.html.twig' %}
 
 {# Add a custom banner above product details #}
 {% block page_product_detail_content %}

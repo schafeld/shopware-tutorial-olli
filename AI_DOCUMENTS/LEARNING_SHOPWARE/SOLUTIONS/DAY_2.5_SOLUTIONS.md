@@ -948,42 +948,76 @@ Create `src/Resources/views/storefront/component/product/price-filter.html.twig`
 </div>
 ```
 
-### Step 3: Add Filter to Product Listing Sidebar
+### Step 3: Add Filter to Product Listing Pages
 
-Create or extend `src/Resources/views/storefront/page/product-detail/index.html.twig`:
+**Option A: Add to Filter Panel (Recommended)**
+
+Extend the existing filter panel to include your custom price filter alongside Shopware's default filters.
+
+Create `src/Resources/views/storefront/component/listing/filter-panel.html.twig`:
 
 ```twig
-{% sw_extends '@Storefront/storefront/page/product-detail/index.html.twig' %}
+{% sw_extends '@Storefront/storefront/component/listing/filter-panel.html.twig' %}
 
-{# Add filter to sidebar #}
-{% block page_product_detail_sidebar %}
-    {{ parent() }}
+{% block component_filter_panel_items %}
+    {# Add custom price filter before default filters #}
+    {% block component_filter_panel_item_custom_price %}
+        <div class="filter-panel-item">
+            {% sw_include '@LearningBundle/storefront/component/product/price-filter.html.twig' %}
+        </div>
+    {% endblock %}
     
-    {# Include price filter widget #}
-    {% sw_include '@LearningBundle/storefront/component/product/price-filter.html.twig' %}
+    {# Keep all default filters (manufacturer, properties, price, rating, etc.) #}
+    {{ parent() }}
 {% endblock %}
 ```
 
-For product listing pages, create `src/Resources/views/storefront/page/search/index.html.twig`:
+**Option B: Add to Search Page**
+
+For search pages specifically, add the filter above the search results.
+
+Create `src/Resources/views/storefront/page/search/search-pagelet.html.twig`:
 
 ```twig
-{% sw_extends '@Storefront/storefront/page/search/index.html.twig' %}
+{% sw_extends '@Storefront/storefront/page/search/search-pagelet.html.twig' %}
 
-{# Add filter before listing #}
-{% block page_search_content %}
-    <div class="row">
-        <div class="col-md-3">
-            {# Sidebar with filters #}
-            {% sw_include '@LearningBundle/storefront/component/product/price-filter.html.twig' %}
-        </div>
-        
-        <div class="col-md-9">
-            {# Original listing content #}
-            {{ parent() }}
+{% block element_product_listing_wrapper %}
+    {# Add custom filter above search results #}
+    <div class="container mb-4">
+        {% sw_include '@LearningBundle/storefront/component/product/price-filter.html.twig' %}
+    </div>
+    
+    {# Original search results with sidebar filter and listing #}
+    {{ parent() }}
+{% endblock %}
+```
+
+**Option C: Add to Product Detail Page**
+
+For product detail pages, extend the base content area.
+
+Create `src/Resources/views/storefront/page/content/product-detail.html.twig`:
+
+```twig
+{% sw_extends '@Storefront/storefront/page/content/product-detail.html.twig' %}
+
+{% block cms_content %}
+    {# Add price filter widget above product content #}
+    <div class="container mb-4">
+        <div class="row">
+            <div class="col-md-3">
+                {% sw_include '@LearningBundle/storefront/component/product/price-filter.html.twig' %}
+            </div>
+            <div class="col-md-9">
+                {# Original product detail content #}
+                {{ parent() }}
+            </div>
         </div>
     </div>
 {% endblock %}
 ```
+
+**Note:** For product listing/category pages, you can also extend `element/cms-element-sidebar-filter.html.twig` to add custom filters next to the default sidebar filter button.
 
 ### Step 4: Add CSS Styling
 

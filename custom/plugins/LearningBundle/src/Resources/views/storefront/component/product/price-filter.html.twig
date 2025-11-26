@@ -1,82 +1,84 @@
-{# Price Range Filter Component #}
-<div class="price-filter-widget card mb-4"
-        data-price-filter
-        data-price-filter-options='{{ {
-        updateDelay: 300
-        }|json_encode }}'>
+{# Price Range Filter Component - Horizontal Layout #}
+<div class="price-filter-widget filter-range filter-panel-item"
+     data-price-filter
+     data-price-filter-options='{{ {
+         updateDelay: 300
+     }|json_encode }}'>
 
-    <div class="card-header">
-        <h5 class="mb-0">
-            <i class="fas fa-filter"></i>
-            Price Range
-        </h5>
-    </div>
+    {# Filter Toggle Button (like other filters) #}
+    <button class="filter-panel-item-toggle btn"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#customPriceFilter"
+            aria-expanded="false"
+            aria-controls="customPriceFilter">
+        Custom Price Range
+        {% sw_icon 'arrow-medium-down' style {pack: 'solid', size: 'xs', class: 'filter-panel-item-toggle'} %}
+    </button>
 
-    <div class="card-body">
-        {# Price Range Display #}
-        <div class="price-filter-display d-flex justify-content-between mb-3">
-            <div class="price-min">
-                <span class="text-muted">Min:</span>
-                <span class="fw-bold" data-price-display-min>€ 0</span>
+    {# Collapsible Filter Content #}
+    <div class="collapse filter-panel-item-dropdown" id="customPriceFilter">
+        <div class="filter-panel-item-body" style="min-height: 240px;">
+            
+            {# Horizontal Price Display & Controls #}
+            <div class="row g-2 align-items-end mb-3">
+                {# Min Price #}
+                <div class="col-6">
+                    <label for="priceMin" class="form-label small text-muted mb-1">Minimum</label>
+                    <div class="price-display mb-2">
+                        <strong data-price-display-min>€ 0</strong>
+                    </div>
+                    <input type="range"
+                           class="form-range"
+                           id="priceMin"
+                           min="0"
+                           max="1000"
+                           step="10"
+                           value="0"
+                           data-price-filter-min
+                           aria-label="Minimum Price">
+                </div>
+
+                {# Max Price #}
+                <div class="col-6">
+                    <label for="priceMax" class="form-label small text-muted mb-1">Maximum</label>
+                    <div class="price-display mb-2">
+                        <strong data-price-display-max>€ 1000</strong>
+                    </div>
+                    <input type="range"
+                           class="form-range"
+                           id="priceMax"
+                           min="0"
+                           max="1000"
+                           step="10"
+                           value="1000"
+                           data-price-filter-max
+                           aria-label="Maximum Price">
+                </div>
             </div>
-            <div class="price-max">
-                <span class="text-muted">Max:</span>
-                <span class="fw-bold" data-price-display-max>€ 1000</span>
+
+            {# Action Buttons - Horizontal #}
+            <div class="d-flex gap-2">
+                <button type="button"
+                        class="btn btn-primary btn-sm flex-grow-1"
+                        data-price-filter-apply>
+                    Apply
+                </button>
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm"
+                        data-price-filter-reset>
+                    Reset
+                </button>
             </div>
+
+            {# Active filter indicator #}
+            {% if app.request.query.get('min-price') or app.request.query.get('max-price') %}
+                <div class="alert alert-info mt-2 mb-0 py-2 px-2" role="info">
+                    <small>
+                        Active: {{ app.request.get('min-price', '0') }}€ - {{ app.request.get('max-price', '1000') }}€
+                    </small>
+                </div>
+            {% endif %}
         </div>
-
-        {# Price Range Slider #}
-        <div class="price-filter-sliders mb-3">
-            <div class="mb-3">
-                <label for="priceMin" class="form-label">Minimum Price</label>
-                <input type="range"
-                        class="form-range"
-                        id="priceMin"
-                        min="0"
-                        max="1000"
-                        step="10"
-                        value="0"
-                        data-price-filter-min
-                        aria-label="Minimum Price">
-            </div>
-            <div>
-                <label for="priceMax" class="form-label">Maximum Price</label>
-                <input type="range"
-                        class="form-range"
-                        id="priceMax"
-                        min="0"
-                        max="1000"
-                        step="10"
-                        value="1000"
-                        data-price-filter-max
-                        aria-label="Maximum Price">
-            </div>
-        </div>
-
-        {# Action Buttons #}
-        <div class="price-filter-actions d-grid gap-2">
-            <button type="button"
-                    class="btn btn-primary"
-                    data-price-filter-apply>
-                <i class="fas fa-check"></i>
-                Apply Filter
-            </button>
-            <button type="button"
-                    class="btn btn-outline-secondary btn-sm"
-                    data-price-filter-reset>
-                <i class="fas fa-undo"></i>
-                Reset Filter
-            </button>
-        </div>
-
-        {# Active filter indicator #}
-        {% if app.request.query.get('min-price') or app.request.query.get('max-price') %}
-            <div class="alert alert-info mt-3 mb-0" role="info">
-                <small>
-                    <i class="fas fa-info-circle"></i> Active Filter:
-                    {{ app.request.get('min-price', '0') }}€ - {{ app.request.get('max-price', '1000') }}€
-                </small>
-            </div>
-        {% endif %}
     </div>
 </div>

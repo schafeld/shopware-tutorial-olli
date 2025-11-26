@@ -1,89 +1,122 @@
+// Price Filter Widget - Integrated with Shopware Filter Panel
 .price-filter-widget {
-    border: 1px solid $border-color;
-    transition: box-shadow 0.3s ease;
-    
-    &:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    // Match Shopware's filter panel item styles
+    &.filter-panel-item {
+        border: none;
+        padding: 0;
+        margin-bottom: 0;
     }
-    
-    .card-header {
-        background-color: $light;
-        border-bottom: 2px solid $primary;
+
+    .filter-panel-item-toggle {
+        width: 100%;
+        text-align: left;
+        padding: 0.75rem 1rem;
+        border: none;
+        background: transparent;
+        font-weight: 500;
         
-        h5 {
-            color: $primary;
-            font-size: 1rem;
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.02);
         }
     }
-}
 
-.price-filter-display {
-    padding: 1rem;
-    background-color: $light;
-    border-radius: 0.375rem;
-    
-    .price-min,
-    .price-max {
+    .filter-panel-item-body {
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 0.25rem;
+        min-height: 240px; // Prevent scrollbar when alert is shown
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    // Price display styling
+    .price-display {
         text-align: center;
         
-        small {
-            display: block;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-        }
-        
-        .fw-bold {
-            font-size: 1.25rem;
+        strong {
+            font-size: 1.1rem;
             color: $primary;
+            display: block;
         }
     }
-}
 
-.price-filter-sliders {
+    // Horizontal slider layout
     .form-range {
         cursor: pointer;
+        width: 100%;
+        height: 0.5rem;
         
         &::-webkit-slider-thumb {
             background-color: $primary;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
             transition: all 0.2s ease;
+            cursor: grab;
             
             &:hover {
                 transform: scale(1.2);
-                box-shadow: 0 0 0 8px rgba($primary, 0.1);
+                box-shadow: 0 0 0 8px rgba($primary, 0.15);
+            }
+
+            &:active {
+                cursor: grabbing;
+                transform: scale(1.1);
             }
         }
         
         &::-moz-range-thumb {
             background-color: $primary;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            border: none;
             transition: all 0.2s ease;
+            cursor: grab;
             
             &:hover {
                 transform: scale(1.2);
-                box-shadow: 0 0 0 8px rgba($primary, 0.1);
+                box-shadow: 0 0 0 8px rgba($primary, 0.15);
+            }
+
+            &:active {
+                cursor: grabbing;
+                transform: scale(1.1);
             }
         }
     }
-    
-    label {
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: $secondary;
-    }
-}
 
-.price-filter-actions {
-    button {
+    // Compact button styling
+    .btn {
         transition: all 0.2s ease;
         
         &.is-loading {
             opacity: 0.6;
             cursor: not-allowed;
+            pointer-events: none;
         }
         
-        &:not(:disabled):hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        &:not(:disabled):hover:not(.is-loading) {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+    }
+
+    // Compact alert styling
+    .alert {
+        font-size: 0.85rem;
+        border-radius: 0.25rem;
+    }
+}
+
+// Fix sorting alignment to appear inline with filter facets
+.cms-element-product-listing-actions {
+    align-items: center !important;
+    margin-bottom: 1rem;
+
+    .sorting {
+        min-width: 200px;
     }
 }
 

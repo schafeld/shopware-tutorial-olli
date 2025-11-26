@@ -2,6 +2,7 @@
 
 > **Note:** These solutions focus on practical Storefront development with Twig and JavaScript!
 
+> **Remeber:** These AI time estimates are generally rubbish. Even just copy-typing the exercise solution with a tiny bit of typo-debugging takes longer than most of these time estimates. If you need to study the Shopware docs for propritary practices and methods you'll need even more time.
 ---
 
 ## Exercise 1: Product Comparison Feature (45-60 min)

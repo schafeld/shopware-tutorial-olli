@@ -336,7 +336,7 @@ PluginManager.register(
 );
 ```
 
-Include compare bar in base template:
+Create `src/Resources/views/storefront/base.html.twig` to include the compare bar globally:
 
 ```twig
 {% sw_extends '@Storefront/storefront/base.html.twig' %}
@@ -344,9 +344,12 @@ Include compare bar in base template:
 {% block base_body_inner %}
     {{ parent() }}
     
+    {# Include compare bar component #}
     {% sw_include '@LearningBundle/storefront/component/product/compare-bar.html.twig' %}
 {% endblock %}
 ```
+
+**Note:** This extends the base template to add the compare bar to every storefront page.
 
 ### Step 6: Add CSS Styling
 

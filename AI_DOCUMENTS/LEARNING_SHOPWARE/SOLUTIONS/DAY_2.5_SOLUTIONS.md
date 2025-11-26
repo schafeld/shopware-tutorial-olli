@@ -208,7 +208,7 @@ Create `src/Resources/views/storefront/component/product/card/action.html.twig`:
 {% sw_extends '@Storefront/storefront/component/product/card/action.html.twig' %}
 
 {% block component_product_box_action_inner %}
-    {{ parent() }}
+    {{ parent() }} 
     
     {# Add compare button #}
     <button class="btn btn-sm btn-outline-secondary mt-2 w-100 product-compare-btn"

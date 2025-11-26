@@ -1,0 +1,13 @@
+{% sw_extends '@Storefront/storefront/component/listing/filter-panel.html.twig' %}
+
+{% block component_filter_panel_items %}
+    {# Add custom price filter before default filters #}
+    {% block component_filter_panel_item_custom_price %}
+        <div class="filter-panel-item">
+            {% sw_include '@LearningBundle/storefront/component/product/price-filter.html.twig' %}
+        </div>
+    {% endblock %}
+    
+    {# Keep all default filters (manufacturer, properties, price, rating, etc.) #}
+    {{ parent() }}
+{% endblock %}

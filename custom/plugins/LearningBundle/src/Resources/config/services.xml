@@ -151,5 +151,11 @@
             <argument type="service" id="product.repository"/>
             <tag name="console.command"/>
         </service>
+
+        <!-- Price range filter-->
+        <service id="Learning\Bundle\Subscriber\ProductListingSubscriber">
+            <argument type="service" id="request_stack"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
     </services>
 </container>

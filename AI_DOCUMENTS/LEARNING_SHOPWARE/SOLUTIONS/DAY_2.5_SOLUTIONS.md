@@ -1209,13 +1209,23 @@ class ProductListingSubscriber implements EventSubscriberInterface
 
         if ($minPrice !== null || $maxPrice !== null) {
             $criteria = $event->getCriteria();
-            
-            $criteria->addFilter(
-                new RangeFilter('price', [
-                    RangeFilter::GTE => $minPrice ?? 0,
-                    RangeFilter::LTE => $maxPrice ?? PHP_FLOAT_MAX,
-                ])
-            );
+
+            // Build range filter parameters
+            $range = [];
+            if ($minPrice !== null && $minPrice >= 0) {
+                $range[RangeFilter::GTE] = (float) $minPrice;
+            }
+            if ($maxPrice !== null && $maxPrice >= 0) {
+                $range[RangeFilter::LTE] = (float) $maxPrice;
+            }
+
+            // IMPORTANT: Use 'product.cheapestPrice' field - NOT just 'price'
+            // This is the correct indexed field for price filtering in Shopware
+            if (!empty($range)) {
+                $criteria->addFilter(
+                    new RangeFilter('product.cheapestPrice', $range)
+                );
+            }
         }
     }
 }

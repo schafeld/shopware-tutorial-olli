@@ -77,6 +77,17 @@ export default class ProductComparePlugin extends Plugin {
             
             // Notify other plugin instances
             this.broadcastUpdate();
+            
+            // Show modal with comparison
+            this.showCompareModal();
+        }
+    }
+    
+    showCompareModal() {
+        const modal = document.getElementById('compareModal');
+        if (modal && this.compareProducts.length > 0) {
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
         }
     }
 
@@ -150,15 +161,13 @@ Create `src/Resources/views/storefront/component/product/card/action.html.twig`:
 {% block component_product_box_action_inner %}
     {{ parent() }}
     
-    {# Add compare button that opens modal #}
+    {# Add compare button - JavaScript will handle adding to list and showing modal #}
     <button class="btn btn-sm btn-outline-secondary mt-2 w-100 product-compare-btn"
             data-product-compare
             data-product-id="{{ product.id }}"
             data-product-name="{{ product.translated.name }}"
-            data-product-image="{{ product.cover.url }}"
-            data-product-price="{{ product.calculatedPrice.totalPrice }}"
-            data-bs-toggle="modal"
-            data-bs-target="#compareModal">
+            data-product-image="{% if product.cover.media %}{{ product.cover.media.url }}{% endif %}"
+            data-product-price="{{ product.calculatedPrice.totalPrice }}">
         <i class="fas fa-balance-scale"></i> Compare
     </button>
 {% endblock %}
@@ -191,7 +200,7 @@ Create `src/Resources/views/storefront/component/product/compare-modal.html.twig
 </div>
 
 <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        function loadComparisonData() {
             const compareProducts = JSON.parse(localStorage.getItem('learning_product_compare') || '[]');
             const container = document.getElementById('comparison-container');
 
@@ -240,7 +249,7 @@ Create `src/Resources/views/storefront/component/product/compare-modal.html.twig
             compareProducts.forEach(product => {
                 html += `
                     <td class="text-center">
-                        <a href="/detail/${product.id}" class="btn btn-sm btn-primary mb-1">View Details</a>
+                        <a href="/detail/${product.id}" class="btn btn-sm btn-primary">View Details</a>
                         <button class="btn btn-sm btn-danger" onclick="removeFromCompare('${product.id}')">
                             <i class="fas fa-times"></i> Remove
                         </button>
@@ -252,14 +261,46 @@ Create `src/Resources/views/storefront/component/product/compare-modal.html.twig
             html += '</tbody></table></div>';
 
             container.innerHTML = html;
-        });
+        }
 
         function removeFromCompare(productId) {
             let products = JSON.parse(localStorage.getItem('learning_product_compare') || '[]');
             products = products.filter(p => p.id !== productId);
             localStorage.setItem('learning_product_compare', JSON.stringify(products));
-            location.reload();
+            
+            // Broadcast update to all plugin instances
+            const event = new CustomEvent('compareListUpdated', {
+                detail: { products: products }
+            });
+            document.dispatchEvent(event);
+            
+            // Reload the modal content
+            loadComparisonData();
+            
+            // Close modal if no products left
+            if (products.length === 0) {
+                const modal = document.getElementById('compareModal');
+                if (modal) {
+                    const modalInstance = bootstrap.Modal.getInstance(modal);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                }
+            }
         }
+        
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadComparisonData();
+            
+            // Reload data when modal is shown
+            const modal = document.getElementById('compareModal');
+            if (modal) {
+                modal.addEventListener('show.bs.modal', function() {
+                    loadComparisonData();
+                });
+            }
+        });
 </script>
 ```
 
@@ -352,9 +393,10 @@ bin/console cache:clear
 
 # Test in browser:
 # 1. Go to product listing
-# 2. Click "Compare" button on multiple products (you'll see success notifications)
-# 3. Click "Compare" button again on any product to open the comparison modal
-# 4. See products displayed in a comparison table
+# 2. Click "Compare" button on a product
+# 3. You'll see a success notification and the comparison modal opens automatically
+# 4. Click "Compare" on more products to add them (modal updates in real-time)
+# 5. Remove products using the "Remove" button in the modal
 ```
 
 ---

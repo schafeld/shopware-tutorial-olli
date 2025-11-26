@@ -1,0 +1,10 @@
+{% sw_extends '@Storefront/storefront/base.html.twig' %}
+
+{% block base_body_inner %}
+
+{{ parent() }}
+
+{# Include compare bar here #}
+{% sw_include '@LearningBundle/storefront/component/product/compare-modal.html.twig' %}
+
+{% endblock %}

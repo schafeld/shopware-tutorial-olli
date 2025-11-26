@@ -1,0 +1,42 @@
+// Product compare button styling
+.product-compare-btn {
+    &.is-comparing {
+        background-color: $success;
+        color: $white;
+        border-color: $success;
+        
+        &:hover {
+            background-color: darken($success, 10%);
+            border-color: darken($success, 10%);
+        }
+    }
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+}
+
+// Notification animations
+.alert {
+    &.position-fixed {
+        animation: slideInRight 0.3s ease-out;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}

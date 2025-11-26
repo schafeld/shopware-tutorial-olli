@@ -188,10 +188,12 @@ Create `src/Resources/views/storefront/component/product/compare-bar.html.twig`:
                         onclick="localStorage.removeItem('learning_product_compare'); location.reload();">
                     <i class="fas fa-times"></i> Clear All
                 </button>
-                <a href="{{ path('frontend.learning.compare') }}" 
-                   class="btn btn-primary btn-compare">
+                <button type="button" 
+                        class="btn btn-primary btn-compare"
+                        data-bs-toggle="modal"
+                        data-bs-target="#compareModal">
                     <i class="fas fa-eye"></i> Compare Products
-                </a>
+                </button>
             </div>
         </div>
     </div>
@@ -220,27 +222,33 @@ Create `src/Resources/views/storefront/component/product/card/action.html.twig`:
 {% endblock %}
 ```
 
-### Step 4: Create Comparison Page Template
+### Step 4: Create Comparison Modal Template
 
-Create `src/Resources/views/storefront/page/learning/compare.html.twig`:
+Create `src/Resources/views/storefront/component/product/compare-modal.html.twig`:
 
 ```twig
-{% sw_extends '@Storefront/storefront/base.html.twig' %}
-
-{% block base_content %}
-    <div class="container my-5">
-        <h1 class="mb-4">
-            <i class="fas fa-balance-scale"></i> Product Comparison
-        </h1>
-
-        <div id="comparison-container">
-            <p class="text-center">
-                <i class="fas fa-spinner fa-spin"></i> Loading products...
-            </p>
+{# Product Comparison Modal - No controller needed, fully client-side #}
+<div class="modal fade" id="compareModal" tabindex="-1" aria-labelledby="compareModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="compareModalLabel">
+                    <i class="fas fa-balance-scale"></i> Product Comparison
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="comparison-container">
+                    <p class="text-center">
+                        <i class="fas fa-spinner fa-spin"></i> Loading products...
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 
-    <script>
+<script>
         document.addEventListener('DOMContentLoaded', function() {
             const compareProducts = JSON.parse(localStorage.getItem('learning_product_compare') || '[]');
             const container = document.getElementById('comparison-container');
@@ -644,7 +652,7 @@ Create `src/Resources/views/storefront/component/product/quick-view-modal.html.t
 </div>
 ```
 
-Include in base template:
+Include both compare bar and modal in base template by creating `src/Resources/views/storefront/base.html.twig`:
 
 ```twig
 {% sw_extends '@Storefront/storefront/base.html.twig' %}
@@ -652,9 +660,12 @@ Include in base template:
 {% block base_body_inner %}
     {{ parent() }}
     
-    {% sw_include '@LearningBundle/storefront/component/product/quick-view-modal.html.twig' %}
+    {% sw_include '@LearningBundle/storefront/component/product/compare-bar.html.twig' %}
+    {% sw_include '@LearningBundle/storefront/component/product/compare-modal.html.twig' %}
 {% endblock %}
 ```
+
+**Note:** No controller needed! This is a fully client-side feature using localStorage and Bootstrap modals.
 
 ### Step 4: Register Plugin
 

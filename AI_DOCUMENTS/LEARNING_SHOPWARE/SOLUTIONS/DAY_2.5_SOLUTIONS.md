@@ -678,16 +678,562 @@ bin/console cache:clear
 
 ## Exercise 3: Custom Product Filter (30-45 min)
 
-### Complete solution available - creates an interactive price range filter with instant updates!
+### Goal
+Create an interactive price range filter that updates product listings without page reload. This teaches URL manipulation, dynamic filtering, and smooth UX patterns.
 
-Implementation includes:
-- HTML5 range slider
-- Real-time price display
-- URL parameter updates
-- Smooth transitions
-- Responsive design
+### Step 1: Create Price Filter Plugin
 
-[Full code provided in detailed tutorial documentation]
+Create `src/Resources/app/storefront/src/plugin/price-filter.plugin.js`:
+
+```javascript
+import Plugin from 'src/plugin-system/plugin.class';
+import DomAccess from 'src/helper/dom-access.helper';
+
+/**
+ * Price Filter Plugin
+ * Interactive price range filter with URL updates
+ */
+export default class PriceFilterPlugin extends Plugin {
+    
+    static options = {
+        minPriceInputSelector: '[data-price-filter-min]',
+        maxPriceInputSelector: '[data-price-filter-max]',
+        minPriceDisplaySelector: '[data-price-display-min]',
+        maxPriceDisplaySelector: '[data-price-display-max]',
+        applyButtonSelector: '[data-price-filter-apply]',
+        resetButtonSelector: '[data-price-filter-reset]',
+        productListingSelector: '.cms-element-product-listing',
+        loadingClass: 'is-loading',
+        updateDelay: 300, // Debounce delay in ms
+    };
+
+    init() {
+        try {
+            this.minPriceInput = DomAccess.querySelector(this.el, this.options.minPriceInputSelector);
+            this.maxPriceInput = DomAccess.querySelector(this.el, this.options.maxPriceInputSelector);
+            this.minPriceDisplay = DomAccess.querySelector(this.el, this.options.minPriceDisplaySelector);
+            this.maxPriceDisplay = DomAccess.querySelector(this.el, this.options.maxPriceDisplaySelector);
+            this.applyButton = DomAccess.querySelector(this.el, this.options.applyButtonSelector);
+            this.resetButton = DomAccess.querySelector(this.el, this.options.resetButtonSelector, false);
+        } catch (e) {
+            console.error('PriceFilter: Required elements not found', e);
+            return;
+        }
+
+        this.productListing = document.querySelector(this.options.productListingSelector);
+        this.updateTimeout = null;
+
+        this._registerEvents();
+        this._updateDisplayValues();
+        this._loadInitialValues();
+        
+        console.log('PriceFilter initialized');
+    }
+
+    _registerEvents() {
+        // Update display values in real-time as sliders move
+        this.minPriceInput.addEventListener('input', this._onPriceInputChange.bind(this));
+        this.maxPriceInput.addEventListener('input', this._onPriceInputChange.bind(this));
+        
+        // Apply filter when button is clicked
+        this.applyButton.addEventListener('click', this._onApplyFilter.bind(this));
+        
+        // Reset filter
+        if (this.resetButton) {
+            this.resetButton.addEventListener('click', this._onResetFilter.bind(this));
+        }
+        
+        // Apply filter on Enter key
+        this.minPriceInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this._onApplyFilter();
+        });
+        this.maxPriceInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this._onApplyFilter();
+        });
+    }
+
+    _loadInitialValues() {
+        // Load filter values from URL if present
+        const urlParams = new URLSearchParams(window.location.search);
+        const minPrice = urlParams.get('min-price');
+        const maxPrice = urlParams.get('max-price');
+        
+        if (minPrice) {
+            this.minPriceInput.value = minPrice;
+        }
+        if (maxPrice) {
+            this.maxPriceInput.value = maxPrice;
+        }
+        
+        this._updateDisplayValues();
+    }
+
+    _onPriceInputChange() {
+        // Ensure min doesn't exceed max
+        const minValue = parseFloat(this.minPriceInput.value);
+        const maxValue = parseFloat(this.maxPriceInput.value);
+        
+        if (minValue > maxValue) {
+            this.minPriceInput.value = maxValue;
+        }
+        
+        this._updateDisplayValues();
+    }
+
+    _updateDisplayValues() {
+        const minValue = this.minPriceInput.value;
+        const maxValue = this.maxPriceInput.value;
+        
+        this.minPriceDisplay.textContent = this._formatPrice(minValue);
+        this.maxPriceDisplay.textContent = this._formatPrice(maxValue);
+    }
+
+    _formatPrice(value) {
+        return new Intl.NumberFormat('de-DE', {
+            style: 'currency',
+            currency: 'EUR'
+        }).format(value);
+    }
+
+    _onApplyFilter(event) {
+        if (event) {
+            event.preventDefault();
+        }
+        
+        const minPrice = this.minPriceInput.value;
+        const maxPrice = this.maxPriceInput.value;
+        
+        // Update URL with filter parameters
+        this._updateUrl(minPrice, maxPrice);
+        
+        // Show loading state
+        this._showLoading();
+        
+        // Reload page with new filters (in a real implementation, you'd use AJAX)
+        setTimeout(() => {
+            window.location.reload();
+        }, 300);
+    }
+
+    _onResetFilter(event) {
+        event.preventDefault();
+        
+        // Reset to default values
+        const minDefault = this.minPriceInput.getAttribute('min') || '0';
+        const maxDefault = this.minPriceInput.getAttribute('max') || '1000';
+        
+        this.minPriceInput.value = minDefault;
+        this.maxPriceInput.value = maxDefault;
+        
+        this._updateDisplayValues();
+        
+        // Remove filter from URL
+        const url = new URL(window.location);
+        url.searchParams.delete('min-price');
+        url.searchParams.delete('max-price');
+        
+        this._showLoading();
+        
+        window.location.href = url.toString();
+    }
+
+    _updateUrl(minPrice, maxPrice) {
+        const url = new URL(window.location);
+        
+        // Update or add filter parameters
+        url.searchParams.set('min-price', minPrice);
+        url.searchParams.set('max-price', maxPrice);
+        
+        // Update browser history without reload
+        window.history.pushState({}, '', url);
+    }
+
+    _showLoading() {
+        this.applyButton.disabled = true;
+        this.applyButton.classList.add(this.options.loadingClass);
+        this.applyButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Filtering...';
+        
+        if (this.productListing) {
+            this.productListing.style.opacity = '0.5';
+            this.productListing.style.pointerEvents = 'none';
+        }
+    }
+}
+```
+
+### Step 2: Create Filter Template Component
+
+Create `src/Resources/views/storefront/component/product/price-filter.html.twig`:
+
+```twig
+{# Price Range Filter Component #}
+<div class="price-filter-widget card mb-4" 
+     data-price-filter
+     data-price-filter-options='{{ {
+         updateDelay: 300
+     }|json_encode }}'>
+    
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-filter"></i> Price Range
+        </h5>
+    </div>
+    
+    <div class="card-body">
+        {# Price range display #}
+        <div class="price-filter-display d-flex justify-content-between mb-3">
+            <div class="price-min">
+                <small class="text-muted">Min</small>
+                <div class="fw-bold" data-price-display-min>€0</div>
+            </div>
+            <div class="price-max">
+                <small class="text-muted">Max</small>
+                <div class="fw-bold" data-price-display-max>€1000</div>
+            </div>
+        </div>
+        
+        {# Range sliders #}
+        <div class="price-filter-sliders mb-3">
+            <div class="mb-3">
+                <label for="priceMin" class="form-label">Minimum Price</label>
+                <input type="range" 
+                       class="form-range" 
+                       id="priceMin"
+                       data-price-filter-min
+                       min="0" 
+                       max="1000" 
+                       step="10" 
+                       value="0">
+            </div>
+            
+            <div class="mb-3">
+                <label for="priceMax" class="form-label">Maximum Price</label>
+                <input type="range" 
+                       class="form-range" 
+                       id="priceMax"
+                       data-price-filter-max
+                       min="0" 
+                       max="1000" 
+                       step="10" 
+                       value="1000">
+            </div>
+        </div>
+        
+        {# Action buttons #}
+        <div class="price-filter-actions d-grid gap-2">
+            <button type="button" 
+                    class="btn btn-primary" 
+                    data-price-filter-apply>
+                <i class="fas fa-check"></i> Apply Filter
+            </button>
+            
+            <button type="button" 
+                    class="btn btn-outline-secondary btn-sm" 
+                    data-price-filter-reset>
+                <i class="fas fa-undo"></i> Reset
+            </button>
+        </div>
+        
+        {# Active filter indicator #}
+        {% if app.request.get('min-price') or app.request.get('max-price') %}
+            <div class="alert alert-info mt-3 mb-0">
+                <small>
+                    <i class="fas fa-info-circle"></i>
+                    Active filter: 
+                    {{ app.request.get('min-price', '0') }}€ - {{ app.request.get('max-price', '1000') }}€
+                </small>
+            </div>
+        {% endif %}
+    </div>
+</div>
+```
+
+### Step 3: Add Filter to Product Listing Sidebar
+
+Create or extend `src/Resources/views/storefront/page/product-detail/index.html.twig`:
+
+```twig
+{% sw_extends '@Storefront/storefront/page/product-detail/index.html.twig' %}
+
+{# Add filter to sidebar #}
+{% block page_product_detail_sidebar %}
+    {{ parent() }}
+    
+    {# Include price filter widget #}
+    {% sw_include '@LearningBundle/storefront/component/product/price-filter.html.twig' %}
+{% endblock %}
+```
+
+For product listing pages, create `src/Resources/views/storefront/page/search/index.html.twig`:
+
+```twig
+{% sw_extends '@Storefront/storefront/page/search/index.html.twig' %}
+
+{# Add filter before listing #}
+{% block page_search_content %}
+    <div class="row">
+        <div class="col-md-3">
+            {# Sidebar with filters #}
+            {% sw_include '@LearningBundle/storefront/component/product/price-filter.html.twig' %}
+        </div>
+        
+        <div class="col-md-9">
+            {# Original listing content #}
+            {{ parent() }}
+        </div>
+    </div>
+{% endblock %}
+```
+
+### Step 4: Add CSS Styling
+
+Create `src/Resources/app/storefront/src/scss/component/_price-filter.scss`:
+
+```scss
+.price-filter-widget {
+    border: 1px solid $border-color;
+    transition: box-shadow 0.3s ease;
+    
+    &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .card-header {
+        background-color: $light;
+        border-bottom: 2px solid $primary;
+        
+        h5 {
+            color: $primary;
+            font-size: 1rem;
+        }
+    }
+}
+
+.price-filter-display {
+    padding: 1rem;
+    background-color: $light;
+    border-radius: 0.375rem;
+    
+    .price-min,
+    .price-max {
+        text-align: center;
+        
+        small {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+        
+        .fw-bold {
+            font-size: 1.25rem;
+            color: $primary;
+        }
+    }
+}
+
+.price-filter-sliders {
+    .form-range {
+        cursor: pointer;
+        
+        &::-webkit-slider-thumb {
+            background-color: $primary;
+            transition: all 0.2s ease;
+            
+            &:hover {
+                transform: scale(1.2);
+                box-shadow: 0 0 0 8px rgba($primary, 0.1);
+            }
+        }
+        
+        &::-moz-range-thumb {
+            background-color: $primary;
+            transition: all 0.2s ease;
+            
+            &:hover {
+                transform: scale(1.2);
+                box-shadow: 0 0 0 8px rgba($primary, 0.1);
+            }
+        }
+    }
+    
+    label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: $secondary;
+    }
+}
+
+.price-filter-actions {
+    button {
+        transition: all 0.2s ease;
+        
+        &.is-loading {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        &:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+    }
+}
+
+// Loading state animations
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.cms-element-product-listing {
+    transition: opacity 0.3s ease;
+    
+    &.is-loading {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+    .price-filter-widget {
+        margin-bottom: 1.5rem;
+    }
+    
+    .price-filter-display {
+        padding: 0.75rem;
+        
+        .price-min,
+        .price-max {
+            .fw-bold {
+                font-size: 1rem;
+            }
+        }
+    }
+}
+```
+
+Import in `src/Resources/app/storefront/src/scss/base.scss`:
+
+```scss
+@import "component/price-filter";
+```
+
+### Step 5: Register the Plugin
+
+Update `src/Resources/app/storefront/src/main.js`:
+
+```javascript
+import PriceFilterPlugin from './plugin/price-filter.plugin';
+
+PluginManager.register(
+    'PriceFilter',
+    PriceFilterPlugin,
+    '[data-price-filter]'
+);
+```
+
+### Step 6: Optional - Add Server-Side Filtering
+
+For the filter to actually work, you'd need to handle the URL parameters on the server side. Here's a basic example:
+
+Create `src/Subscriber/ProductListingSubscriber.php`:
+
+```php
+<?php declare(strict_types=1);
+
+namespace LearningBundle\Subscriber;
+
+use Shopware\Core\Content\Product\Events\ProductListingCriteriaEvent;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\RangeFilter;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+
+class ProductListingSubscriber implements EventSubscriberInterface
+{
+    public function __construct(
+        private readonly RequestStack $requestStack
+    ) {
+    }
+
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            ProductListingCriteriaEvent::class => 'handlePriceFilter'
+        ];
+    }
+
+    public function handlePriceFilter(ProductListingCriteriaEvent $event): void
+    {
+        $request = $this->requestStack->getCurrentRequest();
+        
+        if (!$request) {
+            return;
+        }
+
+        $minPrice = $request->query->get('min-price');
+        $maxPrice = $request->query->get('max-price');
+
+        if ($minPrice !== null || $maxPrice !== null) {
+            $criteria = $event->getCriteria();
+            
+            $criteria->addFilter(
+                new RangeFilter('price', [
+                    RangeFilter::GTE => $minPrice ?? 0,
+                    RangeFilter::LTE => $maxPrice ?? PHP_FLOAT_MAX,
+                ])
+            );
+        }
+    }
+}
+```
+
+Register in `src/Resources/config/services.xml`:
+
+```xml
+<service id="LearningBundle\Subscriber\ProductListingSubscriber">
+    <argument type="service" id="request_stack"/>
+    <tag name="kernel.event_subscriber"/>
+</service>
+```
+
+### Step 7: Test the Solution
+
+```bash
+# Build storefront
+./bin/build-storefront.sh
+
+# Clear cache
+bin/console cache:clear
+
+# Test in browser:
+# 1. Navigate to a product listing or search page
+# 2. Use the price range sliders to adjust min/max values
+# 3. Observe the real-time price display updates
+# 4. Click "Apply Filter" to filter products
+# 5. Click "Reset" to clear the filter
+# 6. Check URL parameters are updated correctly
+```
+
+### Features Implemented
+
+✅ **Interactive dual range sliders** with smooth transitions  
+✅ **Real-time price display** that updates as you drag  
+✅ **URL parameter management** for shareable filter states  
+✅ **Loading states** with visual feedback  
+✅ **Reset functionality** to clear filters  
+✅ **Responsive design** that works on mobile  
+✅ **Server-side integration** (optional) for actual filtering  
+✅ **Active filter indicator** showing current range  
+✅ **Keyboard support** (Enter key to apply)  
+
+### Enhancement Ideas
+
+- Add debouncing for smoother slider interaction
+- Implement AJAX filtering without page reload
+- Add animation for product list updates
+- Show product count for each price range
+- Add preset price ranges (e.g., "Under €50", "€50-€100")
+- Remember user's last filter preferences in localStorage
 
 ---
 

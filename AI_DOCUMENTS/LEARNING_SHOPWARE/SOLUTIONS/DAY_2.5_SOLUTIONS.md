@@ -200,12 +200,12 @@ Create `src/Resources/views/storefront/component/product/compare-bar.html.twig`:
 
 ### Step 3: Add Compare Button to Product Cards
 
-Create `src/Resources/views/storefront/component/product/card.html.twig`:
+Create `src/Resources/views/storefront/component/product/card/action.html.twig`:
 
 ```twig
-{% sw_extends '@Storefront/storefront/component/product/card.html.twig' %}
+{% sw_extends '@Storefront/storefront/component/product/card/action.html.twig' %}
 
-{% block component_product_box_action %}
+{% block component_product_box_action_inner %}
     {{ parent() }}
     
     {# Add compare button #}
@@ -588,12 +588,15 @@ export default class ProductQuickViewPlugin extends Plugin {
 
 ### Step 2: Add Quick View Button to Product Cards
 
-Update `component/product/card.html.twig`:
+Create `src/Resources/views/storefront/component/product/card/action.html.twig`:
 
 ```twig
-{% sw_extends '@Storefront/storefront/component/product/card.html.twig' %}
+{% sw_extends '@Storefront/storefront/component/product/card/action.html.twig' %}
 
-{% block component_product_box_action %}
+{% block component_product_box_action_inner %}
+    {{ parent() }}
+    
+    {# Add quick view button #}
     <div class="btn-group w-100 mt-2" role="group">
         <a href="{{ seoUrl('frontend.detail.page', {'productId': product.id}) }}"
            class="btn btn-primary">
@@ -607,8 +610,6 @@ Update `component/product/card.html.twig`:
             <i class="fas fa-eye"></i>
         </button>
     </div>
-    
-    {{ parent() }}
 {% endblock %}
 ```
 

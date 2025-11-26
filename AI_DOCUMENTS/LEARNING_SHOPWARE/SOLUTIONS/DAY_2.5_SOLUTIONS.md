@@ -110,7 +110,6 @@ export default class ProductComparePlugin extends Plugin {
     onCompareListUpdated(event) {
         this.compareProducts = event.detail.products;
         this.updateUI();
-        this.updateCompareBar();
     }
 
     updateUI() {
@@ -122,30 +121,6 @@ export default class ProductComparePlugin extends Plugin {
         } else {
             this.el.classList.remove('is-comparing');
             this.el.innerHTML = '<i class="fas fa-balance-scale"></i> Compare';
-        }
-    }
-
-    updateCompareBar() {
-        // Update floating compare bar if it exists
-        const compareBar = document.querySelector('[data-product-compare-bar]');
-        if (compareBar) {
-            const countEl = compareBar.querySelector('.compare-count');
-            const compareBtn = compareBar.querySelector('.btn-compare');
-            
-            if (countEl) {
-                countEl.textContent = this.compareProducts.length;
-            }
-            
-            if (compareBtn) {
-                compareBtn.disabled = this.compareProducts.length < 2;
-            }
-            
-            // Show/hide bar
-            if (this.compareProducts.length > 0) {
-                compareBar.classList.remove('d-none');
-            } else {
-                compareBar.classList.add('d-none');
-            }
         }
     }
 
@@ -165,42 +140,7 @@ export default class ProductComparePlugin extends Plugin {
 }
 ```
 
-### Step 2: Create Compare Bar Component
-
-Create `src/Resources/views/storefront/component/product/compare-bar.html.twig`:
-
-```twig
-{# Floating compare bar #}
-<div class="product-compare-bar d-none" 
-     data-product-compare-bar>
-    <div class="container">
-        <div class="row align-items-center py-3">
-            <div class="col-md-6">
-                <h5 class="mb-0">
-                    <i class="fas fa-balance-scale"></i>
-                    Product Comparison
-                    <span class="badge bg-primary compare-count">0</span>
-                </h5>
-            </div>
-            <div class="col-md-6 text-end">
-                <button type="button" 
-                        class="btn btn-secondary me-2"
-                        onclick="localStorage.removeItem('learning_product_compare'); location.reload();">
-                    <i class="fas fa-times"></i> Clear All
-                </button>
-                <button type="button" 
-                        class="btn btn-primary btn-compare"
-                        data-bs-toggle="modal"
-                        data-bs-target="#compareModal">
-                    <i class="fas fa-eye"></i> Compare Products
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-```
-
-### Step 3: Add Compare Button to Product Cards
+### Step 2: Add Compare Button to Product Cards
 
 Create `src/Resources/views/storefront/component/product/card/action.html.twig`:
 
@@ -210,19 +150,21 @@ Create `src/Resources/views/storefront/component/product/card/action.html.twig`:
 {% block component_product_box_action_inner %}
     {{ parent() }}
     
-    {# Add compare button #}
+    {# Add compare button that opens modal #}
     <button class="btn btn-sm btn-outline-secondary mt-2 w-100 product-compare-btn"
             data-product-compare
             data-product-id="{{ product.id }}"
             data-product-name="{{ product.translated.name }}"
             data-product-image="{{ product.cover.url }}"
-            data-product-price="{{ product.calculatedPrice.totalPrice }}">
+            data-product-price="{{ product.calculatedPrice.totalPrice }}"
+            data-bs-toggle="modal"
+            data-bs-target="#compareModal">
         <i class="fas fa-balance-scale"></i> Compare
     </button>
 {% endblock %}
 ```
 
-### Step 4: Create Comparison Modal Template
+### Step 3: Create Comparison Modal Template
 
 Create `src/Resources/views/storefront/component/product/compare-modal.html.twig`:
 
@@ -318,11 +260,10 @@ Create `src/Resources/views/storefront/component/product/compare-modal.html.twig
             localStorage.setItem('learning_product_compare', JSON.stringify(products));
             location.reload();
         }
-    </script>
-{% endblock %}
+</script>
 ```
 
-### Step 5: Register Plugin and Include Components
+### Step 4: Register Plugin and Include Modal
 
 Update `main.js`:
 
@@ -336,7 +277,7 @@ PluginManager.register(
 );
 ```
 
-Create `src/Resources/views/storefront/base.html.twig` to include the compare bar globally:
+Create `src/Resources/views/storefront/base.html.twig` to include the compare modal globally:
 
 ```twig
 {% sw_extends '@Storefront/storefront/base.html.twig' %}
@@ -344,38 +285,19 @@ Create `src/Resources/views/storefront/base.html.twig` to include the compare ba
 {% block base_body_inner %}
     {{ parent() }}
     
-    {# Include compare bar component #}
-    {% sw_include '@LearningBundle/storefront/component/product/compare-bar.html.twig' %}
+    {# Include compare modal component #}
+    {% sw_include '@LearningBundle/storefront/component/product/compare-modal.html.twig' %}
 {% endblock %}
 ```
 
-**Note:** This extends the base template to add the compare bar to every storefront page.
+**Note:** This extends the base template to add the compare modal to every storefront page. The modal is hidden by default and shown when users click the compare button.
 
-### Step 6: Add CSS Styling
+### Step 5: Add CSS Styling (Optional)
 
 Create `scss/component/_product-compare.scss`:
 
 ```scss
-.product-compare-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: $white;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1030;
-    animation: slideUp 0.3s ease-out;
-}
-
-@keyframes slideUp {
-    from {
-        transform: translateY(100%);
-    }
-    to {
-        transform: translateY(0);
-    }
-}
-
+// Product compare button styling
 .product-compare-btn {
     &.is-comparing {
         background-color: $success;
@@ -399,9 +321,27 @@ Create `scss/component/_product-compare.scss`:
         transform: translateX(20px);
     }
 }
+
+// Notification animations
+.alert {
+    &.position-fixed {
+        animation: slideInRight 0.3s ease-out;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
 ```
 
-### Step 7: Test the Solution
+### Step 6: Test the Solution
 
 ```bash
 # Build storefront
@@ -412,9 +352,9 @@ bin/console cache:clear
 
 # Test in browser:
 # 1. Go to product listing
-# 2. Click "Compare" on multiple products
-# 3. See compare bar appear
-# 4. Click "Compare Products" to see comparison table
+# 2. Click "Compare" button on multiple products (you'll see success notifications)
+# 3. Click "Compare" button again on any product to open the comparison modal
+# 4. See products displayed in a comparison table
 ```
 
 ---
@@ -655,7 +595,7 @@ Create `src/Resources/views/storefront/component/product/quick-view-modal.html.t
 </div>
 ```
 
-Include both compare bar and modal in base template by creating `src/Resources/views/storefront/base.html.twig`:
+Update `src/Resources/views/storefront/base.html.twig` to also include the Quick View modal:
 
 ```twig
 {% sw_extends '@Storefront/storefront/base.html.twig' %}
@@ -663,12 +603,13 @@ Include both compare bar and modal in base template by creating `src/Resources/v
 {% block base_body_inner %}
     {{ parent() }}
     
-    {% sw_include '@LearningBundle/storefront/component/product/compare-bar.html.twig' %}
+    {# Include modals #}
     {% sw_include '@LearningBundle/storefront/component/product/compare-modal.html.twig' %}
+    {% sw_include '@LearningBundle/storefront/component/product/quick-view-modal.html.twig' %}
 {% endblock %}
 ```
 
-**Note:** No controller needed! This is a fully client-side feature using localStorage and Bootstrap modals.
+**Note:** Both features are fully client-side using localStorage, AJAX, and Bootstrap modals - no controllers needed!
 
 ### Step 4: Register Plugin
 

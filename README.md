@@ -23,3 +23,15 @@ open https://127.0.0.1:8000/admin
 # login: admin
 # pw: shopware
 ```
+
+## Documentation
+
+This project includes comprehensive documentation in the `AI_DOCUMENTS/` folder:
+
+- **[AI Coding Guide](AI_DOCUMENTS/AI_CODING_GUIDE.md)** - Coding standards and best practices for AI assistants
+- **[Learning Resources](AI_DOCUMENTS/README.md)** - Complete onboarding documentation
+- See the [AI_DOCUMENTS](AI_DOCUMENTS/) folder for all available guides
+
+### For AI Assistants
+
+When generating code for this project, **always follow the guidelines in [AI_DOCUMENTS/AI_CODING_GUIDE.md](AI_DOCUMENTS/AI_CODING_GUIDE.md)**. This ensures consistency with project standards and Shopware best practices.

@@ -21,6 +21,39 @@
 - Basic SQL knowledge
 - Understanding of ORM concepts
 
+## Quick Command Reference
+
+**Migration Commands:**
+```bash
+# Run all pending migrations
+bin/console database:migrate --all
+
+# Create a new migration file
+bin/console database:create-migration YourMigrationName LearningBundle
+```
+
+**Database Access (via Docker):**
+```bash
+# Run a single SQL query
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "YOUR_SQL_QUERY"
+
+# Interactive database access
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware
+
+# Example queries
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SHOW TABLES LIKE 'learning_%';"
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "DESCRIBE learning_product_view;"
+```
+
+**Entity Debugging:**
+```bash
+# Check if entity is registered
+bin/console debug:container --tag=shopware.entity.definition | grep learning
+
+# Clear cache after changes
+bin/console cache:clear
+```
+
 ---
 
 ## Part 1: Understanding the Data Abstraction Layer (60 minutes)
@@ -60,6 +93,26 @@ Migration/
 ├── Migration1700000001CreateProductViewTable.php
 └── Migration1700000002AddIndexToProductView.php
 ```
+
+**Important:** Before creating migrations, your plugin class must register the migration namespace!
+
+### Step 1.5: Register Migration Namespace in Plugin Class
+
+Edit `custom/plugins/LearningBundle/src/LearningBundle.php` and add these methods:
+
+```php
+public function getMigrationNamespace(): string
+{
+    return 'Learning\Bundle\Migration';
+}
+
+public function getMigrationPath(): string
+{
+    return $this->getPath() . '/src/Migration';
+}
+```
+
+These methods tell Shopware where to find your plugin's migrations. **Without these, your migrations won't be detected!**
 
 ### Step 2: Create Migration File
 
@@ -123,15 +176,58 @@ SQL;
 ### Step 3: Run Migration
 
 ```bash
-# Run migrations
-bin/console database:migrate --all LearningBundle
+# Migrations run automatically when you install/update a plugin
+# To manually trigger migrations for your plugin, reinstall it:
+bin/console plugin:uninstall LearningBundle
+bin/console plugin:install --activate LearningBundle
 
-# Check if table was created
-bin/console dbal:run-sql "SHOW TABLES LIKE 'learning_product_view'"
+# Or run all pending migrations manually (only works for NEW migrations):
+bin/console database:migrate --all
+
+# ⚠️ Note: database:migrate only runs migrations that haven't been executed yet!
+# If you've already run a migration, it won't run again even if you drop the table.
+# Use plugin:uninstall/install to re-run migrations.
+
+# Check if table was created using Docker
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SHOW TABLES LIKE 'learning_product_view';"
 
 # Describe table structure
-bin/console dbal:run-sql "DESCRIBE learning_product_view"
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "DESCRIBE learning_product_view;"
+
+# Alternative: Connect to the database directly
+# docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware
+# Then run SQL commands interactively
 ```
+
+### Step 3.5: Rolling Back Migrations (Optional)
+
+If you need to undo a migration (for testing or fixing mistakes):
+
+```bash
+# Option 1: Run destructive migrations (calls updateDestructive() method)
+bin/console database:migrate-destructive --all
+
+# Option 2: Manually drop the table (🤓 this worked for me)
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "DROP TABLE IF EXISTS learning_product_view;"
+
+# Option 3: Uninstall the plugin (runs updateDestructive() automatically)
+bin/console plugin:uninstall LearningBundle
+
+# Verify table is gone
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SHOW TABLES LIKE 'learning_product_view';"
+
+# To re-apply the migration after rollback:
+bin/console plugin:install --activate LearningBundle
+# Or
+bin/console database:migrate --all
+```
+
+**Important Notes:**
+- `updateDestructive()` is called during `plugin:uninstall` or `database:migrate-destructive`
+- Always test rollbacks in development before running in production
+- Destructive migrations should safely handle data loss (e.g., create backups first)
+- The migration system tracks which migrations have been executed in the `migration` table
+- **Key concept:** Once a migration runs, Shopware records it. Even if you manually drop the table, `database:migrate` won't re-run it. You must uninstall/reinstall the plugin to reset the migration tracking.
 
 ### Step 4: Create Another Migration (Add Column)
 
@@ -176,7 +272,7 @@ SQL;
 
 Run it:
 ```bash
-bin/console database:migrate --all LearningBundle
+bin/console database:migrate --all
 ```
 
 ---
@@ -872,19 +968,22 @@ Create a product comparison table:
 
 ```bash
 # Run migrations
-bin/console database:migrate --all LearningBundle
+bin/console database:migrate --all
 
-# Check tables
-bin/console dbal:run-sql "SHOW TABLES LIKE 'learning_%'"
+# Check tables using Docker
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SHOW TABLES LIKE 'learning_%';"
 
 # Test entity definition
 bin/console debug:container --tag=shopware.entity.definition | grep learning
 
-# Query data
-bin/console dbal:run-sql "SELECT * FROM learning_product_view"
+# Query data using Docker
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT * FROM learning_product_view;"
 
 # Test commands
 bin/console learning:test-product-view
+
+# Alternative: Interactive database access
+# docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware
 ```
 
 ---
@@ -902,10 +1001,16 @@ bin/console learning:test-product-view
 
 ## Common Issues
 
-**Problem:** Migration not found
-- Check timestamp in filename and getCreationTimestamp()
-- Ensure namespace is correct
-- Run `bin/console database:migrate --all LearningBundle`
+**Problem:** Migration not found (0 out of 0 migrations)
+- **Most common:** Missing `getMigrationNamespace()` and `getMigrationPath()` methods in your plugin class
+- Check timestamp in filename matches getCreationTimestamp()
+- Ensure namespace is correct: `Learning\Bundle\Migration`
+- Reinstall plugin: `bin/console plugin:uninstall LearningBundle && bin/console plugin:install --activate LearningBundle`
+
+**Problem:** SQL syntax error in migration
+- **Heredoc syntax:** Don't indent the SQL in heredoc strings - start SQL commands at the beginning of the line
+- Missing columns that are referenced in CONSTRAINT or KEY definitions
+- Check foreign key column names match exactly
 
 **Problem:** Entity not registered
 - Verify `<tag name="shopware.entity.definition"/>`
@@ -916,6 +1021,7 @@ bin/console learning:test-product-view
 - Ensure referenced IDs exist
 - Check foreign key definitions in migration
 - Verify CASCADE rules
+- Make sure `product_version_id` is included when referencing product table
 
 ---
 

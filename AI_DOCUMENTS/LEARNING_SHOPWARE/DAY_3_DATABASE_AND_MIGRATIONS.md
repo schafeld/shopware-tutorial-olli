@@ -529,8 +529,8 @@ bin/console cache:clear
 # Check if entity is registered
 bin/console debug:container --tag=shopware.entity.definition | grep learning
 
-# Test DAL access
-bin/console dbal:run-sql "SELECT COUNT(*) FROM learning_product_view"
+# Query the table directly using Docker
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT COUNT(*) FROM learning_product_view"
 ```
 
 ---

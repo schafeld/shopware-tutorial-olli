@@ -157,5 +157,10 @@
             <argument type="service" id="request_stack"/>
             <tag name="kernel.event_subscriber"/>
         </service>
+
+        <!-- Entity Definition -->
+        <service id="Learning\Bundle\Core\Content\ProductView\ProductViewDefinition">
+            <tag name="shopware.entity.definition" entity="learning_product_view"/>
+        </service>
     </services>
 </container>

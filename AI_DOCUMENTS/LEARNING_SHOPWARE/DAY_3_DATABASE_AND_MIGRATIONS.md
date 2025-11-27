@@ -1108,7 +1108,7 @@ Register in `services.xml`:
 
 ```bash
 # First, get a product ID from your database
-docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT HEX(id) as product_id, name FROM product LIMIT 5;"
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT HEX(id) as product_id, product_number FROM product LIMIT 5;"
 
 # Generate sample data (replace YOUR_PRODUCT_ID with an actual ID)
 bin/console learning:test-analytics --generate-data --product-id=YOUR_PRODUCT_ID
@@ -1475,7 +1475,7 @@ docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware
 bin/console debug:container --tag=shopware.entity.definition | grep learning
 
 # 4. Get a product ID to test with
-docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT HEX(id) as product_id, name FROM product LIMIT 5;"
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT HEX(id) as product_id, product_number FROM product LIMIT 5;"
 
 # 5. Test basic product view tracking
 bin/console learning:test-product-view
@@ -1494,9 +1494,10 @@ docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware
 SELECT 
     pv.view_count, 
     pv.last_viewed_at, 
-    p.name as product_name 
+    p.product_number,
+    HEX(pv.product_id) as product_id
 FROM learning_product_view pv
-LEFT JOIN product p ON pv.product_id = p.id
+LEFT JOIN product p ON pv.product_id = p.id AND pv.product_version_id = p.version_id
 ORDER BY pv.last_viewed_at DESC
 LIMIT 10;
 "

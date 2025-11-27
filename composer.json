@@ -75,6 +75,7 @@
         }
     },
     "require-dev": {
+        "frosh/development-helper": "^3.0",
         "shopware/dev-tools": "^1.5",
         "symfony/web-profiler-bundle": "^7.3"
     }

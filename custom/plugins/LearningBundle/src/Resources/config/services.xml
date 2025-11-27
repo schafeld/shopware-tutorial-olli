@@ -173,5 +173,16 @@
             <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
             <tag name="console.command"/>
         </service>
+
+        <!-- Product View Analytics Service -->
+        <service id="Learning\Bundle\Service\ProductViewAnalyticsService">
+            <argument type="service" id="learning_product_view.repository"/>
+        </service>
+
+        <service id="Learning\Bundle\Command\TestAnalyticsCommand">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewAnalyticsService"/>
+            <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+            <tag name="console.command"/>
+        </service>
     </services>
 </container>

@@ -739,8 +739,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class TestProductViewCommand extends Command
 {
-    protected static $defaultName = 'learning:test-product-view';
-
     private ProductViewService $productViewService;
 
     public function __construct(ProductViewService $productViewService)
@@ -751,7 +749,9 @@ class TestProductViewCommand extends Command
 
     protected function configure(): void
     {
-        $this->setDescription('Test the ProductViewService');
+        $this
+            ->setName('learning:test-product-view')
+            ->setDescription('Test the ProductViewService');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

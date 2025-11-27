@@ -93,9 +93,15 @@ class ProductViewService
         $result = [];
         /** @var ProductViewEntity $view */
         foreach ($views as $view) {
+            $product = $view->getProduct();
+            $productName = $product?->getTranslated()['name'] 
+                ?? $product?->getName() 
+                ?? $product?->getProductNumber() 
+                ?? 'N/A';
+            
             $result[] = [
                 'product_id' => $view->getProductId(),
-                'product_name' => $view->getProduct()?->getName(),
+                'product_name' => $productName,
                 'view_count' => $view->getViewCount(),
                 'last_viewed' => $view->getLastViewedAt()->format('Y-m-d H:i:s'),
             ];
@@ -119,9 +125,15 @@ class ProductViewService
         $result = [];
         /** @var ProductViewEntity $view */
         foreach ($views as $view) {
+            $product = $view->getProduct();
+            $productName = $product?->getTranslated()['name'] 
+                ?? $product?->getName() 
+                ?? $product?->getProductNumber() 
+                ?? 'N/A';
+            
             $result[] = [
                 'product_id' => $view->getProductId(),
-                'product_name' => $view->getProduct()?->getName(),
+                'product_name' => $productName,
                 'view_count' => $view->getViewCount(),
                 'last_viewed' => $view->getLastViewedAt()->format('Y-m-d H:i:s'),
             ];

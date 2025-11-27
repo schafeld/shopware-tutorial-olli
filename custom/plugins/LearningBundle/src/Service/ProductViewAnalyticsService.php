@@ -70,9 +70,15 @@ class ProductViewAnalyticsService
         foreach ($result as $view) {
             $productId = $view->getProductId();
             if (!isset($summary[$productId])) {
+                $product = $view->getProduct();
+                $productName = $product?->getTranslated()['name'] 
+                    ?? $product?->getName() 
+                    ?? $product?->getProductNumber() 
+                    ?? 'N/A';
+                
                 $summary[$productId] = [
                     'product_id' => $productId,
-                    'product_name' => $view->getProduct()?->getName(),
+                    'product_name' => $productName,
                     'total_views' => 0,
                 ];
             }

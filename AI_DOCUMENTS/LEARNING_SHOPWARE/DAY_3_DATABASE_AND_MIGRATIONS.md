@@ -1107,10 +1107,10 @@ Register in `services.xml`:
 ### Step 4: Test the Analytics
 
 ```bash
-# First, get a product ID from your database
-docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT HEX(id) as product_id, product_number FROM product LIMIT 5;"
+# First, get a product ID from your database (use lowercase hex format)
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT LOWER(HEX(id)) as product_id, product_number FROM product LIMIT 5;"
 
-# Generate sample data (replace YOUR_PRODUCT_ID with an actual ID)
+# Generate sample data (replace YOUR_PRODUCT_ID with an actual ID - use lowercase hex)
 bin/console learning:test-analytics --generate-data --product-id=YOUR_PRODUCT_ID
 
 # Run analytics without generating new data
@@ -1118,6 +1118,10 @@ bin/console learning:test-analytics
 
 # Check the database directly
 docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT product_id, view_count, user_agent, last_viewed_at FROM learning_product_view ORDER BY last_viewed_at DESC LIMIT 10;"
+
+# Note: Product names are fetched using getTranslated()['name'] which accesses 
+# the product_translation table. If a product variant doesn't have a name in 
+# translations, the service falls back to showing the product_number instead.
 ```
 
 ---
@@ -1474,8 +1478,8 @@ docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware
 # 3. Verify entity definitions are registered
 bin/console debug:container --tag=shopware.entity.definition | grep learning
 
-# 4. Get a product ID to test with
-docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT HEX(id) as product_id, product_number FROM product LIMIT 5;"
+# 4. Get a product ID to test with (lowercase hex format required)
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT LOWER(HEX(id)) as product_id, product_number FROM product LIMIT 5;"
 
 # 5. Test basic product view tracking
 bin/console learning:test-product-view

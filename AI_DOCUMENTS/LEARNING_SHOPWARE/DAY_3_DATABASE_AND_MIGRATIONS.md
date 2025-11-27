@@ -291,6 +291,36 @@ bin/console plugin:update LearningBundle
 
 ## Part 3: Create Entity Definition (90 minutes)
 
+### What's the Purpose of This Part?
+
+**Important:** At the end of this section, your database will still show "COUNT 0" - that's correct! This part doesn't create data, it creates the **tools to work with data**.
+
+Think of it like this:
+- **Part 2 (Migrations)** = Built the garage (database table)
+- **Part 3 (Entity Definition)** = Built the car and got the keys (PHP classes to interact with the table)
+- **Part 4 (Repository Operations)** = Actually driving the car (creating, reading, updating data)
+
+**What you're building:**
+1. **Entity Class** - Represents one row as a PHP object (like a Product or Customer object)
+2. **Collection Class** - Container for multiple entities (like an array, but type-safe)
+3. **Definition Class** - Schema that tells Shopware how to map database columns to PHP properties
+4. **Repository Service** - Automatically created by Shopware to perform CRUD operations
+
+**Without this infrastructure**, you'd have to write raw SQL queries every time you want to interact with your table. With it, you can write clean PHP code like:
+```php
+// Instead of: "INSERT INTO learning_product_view VALUES..."
+$repository->create([['productId' => $id, 'viewCount' => 1]], $context);
+
+// Instead of: "SELECT * FROM learning_product_view WHERE product_id = ?"
+$criteria = new Criteria();
+$criteria->addFilter(new EqualsFilter('productId', $productId));
+$views = $repository->search($criteria, $context);
+```
+
+**Real-world use case:** Once this is set up, Part 4 will show you how to automatically track when customers view products, count total views, and display "Most Viewed Products" on your storefront.
+
+---
+
 ### Step 1: Create Entity Class
 
 **Purpose:** The Entity class represents a single row from your database table as a PHP object. It contains properties for each column and getter/setter methods to access them. The `EntityIdTrait` provides the `id` property and related methods automatically.

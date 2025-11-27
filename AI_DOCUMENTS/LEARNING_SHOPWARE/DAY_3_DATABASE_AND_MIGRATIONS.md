@@ -25,8 +25,14 @@
 
 **Migration Commands:**
 ```bash
-# Run all pending migrations
+# Run all pending CORE migrations
 bin/console database:migrate --all
+
+# Run plugin migrations (after adding new ones to an installed plugin)
+bin/console plugin:update YourPluginName
+
+# Install plugin (runs all plugin migrations)
+bin/console plugin:install --activate YourPluginName
 
 # Create a new migration file
 bin/console database:create-migration YourMigrationName LearningBundle
@@ -272,8 +278,14 @@ SQL;
 
 Run it:
 ```bash
-bin/console database:migrate --all
+# Option 1: Update the plugin (runs pending migrations automatically)
+bin/console plugin:update LearningBundle
+
+# Option 2: Use database:migrate (but this doesn't work for plugin migrations without the plugin being updated first)
+# bin/console database:migrate --all
 ```
+
+**Important:** When you add new migrations to an already-installed plugin, use `plugin:update` to trigger them. The `database:migrate --all` command only processes core migrations by default and won't detect new plugin migrations until the plugin is updated.
 
 ---
 

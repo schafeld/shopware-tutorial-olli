@@ -54,4 +54,14 @@ class LearningBundle extends Plugin
     public function postUpdate(UpdateContext $updateContext): void
     {
     }
+
+    public function getMigrationNamespace(): string
+    {
+        return 'Learning\Bundle\Migration';
+    }
+
+    public function getMigrationPath(): string
+    {
+        return $this->getPath() . '/src/Migration';
+    }
 }

@@ -818,14 +818,14 @@ Create `custom/plugins/LearningBundle/src/Service/ProductViewAnalyticsService.ph
 
 namespace Learning\Bundle\Service;
 
+use Learning\Bundle\Core\Content\ProductView\ProductViewEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Aggregation\Bucket\DateHistogramAggregation;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Aggregation\Metric\SumAggregation;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\AggregationResult\Bucket\BucketResult;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\RangeFilter;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
 
 class ProductViewAnalyticsService
 {
@@ -842,28 +842,31 @@ class ProductViewAnalyticsService
     public function getViewsForLastDays(int $days, Context $context): array
     {
         $date = new \DateTime();
-        $date->modify("-{$days} days");
+        $date->modify(sprintf('-%d days', $days));
 
         $criteria = new Criteria();
         $criteria->addFilter(
-            new RangeFilter('lastViewedAt', [
-                RangeFilter::GTE => $date->format('Y-m-d H:i:s'),
+            new RangeFilter('lastViewedAt',[
+            RangeFilter::GTE => $date->format('Y-m-d H:i:s')
             ])
         );
+
         $criteria->addAggregation(
             new DateHistogramAggregation(
                 'views_per_day',
                 'lastViewedAt',
-                DateHistogramAggregation::PER_DAY
-            )
+                DateHistogramAggregation::PER_DAY,
+                    )
         );
 
         $result = $this->productViewRepository->search($criteria, $context);
         $aggregations = $result->getAggregations();
         
-        return $aggregations->get('views_per_day')?->getBuckets() ?? [];
-    }
+        /** @var BucketResult|null $bucketResult */
+        $bucketResult = $aggregations->get('views_per_day');
 
+        return $bucketResult?->getBuckets() ?? [];
+    }
     /**
      * Get total views by product
      */
@@ -876,9 +879,10 @@ class ProductViewAnalyticsService
         );
 
         $result = $this->productViewRepository->search($criteria, $context);
-        
-        // Build summary
+
+        // Build Summary
         $summary = [];
+        /** @var ProductViewEntity $view */
         foreach ($result as $view) {
             $productId = $view->getProductId();
             if (!isset($summary[$productId])) {
@@ -890,10 +894,8 @@ class ProductViewAnalyticsService
             }
             $summary[$productId]['total_views'] += $view->getViewCount();
         }
-
         return array_values($summary);
     }
-
     /**
      * Get views by user agent (browser analysis)
      */
@@ -902,18 +904,24 @@ class ProductViewAnalyticsService
         $criteria = new Criteria();
         
         $result = $this->productViewRepository->search($criteria, $context);
-        
+
         $browsers = [];
+        /** @var ProductViewEntity $view */
         foreach ($result as $view) {
             $userAgent = $view->getUserAgent() ?? 'Unknown';
-            
-            // Simple browser detection (you could use a library for better detection)
+
+            // Simple browser detection (use a library for better results)
             $browser = 'Unknown';
-            if (str_contains($userAgent, 'Chrome')) $browser = 'Chrome';
-            elseif (str_contains($userAgent, 'Firefox')) $browser = 'Firefox';
-            elseif (str_contains($userAgent, 'Safari')) $browser = 'Safari';
-            elseif (str_contains($userAgent, 'Edge')) $browser = 'Edge';
-            
+            if (str_contains($userAgent,'Chrome')) {
+                $browser = 'Chrome';
+            } elseif (str_contains($userAgent,'Firefox')) {
+                $browser = 'Firefox';
+            } elseif (str_contains($userAgent,'Safari')) {
+                $browser = 'Safari';
+            } elseif (str_contains($userAgent,'Edge')) {
+                $browser = 'Edge';
+            }
+
             if (!isset($browsers[$browser])) {
                 $browsers[$browser] = 0;
             }
@@ -923,6 +931,193 @@ class ProductViewAnalyticsService
         return $browsers;
     }
 }
+```
+
+### Step 2: Register Analytics Service
+
+Update `services.xml`:
+
+```xml
+<!-- Product View Analytics Service -->
+<service id="Learning\Bundle\Service\ProductViewAnalyticsService">
+    <argument type="service" id="learning_product_view.repository"/>
+</service>
+```
+
+### Step 3: Create Analytics Test Command
+
+Create `custom/plugins/LearningBundle/src/Command/TestAnalyticsCommand.php`:
+
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Command;
+
+use Learning\Bundle\Service\ProductViewAnalyticsService;
+use Learning\Bundle\Service\ProductViewService;
+use Shopware\Core\Framework\Context;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+
+class TestAnalyticsCommand extends Command
+{
+    private ProductViewAnalyticsService $analyticsService;
+    private ProductViewService $viewService;
+
+    public function __construct(
+        ProductViewAnalyticsService $analyticsService,
+        ProductViewService $viewService
+    ) {
+        parent::__construct();
+        $this->analyticsService = $analyticsService;
+        $this->viewService = $viewService;
+    }
+
+    protected function configure(): void
+    {
+        $this
+            ->setName('learning:test-analytics')
+            ->setDescription('Test the ProductViewAnalyticsService')
+            ->addOption(
+                'generate-data',
+                'g',
+                InputOption::VALUE_NONE,
+                'Generate sample data first'
+            )
+            ->addOption(
+                'product-id',
+                'p',
+                InputOption::VALUE_REQUIRED,
+                'Product ID to generate views for'
+            );
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $io = new SymfonyStyle($input, $output);
+        $context = Context::createDefaultContext();
+
+        // Generate sample data if requested
+        if ($input->getOption('generate-data')) {
+            $productId = $input->getOption('product-id');
+            if (!$productId) {
+                $io->error('Please provide a product ID with --product-id when using --generate-data');
+                return Command::FAILURE;
+            }
+
+            $io->section('Generating sample data...');
+            $this->generateSampleData($productId, $context, $io);
+        }
+
+        // Test 1: Views for last N days
+        $io->section('Views for Last 7 Days');
+        $viewsByDay = $this->analyticsService->getViewsForLastDays(7, $context);
+        
+        if (empty($viewsByDay)) {
+            $io->warning('No data found. Use --generate-data to create sample data.');
+        } else {
+            $io->table(
+                ['Date', 'View Count'],
+                array_map(fn($bucket) => [
+                    $bucket->getKey(),
+                    $bucket->getCount(),
+                ], $viewsByDay)
+            );
+        }
+
+        // Test 2: Total views by product
+        $io->section('Total Views by Product');
+        $viewsByProduct = $this->analyticsService->getTotalViewsByProduct($context);
+        
+        if (empty($viewsByProduct)) {
+            $io->warning('No data found.');
+        } else {
+            $io->table(
+                ['Product ID', 'Product Name', 'Total Views'],
+                array_map(fn($item) => [
+                    substr($item['product_id'], 0, 8) . '...',
+                    $item['product_name'] ?? 'N/A',
+                    $item['total_views'],
+                ], array_slice($viewsByProduct, 0, 10)) // Show top 10
+            );
+        }
+
+        // Test 3: Views by browser
+        $io->section('Views by Browser');
+        $viewsByBrowser = $this->analyticsService->getViewsByBrowser($context);
+        
+        if (empty($viewsByBrowser)) {
+            $io->warning('No data found.');
+        } else {
+            $io->table(
+                ['Browser', 'Total Views'],
+                array_map(fn($browser, $count) => [$browser, $count], 
+                    array_keys($viewsByBrowser), 
+                    array_values($viewsByBrowser))
+            );
+        }
+
+        $io->success('Analytics test completed!');
+        
+        return Command::SUCCESS;
+    }
+
+    private function generateSampleData(string $productId, Context $context, SymfonyStyle $io): void
+    {
+        $userAgents = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.59',
+        ];
+
+        // Generate views for the last 7 days
+        for ($day = 0; $day < 7; $day++) {
+            $viewsPerDay = rand(5, 20);
+            for ($i = 0; $i < $viewsPerDay; $i++) {
+                $this->viewService->recordView(
+                    $productId,
+                    null,
+                    $userAgents[array_rand($userAgents)],
+                    $context
+                );
+            }
+            $io->writeln("Generated {$viewsPerDay} views for day -{$day}");
+        }
+
+        $io->success('Sample data generated successfully!');
+    }
+}
+```
+
+Register in `services.xml`:
+
+```xml
+<service id="Learning\Bundle\Command\TestAnalyticsCommand">
+    <argument type="service" id="Learning\Bundle\Service\ProductViewAnalyticsService"/>
+    <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+    <tag name="console.command"/>
+</service>
+```
+
+### Step 4: Test the Analytics
+
+```bash
+# First, get a product ID from your database
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT HEX(id) as product_id, name FROM product LIMIT 5;"
+
+# Generate sample data (replace YOUR_PRODUCT_ID with an actual ID)
+bin/console learning:test-analytics --generate-data --product-id=YOUR_PRODUCT_ID
+
+# Run analytics without generating new data
+bin/console learning:test-analytics
+
+# Check the database directly
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT product_id, view_count, user_agent, last_viewed_at FROM learning_product_view ORDER BY last_viewed_at DESC LIMIT 10;"
 ```
 
 ---
@@ -1010,47 +1205,333 @@ class CustomFieldService
 
 ### Exercise 1: Product Rating System
 
-Create a complete rating system:
-- Migration for `learning_product_rating` table (product_id, customer_id, rating, comment, created_at)
-- Entity, Collection, and Definition
-- Service with methods: addRating, getAverageRating, getRatingsForProduct
+Create a complete rating system with testing capability.
+
+**Step 1: Create Migration**
+
+Create `Migration1700000003CreateProductRatingTable.php`:
+
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Migration;
+
+use Doctrine\DBAL\Connection;
+use Shopware\Core\Framework\Migration\MigrationStep;
+
+class Migration1700000003CreateProductRatingTable extends MigrationStep
+{
+    public function getCreationTimestamp(): int
+    {
+        return 1700000003;
+    }
+
+    public function update(Connection $connection): void
+    {
+        $sql = <<<SQL
+CREATE TABLE IF NOT EXISTS `learning_product_rating` (
+    `id` BINARY(16) NOT NULL,
+    `product_id` BINARY(16) NOT NULL,
+    `product_version_id` BINARY(16) NOT NULL,
+    `customer_id` BINARY(16) NULL,
+    `rating` INT NOT NULL,
+    `comment` TEXT NULL,
+    `created_at` DATETIME(3) NOT NULL,
+    `updated_at` DATETIME(3) NULL,
+    PRIMARY KEY (`id`),
+    KEY `fk.learning_product_rating.product_id` (`product_id`,`product_version_id`),
+    KEY `fk.learning_product_rating.customer_id` (`customer_id`),
+    CONSTRAINT `fk.learning_product_rating.product_id` 
+        FOREIGN KEY (`product_id`,`product_version_id`) 
+        REFERENCES `product` (`id`,`version_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk.learning_product_rating.customer_id` 
+        FOREIGN KEY (`customer_id`) 
+        REFERENCES `customer` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT `chk.learning_product_rating.rating` CHECK (`rating` >= 1 AND `rating` <= 5)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+SQL;
+
+        $connection->executeStatement($sql);
+    }
+
+    public function updateDestructive(Connection $connection): void
+    {
+        $sql = <<<SQL
+DROP TABLE IF EXISTS `learning_product_rating`;
+SQL;
+
+        $connection->executeStatement($sql);
+    }
+}
+```
+
+**Step 2: Create Entity, Collection, and Definition**
+
+Similar pattern to ProductView - create:
+- `ProductRatingEntity.php` with properties: id, productId, customerId, rating, comment, createdAt
+- `ProductRatingCollection.php`
+- `ProductRatingDefinition.php` with ENTITY_NAME = 'learning_product_rating'
+
+**Step 3: Create Rating Service**
+
+Create `ProductRatingService.php`:
+
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Service;
+
+use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Aggregation\Metric\AvgAggregation;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
+use Shopware\Core\Framework\Uuid\Uuid;
+
+class ProductRatingService
+{
+    private EntityRepository $ratingRepository;
+
+    public function __construct(EntityRepository $ratingRepository)
+    {
+        $this->ratingRepository = $ratingRepository;
+    }
+
+    public function addRating(
+        string $productId,
+        ?string $customerId,
+        int $rating,
+        ?string $comment,
+        Context $context
+    ): void {
+        if ($rating < 1 || $rating > 5) {
+            throw new \InvalidArgumentException('Rating must be between 1 and 5');
+        }
+
+        $this->ratingRepository->create([
+            [
+                'id' => Uuid::randomHex(),
+                'productId' => $productId,
+                'customerId' => $customerId,
+                'rating' => $rating,
+                'comment' => $comment,
+            ]
+        ], $context);
+    }
+
+    public function getAverageRating(string $productId, Context $context): ?float
+    {
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('productId', $productId));
+        $criteria->addAggregation(new AvgAggregation('avg_rating', 'rating'));
+
+        $result = $this->ratingRepository->search($criteria, $context);
+        $avgAggregation = $result->getAggregations()->get('avg_rating');
+
+        return $avgAggregation?->getAvg();
+    }
+
+    public function getRatingsForProduct(string $productId, Context $context): array
+    {
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('productId', $productId));
+        $criteria->addAssociation('customer');
+        $criteria->addSorting(new FieldSorting('createdAt', FieldSorting::DESCENDING));
+
+        return $this->ratingRepository->search($criteria, $context)->getElements();
+    }
+}
+```
+
+**Step 4: Create Test Command**
+
+Create `TestRatingCommand.php`:
+
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Command;
+
+use Learning\Bundle\Service\ProductRatingService;
+use Shopware\Core\Framework\Context;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
+
+class TestRatingCommand extends Command
+{
+    private ProductRatingService $ratingService;
+
+    public function __construct(ProductRatingService $ratingService)
+    {
+        parent::__construct();
+        $this->ratingService = $ratingService;
+    }
+
+    protected function configure(): void
+    {
+        $this
+            ->setName('learning:test-rating')
+            ->setDescription('Test the ProductRatingService')
+            ->addOption('product-id', 'p', InputOption::VALUE_REQUIRED, 'Product ID');
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $io = new SymfonyStyle($input, $output);
+        $context = Context::createDefaultContext();
+        
+        $productId = $input->getOption('product-id');
+        if (!$productId) {
+            $io->error('Please provide --product-id');
+            return Command::FAILURE;
+        }
+
+        // Add sample ratings
+        $io->section('Adding sample ratings...');
+        $this->ratingService->addRating($productId, null, 5, 'Excellent product!', $context);
+        $this->ratingService->addRating($productId, null, 4, 'Very good', $context);
+        $this->ratingService->addRating($productId, null, 5, 'Amazing!', $context);
+        $this->ratingService->addRating($productId, null, 3, 'Good but could be better', $context);
+        $io->success('Added 4 sample ratings');
+
+        // Get average
+        $average = $this->ratingService->getAverageRating($productId, $context);
+        $io->info(sprintf('Average Rating: %.2f / 5.00', $average ?? 0));
+
+        // Get all ratings
+        $ratings = $this->ratingService->getRatingsForProduct($productId, $context);
+        $io->section('All Ratings:');
+        
+        $rows = [];
+        foreach ($ratings as $rating) {
+            $rows[] = [
+                $rating->getRating() . ' ★',
+                $rating->getComment() ?? 'No comment',
+                $rating->getCreatedAt()->format('Y-m-d H:i'),
+            ];
+        }
+        
+        $io->table(['Rating', 'Comment', 'Date'], $rows);
+
+        return Command::SUCCESS;
+    }
+}
+```
+
+**Test it:**
+```bash
+bin/console plugin:update LearningBundle
+bin/console learning:test-rating --product-id=YOUR_PRODUCT_ID
+```
+
+---
 
 ### Exercise 2: Wishlist Feature
 
-Create a wishlist system:
-- Migration for `learning_wishlist` table
-- Track which customers have which products in their wishlist
-- Methods: addToWishlist, removeFromWishlist, getWishlist
+Create a wishlist system - track which customers have which products saved.
 
-### Exercise 3: Product Comparison
+**Goal:** Create migration, entities, service with methods:
+- `addToWishlist(customerId, productId)`
+- `removeFromWishlist(customerId, productId)`
+- `getWishlist(customerId)` - returns list of products
+- `isInWishlist(customerId, productId)` - boolean check
 
-Create a product comparison table:
-- Allow users to compare multiple products
-- Store comparison sessions
-- Add timestamps and user tracking
+**Test with:**
+```bash
+bin/console learning:test-wishlist --customer-id=YOUR_CUSTOMER_ID --product-id=YOUR_PRODUCT_ID
+```
+
+---
+
+### Exercise 3: Product Comparison Table
+
+Create a comparison tracking system.
+
+**Goal:** 
+- Store which products users are comparing together
+- Track comparison sessions (session_id, product_ids[], timestamp)
+- Find most commonly compared product pairs
+
+**Bonus:** Create a command that shows insights like "Products A and B are compared together 45% of the time"
 
 ---
 
 ## Testing Your Work
 
-```bash
-# Run migrations
-bin/console database:migrate --all
+### Complete Testing Workflow
 
-# Check tables using Docker
+```bash
+# 1. Run migrations (install/update plugin)
+bin/console plugin:update LearningBundle
+
+# 2. Check tables were created
 docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SHOW TABLES LIKE 'learning_%';"
 
-# Test entity definition
+# 3. Verify entity definitions are registered
 bin/console debug:container --tag=shopware.entity.definition | grep learning
 
-# Query data using Docker
-docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT * FROM learning_product_view;"
+# 4. Get a product ID to test with
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT HEX(id) as product_id, name FROM product LIMIT 5;"
 
-# Test commands
+# 5. Test basic product view tracking
 bin/console learning:test-product-view
 
-# Alternative: Interactive database access
-# docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware
+# 6. Test analytics (with data generation)
+bin/console learning:test-analytics --generate-data --product-id=YOUR_PRODUCT_ID
+
+# 7. View analytics results
+bin/console learning:test-analytics
+
+# 8. Test rating system (if you completed Exercise 1)
+bin/console learning:test-rating --product-id=YOUR_PRODUCT_ID
+
+# 9. Query data directly to verify
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "
+SELECT 
+    pv.view_count, 
+    pv.last_viewed_at, 
+    p.name as product_name 
+FROM learning_product_view pv
+LEFT JOIN product p ON pv.product_id = p.id
+ORDER BY pv.last_viewed_at DESC
+LIMIT 10;
+"
+
+# 10. Check rating data (if applicable)
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "
+SELECT 
+    rating, 
+    comment, 
+    created_at 
+FROM learning_product_rating 
+ORDER BY created_at DESC 
+LIMIT 10;
+"
+
+# Interactive database access for manual queries
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware
+```
+
+### Troubleshooting Commands
+
+```bash
+# Clear all caches
+bin/console cache:clear
+
+# Rebuild container
+bin/console cache:clear && bin/console debug:container --tag=shopware.entity.definition | grep learning
+
+# Check migration status
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "SELECT * FROM migration WHERE class LIKE '%Learning%';"
+
+# Drop and recreate (for testing migrations)
+bin/console plugin:uninstall LearningBundle
+docker exec -it shopware-tutorial-olli-database-1 mariadb -uroot -proot shopware -e "DROP TABLE IF EXISTS learning_product_view, learning_product_rating;"
+bin/console plugin:install --activate LearningBundle
 ```
 
 ---

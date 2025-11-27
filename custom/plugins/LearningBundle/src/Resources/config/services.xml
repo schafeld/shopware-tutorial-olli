@@ -162,5 +162,16 @@
         <service id="Learning\Bundle\Core\Content\ProductView\ProductViewDefinition">
             <tag name="shopware.entity.definition" entity="learning_product_view"/>
         </service>
+
+        <!-- Product View Service -->
+        <service id="Learning\Bundle\Service\ProductViewService">
+            <argument type="service" id="learning_product_view.repository"/>
+        </service>
+
+        <!-- Test Product View Command -->
+        <service id="Learning\Bundle\Command\TestProductViewCommand">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+            <tag name="console.command"/>
+        </service>
     </services>
 </container>

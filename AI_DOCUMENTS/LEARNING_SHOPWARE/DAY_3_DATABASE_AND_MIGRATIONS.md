@@ -293,6 +293,8 @@ bin/console plugin:update LearningBundle
 
 ### Step 1: Create Entity Class
 
+**Purpose:** The Entity class represents a single row from your database table as a PHP object. It contains properties for each column and getter/setter methods to access them. The `EntityIdTrait` provides the `id` property and related methods automatically.
+
 Create `custom/plugins/LearningBundle/src/Core/Content/ProductView/ProductViewEntity.php`:
 
 ```php
@@ -393,6 +395,8 @@ class ProductViewEntity extends Entity
 
 ### Step 2: Create Entity Collection
 
+**Purpose:** The Collection class is a type-safe container for multiple Entity objects. It extends `EntityCollection` and defines what type of entities it can hold. The PHPDoc annotations provide IDE autocompletion for array-like operations (add, get, first, etc.).
+
 Create `custom/plugins/LearningBundle/src/Core/Content/ProductView/ProductViewCollection.php`:
 
 ```php
@@ -421,6 +425,15 @@ class ProductViewCollection extends EntityCollection
 ```
 
 ### Step 3: Create Entity Definition
+
+**Purpose:** The Definition class is the schema blueprint that tells Shopware's DAL:
+- What database table to use (`getEntityName()`)
+- What fields/columns exist (`defineFields()`)
+- Data types, validation rules, and flags for each field
+- Relationships to other entities (associations)
+- Which Entity and Collection classes to use
+
+This is the bridge between your database table and Shopware's data layer.
 
 Create `custom/plugins/LearningBundle/src/Core/Content/ProductView/ProductViewDefinition.php`:
 
@@ -465,18 +478,24 @@ class ProductViewDefinition extends EntityDefinition
     protected function defineFields(): FieldCollection
     {
         return new FieldCollection([
+            // Primary key - every entity needs this
             (new IdField('id', 'id'))->addFlags(new Required(), new PrimaryKey()),
             
+            // Foreign key to product table (first parameter: column name, second: property name)
             (new FkField('product_id', 'productId', ProductDefinition::class))->addFlags(new Required()),
+            // Shopware's versioning system requires this for product references
             (new ReferenceVersionField(ProductDefinition::class))->addFlags(new Required()),
             
+            // Optional foreign key (no Required flag means it can be NULL)
             new FkField('customer_id', 'customerId', CustomerDefinition::class),
             
+            // Simple data fields with their types
             (new IntField('view_count', 'viewCount'))->addFlags(new Required()),
             new StringField('user_agent', 'userAgent'),
             (new DateTimeField('last_viewed_at', 'lastViewedAt'))->addFlags(new Required()),
             
-            // Associations
+            // Associations allow loading related entities (lazy-loaded by default)
+            // These create the $product and $customer properties in ProductViewEntity
             new ManyToOneAssociationField('product', 'product_id', ProductDefinition::class, 'id', false),
             new ManyToOneAssociationField('customer', 'customer_id', CustomerDefinition::class, 'id', false),
         ]);
@@ -485,6 +504,12 @@ class ProductViewDefinition extends EntityDefinition
 ```
 
 ### Step 4: Register Definition
+
+**Purpose:** Registering the Definition with the `shopware.entity.definition` tag makes it discoverable by Shopware's DAL. This automatically:
+- Creates a repository service named `learning_product_view.repository`
+- Enables Criteria-based querying
+- Integrates with the Admin API
+- Makes the entity available throughout Shopware
 
 Update `services.xml`:
 

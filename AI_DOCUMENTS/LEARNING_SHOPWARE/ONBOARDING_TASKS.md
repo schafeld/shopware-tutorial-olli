@@ -15,6 +15,7 @@ Ideal learning goals:
 - Own SQL database tables and fields
 - Dealing with migrations, repositories, caching
 - Introduction to integration tests
+- **Understanding Shopware Apps** (the modern alternative to plugins for external integrations)
 - Review and documentation of work results
 
 These lessons should not take longer than a week. Keep the tasks manageable for someone onboarding to a *Junior* PHP / Shopware developer without much experience in Shopware or Symfony.

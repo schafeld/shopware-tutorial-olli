@@ -176,11 +176,43 @@ Build a complete feature from scratch:
 - Complete test coverage
 - Documentation
 
+**Alternative:** [GoTo Webinar Integration](./DAY_7_WEBINAR_INTEGRATION.md) - A comprehensive real-world App example (24-33 hours)
+
 **Key Outcomes:**
 - Apply all learned concepts
 - Build production-ready feature
 - Follow best practices
 - Create comprehensive documentation
+
+---
+
+### [Day 8: Shopware Apps (Alternative to Plugins)](./DAY_8_SHOPWARE_APPS.md) 🆕
+**Duration:** 4-6 hours  
+**Difficulty:** ⭐⭐⭐ Intermediate - Important Architectural Concept
+
+Learn the modern alternative to plugins for external integrations:
+- Apps vs Plugins comparison
+- Manifest file structure
+- OAuth registration flow
+- Webhook handling
+- Admin API authentication
+- Real-world app examples
+
+**Key Outcomes:**
+- Understand when to use Apps vs Plugins
+- Create and register a Shopware App
+- Handle webhooks securely
+- Call Shopware's Admin API
+- Build loosely-coupled integrations
+
+**Why This Matters:**
+Apps are the **preferred approach for:**
+- Third-party service integrations (payment, shipping, marketing)
+- Multi-shop SaaS solutions
+- External microservices
+- Marketplace distribution
+
+This complements your plugin knowledge with the modern, API-first approach to Shopware development!
 
 ---
 
@@ -203,6 +235,13 @@ Throughout this course, you'll build several real-world features:
    - Affinity calculations
    - Cached API endpoints
    - Complete test suite
+
+4. **Order Logger App** (Day 8)
+   - App architecture
+   - OAuth registration
+   - Webhook processing
+   - Admin API integration
+   - Signature verification
 
 ---
 

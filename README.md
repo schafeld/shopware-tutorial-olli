@@ -35,3 +35,12 @@ This project includes comprehensive documentation in the `AI_DOCUMENTS/` folder:
 ### For AI Assistants
 
 When generating code for this project, **always follow the guidelines in [AI_DOCUMENTS/AI_CODING_GUIDE.md](AI_DOCUMENTS/AI_CODING_GUIDE.md)**. This ensures consistency with project standards and Shopware best practices.
+
+### Code quality tooling
+
+Experimenting with PhpStan (standalone as [phar](https://phpstan.org/user-guide/getting-started)).
+Usage example:
+
+```bash
+php phpstan.phar analyze custom/plugins/LearningBundle/src/Command/ApplyDiscountCommand.php --memory-limit 120M 
+````

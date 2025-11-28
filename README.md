@@ -43,4 +43,6 @@ Usage example:
 
 ```bash
 php phpstan.phar analyze custom/plugins/LearningBundle/src/Command/ApplyDiscountCommand.php --memory-limit 120M 
-````
+```
+
+Added [SonarQube trial](https://sonarcloud.io/summary/overall?id=schafeld_shopware-tutorial-olli&branch=main) for this tutorial project.

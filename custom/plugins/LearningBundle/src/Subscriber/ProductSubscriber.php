@@ -4,7 +4,7 @@ namespace Learning\Bundle\Subscriber;
 
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Content\Product\ProductEvents;
-use Shopware\Core\Framework\DataAbstarctionLayer\Event\EntityWrittenEvent;
+use Shopware\Core\Framework\DataAbstractionLayer\Event\EntityWrittenEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ProductSubscriber implements EventSubscriberInterface

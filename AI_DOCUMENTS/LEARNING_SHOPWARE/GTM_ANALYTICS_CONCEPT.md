@@ -770,3 +770,6 @@ Your Shopware store now has comprehensive Google Tag Manager integration with:
 - ✅ Privacy-compliant user data
 - ✅ Configurable via admin
 - ✅ Debug logging support
+
+** 📝 Pull Request**
+[Pull Request](https://github.com/schafeld/shopware-tutorial-olli/pull/3/commits/00aad2ce6cc61c0039e07077aa4bd9be2adc51ec) for the entire demo feature.

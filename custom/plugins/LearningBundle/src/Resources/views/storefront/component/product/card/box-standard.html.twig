@@ -1,0 +1,18 @@
+{#
+    Product Listing - GTM Data Enhancement
+    
+    This template extends the product box in listings to add minimal GTM tracking data
+    for product click tracking via data attributes on the existing box.
+#}
+
+{% sw_extends '@Storefront/storefront/component/product/card/box-standard.html.twig' %}
+
+{# Add GTM data attributes to product box - override the attributes block #}
+{% block component_product_box_content_attributes %}
+    {{ parent() }}
+    {% set gtmEnabled = config('LearningBundle.config.gtmEnabled') %}
+    {% if gtmEnabled and product %}
+        data-gtm-product-id="{{ product.id }}"
+        data-gtm-product-number="{{ product.productNumber }}"
+    {% endif %}
+{% endblock %}

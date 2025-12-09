@@ -1,0 +1,59 @@
+{#
+    GTM DataLayer Initialization
+    
+    This template initializes the dataLayer with page-level data.
+#}
+
+{% set gtmEnabled = config('LearningBundle.config.gtmEnabled') %}
+{% set gtmDebug = config('LearningBundle.config.gtmDebugMode') %}
+
+{% if gtmEnabled %}
+<script>
+// Initialize dataLayer
+window.dataLayer = window.dataLayer || [];
+
+{% if gtmDebug %}
+console.log('[GTM Debug] DataLayer initialized on path:', window.location.pathname);
+console.log('[GTM Debug] Page variable exists:', {{ page is defined ? 'true' : 'false' }});
+{% if page is defined and page.extensions is defined %}
+console.log('[GTM Debug] Page extensions:', Object.keys({{ page.extensions|keys|json_encode|raw }}));
+{% endif %}
+{% endif %}
+
+// Page-level data from server
+{% if page is defined and page.extensions is defined and page.extensions.gtmDataLayer is defined %}
+    {% set gtmData = page.extensions.gtmDataLayer %}
+    
+    // Push page data
+    {% set pageJson = gtmData.pageDataJson %}
+    {% if pageJson != '{}' and pageJson != '[]' and pageJson is not empty %}
+    dataLayer.push({{ pageJson|raw }});
+    {% if gtmDebug %}
+    console.log('[GTM Debug] Page data pushed:', {{ pageJson|raw }});
+    {% endif %}
+    {% endif %}
+    
+    // Push page-specific events (pre-encoded as JSON array)
+    {% if gtmData.hasEvents %}
+    (function() {
+        var events = {{ gtmData.eventsJson|raw }};
+        for (var i = 0; i < events.length; i++) {
+            dataLayer.push(events[i]);
+            {% if gtmDebug %}
+            console.log('[GTM Debug] Event pushed:', events[i]);
+            {% endif %}
+        }
+    })();
+    {% endif %}
+{% else %}
+    {% if gtmDebug %}
+    console.log('[GTM Debug] No GTM extension found, using fallback page_view');
+    {% endif %}
+    // Basic page view data (fallback when no specific page data)
+    dataLayer.push({
+        'event': 'page_view',
+        'page_path': window.location.pathname
+    });
+{% endif %}
+</script>
+{% endif %}

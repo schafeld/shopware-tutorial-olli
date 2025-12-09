@@ -97,4 +97,63 @@
         </input-field>
     </card>
 
+    <!-- ================================================================
+         GOOGLE TAG MANAGER CONFIGURATION
+         ================================================================ -->
+    <card>
+        <title>Google Tag Manager</title>
+        <title lang="de-DE">Google Tag Manager</title>
+        <title lang="en-GB">Google Tag Manager</title>
+
+        <input-field type="bool">
+            <name>gtmEnabled</name>
+            <label>Enable GTM Tracking</label>
+            <label lang="de-DE">GTM Tracking aktivieren</label>
+            <label lang="en-GB">Enable GTM Tracking</label>
+            <defaultValue>false</defaultValue>
+            <helpText>Enable or disable Google Tag Manager integration</helpText>
+            <helpText lang="de-DE">Google Tag Manager Integration aktivieren oder deaktivieren</helpText>
+        </input-field>
+
+        <input-field>
+            <name>gtmContainerId</name>
+            <label>GTM Container ID</label>
+            <label lang="de-DE">GTM Container ID</label>
+            <label lang="en-GB">GTM Container ID</label>
+            <placeholder>GTM-XXXXXXX</placeholder>
+            <helpText>Enter your Google Tag Manager Container ID (e.g., GTM-XXXXXXX)</helpText>
+            <helpText lang="de-DE">Geben Sie Ihre Google Tag Manager Container ID ein (z.B. GTM-XXXXXXX)</helpText>
+        </input-field>
+
+        <input-field type="bool">
+            <name>gtmDebugMode</name>
+            <label>Debug Mode</label>
+            <label lang="de-DE">Debug Modus</label>
+            <label lang="en-GB">Debug Mode</label>
+            <defaultValue>false</defaultValue>
+            <helpText>Enable debug logging for GTM events in browser console and server logs</helpText>
+            <helpText lang="de-DE">Debug-Logging für GTM Events in Browser-Konsole und Server-Logs aktivieren</helpText>
+        </input-field>
+
+        <input-field type="bool">
+            <name>gtmTrackUserData</name>
+            <label>Track User Data</label>
+            <label lang="de-DE">Benutzerdaten tracken</label>
+            <label lang="en-GB">Track User Data</label>
+            <defaultValue>true</defaultValue>
+            <helpText>Include hashed user data (customer ID, email hash) for logged-in users. Data is anonymized.</helpText>
+            <helpText lang="de-DE">Anonymisierte Benutzerdaten (Kunden-ID, E-Mail-Hash) für eingeloggte Benutzer einschließen.</helpText>
+        </input-field>
+
+        <input-field type="int">
+            <name>gtmMaxListingItems</name>
+            <label>Max Products in Listings</label>
+            <label lang="de-DE">Max. Produkte in Listings</label>
+            <label lang="en-GB">Max Products in Listings</label>
+            <defaultValue>50</defaultValue>
+            <helpText>Maximum number of products to include in view_item_list events (for performance)</helpText>
+            <helpText lang="de-DE">Maximale Anzahl der Produkte in view_item_list Events (für Performance)</helpText>
+        </input-field>
+    </card>
+
 </config>

@@ -184,5 +184,37 @@
             <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
             <tag name="console.command"/>
         </service>
+
+        <!-- ================================================================
+             GOOGLE TAG MANAGER SERVICES
+             ================================================================ -->
+        
+        <!-- GTM DataLayer Service -->
+        <service id="Learning\Bundle\Service\Gtm\GtmDataLayerService">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <!-- GTM Page Event Subscriber -->
+        <service id="Learning\Bundle\Subscriber\Gtm\GtmPageSubscriber">
+            <argument type="service" id="Learning\Bundle\Service\Gtm\GtmDataLayerService"/>
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- GTM Cart Event Subscriber -->
+        <service id="Learning\Bundle\Subscriber\Gtm\GtmCartSubscriber">
+            <argument type="service" id="Learning\Bundle\Service\Gtm\GtmDataLayerService"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="request_stack"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- GTM Twig Extension -->
+        <service id="Learning\Bundle\Twig\GtmTwigExtension">
+            <argument type="service" id="Learning\Bundle\Service\Gtm\GtmDataLayerService"/>
+            <tag name="twig.extension"/>
+        </service>
+
     </services>
 </container>

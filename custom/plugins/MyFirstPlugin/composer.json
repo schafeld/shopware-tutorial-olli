@@ -1,0 +1,27 @@
+{
+    "name": "ollis-plugin/my-first-plugin",
+    "description": "ollis-plugin/my-first-plugin",
+    "type": "shopware-platform-plugin",
+    "version": "1.0.0",
+    "license": "MIT",
+    "require": {
+        "shopware/core": "~6.7.0"
+    },
+    "extra": {
+        "shopware-plugin-class": "OllisPlugin\\MyFirstPlugin",
+        "label": {
+            "de-DE": "Olli's HelloWorld Plugin",
+            "en-GB": "Olli's HelloWorld Plugin"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "OllisPlugin\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "OllisPlugin\\Tests\\": "tests/"
+        }
+    }
+}

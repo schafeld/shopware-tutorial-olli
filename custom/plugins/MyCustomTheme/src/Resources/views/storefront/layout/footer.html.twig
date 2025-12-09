@@ -1,0 +1,11 @@
+{% sw_extends '@Storefront/storefront/layout/footer.html.twig' %}
+
+{# Override the base footer to add our custom text #}
+{% block base_footer %}
+    {{ parent() }}
+    
+    {# Add custom footer text after the entire footer #}
+    <div style="background-color: #ff6b35; color: white; text-align: center; padding: 20px; font-size: 18px; font-weight: bold;">
+        {{ context.salesChannel.customFields.custom_field_by_olli_text ?? 'An undefined person' }} was here! 🤓 
+    </div>
+{% endblock %}

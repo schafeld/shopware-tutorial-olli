@@ -1,0 +1,22 @@
+{% sw_extends '@Storefront/storefront/element/cms-element-product-description-reviews.html.twig' %}
+
+{% block element_product_description_reviews_tabs_navigation_review %}
+    {{ parent() }}
+    {% block frontend_essentials_custom_tabs_navigation %}
+        <li class="nav-item">
+            <a class="nav-link" id="custom-review-tab" data-bs-toggle="tab" href="#custom-review-content" role="tab"
+               aria-controls="custom-review-content" aria-selected="false">
+                Colorful div tab
+            </a>
+        </li>
+    {% endblock %}
+{% endblock %}
+
+{% block element_product_description_reviews_tabs_content %}
+    {{ parent() }}
+    {% block frontend_essentials_custom_tabs_content %}
+        <div class="tab-pane fade" id="custom-review-content" role="tabpanel" aria-labelledby="custom-review-tab">
+            {% sw_include '@Storefront/storefront/frontend-essentials/color.html.twig' %}
+        </div>
+    {% endblock %}
+{% endblock %}

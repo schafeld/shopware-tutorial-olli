@@ -1,0 +1,124 @@
+{# Product Comparison Modal - No controller needed, fully client-side #}
+<div class="modal fade" id="compareModal" tabindex="-1" aria-labelledby="compareModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="compareModalLabel">
+                    <i class="fas fa-balance-scale"></i> Product Comparison
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="comparison-container">
+                    <p class="text-center">
+                        <i class="fas fa-spinner fa-spin"></i> Loading products...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+        function loadComparisonData() {
+            const compareProducts = JSON.parse(localStorage.getItem('learning_product_compare') || '[]');
+            const container = document.getElementById('comparison-container');
+
+            if (compareProducts.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-info">
+                        <h4>No products to compare</h4>
+                        <p>Add products to comparison from product listings or detail pages.</p>
+                        <a href="/" class="btn btn-primary">Browse Products</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // Build comparison table
+            let html = '<div class="table-responsive"><table class="table table-bordered">';
+            
+            // Header row with product images and names
+            html += '<thead><tr><th>Product</th>';
+            compareProducts.forEach(product => {
+                html += `
+                    <th class="text-center">
+                        <img src="${product.image}" alt="${product.name}" style="max-width: 100px;" class="mb-2">
+                        <h6>${product.name}</h6>
+                    </th>
+                `;
+            });
+            html += '</tr></thead>';
+
+            // Price row
+            html += '<tbody><tr><th>Price</th>';
+            compareProducts.forEach(product => {
+                html += `<td class="text-center"><strong>${product.price} €</strong></td>`;
+            });
+            html += '</tr>';
+
+            // Product ID row
+            html += '<tr><th>Product ID</th>';
+            compareProducts.forEach(product => {
+                html += `<td class="text-center"><code>${product.id}</code></td>`;
+            });
+            html += '</tr>';
+
+            // Actions row
+            html += '<tr><th>Actions</th>';
+            compareProducts.forEach(product => {
+                html += `
+                    <td class="text-center">
+                        <a href="/detail/${product.id}" class="btn btn-sm btn-primary">View Details</a>
+                        <button class="btn btn-sm btn-danger" onclick="removeFromCompare('${product.id}')">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </td>
+                `;
+            });
+            html += '</tr>';
+
+            html += '</tbody></table></div>';
+
+            container.innerHTML = html;
+        }
+
+        function removeFromCompare(productId) {
+            let products = JSON.parse(localStorage.getItem('learning_product_compare') || '[]');
+            products = products.filter(p => p.id !== productId);
+            localStorage.setItem('learning_product_compare', JSON.stringify(products));
+            
+            // Broadcast update to all plugin instances
+            const event = new CustomEvent('compareListUpdated', {
+                detail: { products: products }
+            });
+            document.dispatchEvent(event);
+            
+            // Reload the modal content
+            loadComparisonData();
+            
+            // Close modal if no products left
+            if (products.length === 0) {
+                const modal = document.getElementById('compareModal');
+                if (modal) {
+                    const modalInstance = bootstrap.Modal.getInstance(modal);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+                }
+            }
+        }
+        
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadComparisonData();
+            
+            // Reload data when modal is shown
+            const modal = document.getElementById('compareModal');
+            if (modal) {
+                modal.addEventListener('show.bs.modal', function() {
+                    loadComparisonData();
+                });
+            }
+        });
+</script>

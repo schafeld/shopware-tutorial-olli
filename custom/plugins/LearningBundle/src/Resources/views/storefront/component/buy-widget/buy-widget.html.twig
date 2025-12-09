@@ -1,0 +1,25 @@
+{% sw_extends '@Storefront/storefront/component/buy-widget/buy-widget.html.twig' %}
+
+{# Add custom product info after price #}
+{% block buy_widget_price %}
+    {{ parent() }}
+    
+    <div class="learning-product-info mt-3 p-3 bg-light rounded">
+        <h6>📦 Product Details</h6>
+        
+        <ul class="list-unstyled mb-3">
+            <li><strong>Product Number:</strong> {{ product.productNumber }}</li>
+            <li><strong>Stock:</strong> {{ product.stock }} units</li>
+            <li><strong>Available:</strong> 
+                {% if product.available %}
+                    <span class="badge bg-success">Yes</span>
+                {% else %}
+                    <span class="badge bg-danger">No</span>
+                {% endif %}
+            </li>
+        </ul>
+        <p class="mb-0">
+            <small>This section is added by the LearningBundle plugin to showcase additional product information.</small>
+        </p>
+    </div>
+{% endblock %}

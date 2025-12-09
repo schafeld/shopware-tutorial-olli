@@ -1,0 +1,29 @@
+{#
+    Product Detail Page - GTM Data Enhancement
+    
+    This template extends the product detail page to add minimal GTM tracking data.
+    Full tracking is handled server-side via GtmPageSubscriber.
+#}
+
+{% sw_extends '@Storefront/storefront/page/product-detail/index.html.twig' %}
+
+{# Keep page_product_detail as-is, GTM data is pushed via page.extensions.gtmDataLayer #}
+
+{# Enhance the buy form with minimal GTM data for JS tracking #}
+{% block page_product_detail_buy_form %}
+    {% set gtmEnabled = config('LearningBundle.config.gtmEnabled') %}
+    
+    {% if gtmEnabled and page.product %}
+        {% set product = page.product %}
+        
+        {# Add minimal GTM data - avoid accessing lazy-loaded relations #}
+        <div class="gtm-buy-form-wrapper"
+             data-product-detail-page="true"
+             data-product-id="{{ product.id }}"
+             data-product-number="{{ product.productNumber }}">
+            {{ parent() }}
+        </div>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}

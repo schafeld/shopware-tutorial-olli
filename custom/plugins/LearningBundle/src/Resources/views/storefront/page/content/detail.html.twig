@@ -1,0 +1,17 @@
+{% sw_extends '@Storefront/storefront/page/content/detail.html.twig' %}
+
+{# Add custom component after all CMS sections #}
+{% block page_content_sections_inner %}
+    {{ parent() }}
+    
+    {# Add our custom component in a properly styled section #}
+    <section class="cms-section cms-section-default">
+        <div class="cms-section-default">
+            <div class="container">
+                {% sw_include '@LearningBundle/storefront/component/product/learning-info.html.twig' with {
+                    product: page.product
+                } %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

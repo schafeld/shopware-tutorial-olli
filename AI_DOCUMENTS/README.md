@@ -11,6 +11,9 @@ Welcome to your comprehensive Shopware 6 learning resource collection! These AI-
 - **[08_NEWCOMER_TIPS.md](./08_NEWCOMER_TIPS.md)**  
   Common gotchas, pitfalls to avoid, and productivity hacks for new developers
 
+- **[AI_CODING_GUIDE.md](./AI_CODING_GUIDE.md)** ⭐  
+  **Coding standards and best practices for AI assistants** - defines how AI should generate code for this project
+
 ### Core Development
 - **[02_PLUGIN_DEVELOPMENT.md](./02_PLUGIN_DEVELOPMENT.md)**  
   Complete guide to creating and structuring Shopware plugins

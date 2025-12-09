@@ -1,0 +1,44 @@
+{
+  "Open Shopware Product Detail Template": {
+    "prefix": "sw-open-product-detail",
+    "body": [
+      "vendor/shopware/storefront/Resources/views/storefront/page/content/product-detail.html.twig"
+    ],
+    "description": "Path to Shopware product detail template"
+  },
+  "Open Shopware Buy Widget": {
+    "prefix": "sw-open-buy-widget",
+    "body": [
+      "vendor/shopware/storefront/Resources/views/storefront/component/buy-widget/buy-widget.html.twig"
+    ],
+    "description": "Path to Shopware buy widget template"
+  },
+  "Open Shopware Product Card": {
+    "prefix": "sw-open-product-card",
+    "body": [
+      "vendor/shopware/storefront/Resources/views/storefront/component/product/card/box.html.twig"
+    ],
+    "description": "Path to Shopware product card template"
+  },
+  "Extend Shopware Template": {
+    "prefix": "sw-extend",
+    "body": [
+      "{% sw_extends '@Storefront/storefront/${1:path/to/template}.html.twig' %}",
+      "",
+      "{% block ${2:block_name} %}",
+      "    $3",
+      "    {{ parent() }}",
+      "{% endblock %}"
+    ],
+    "description": "Extend a Shopware template with block override"
+  },
+  "Shopware Include Component": {
+    "prefix": "sw-include",
+    "body": [
+      "{% sw_include '@${1:LearningBundle}/storefront/${2:path/to/template}.html.twig' with {",
+      "    ${3:variable}: ${4:value}",
+      "} %}"
+    ],
+    "description": "Include a Shopware template component"
+  }
+}

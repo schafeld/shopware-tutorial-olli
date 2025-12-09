@@ -1,0 +1,71 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Search Shopware Templates",
+      "type": "shell",
+      "command": "code",
+      "args": [
+        "--goto",
+        "vendor/shopware/storefront/Resources/views/storefront/"
+      ],
+      "problemMatcher": [],
+      "group": "none",
+      "presentation": {
+        "reveal": "never"
+      }
+    },
+    {
+      "label": "Find Template Block",
+      "type": "shell",
+      "command": "grep",
+      "args": [
+        "-r",
+        "\"{% block\"",
+        "vendor/shopware/storefront/Resources/views/storefront/"
+      ],
+      "problemMatcher": [],
+      "group": "none"
+    },
+    {
+      "label": "Find CSS Class in Templates",
+      "type": "shell",
+      "command": "grep",
+      "args": [
+        "-r",
+        "${input:cssClass}",
+        "vendor/shopware/storefront/Resources/views/storefront/"
+      ],
+      "problemMatcher": [],
+      "group": "none"
+    },
+    {
+      "label": "Open Buy Widget Template",
+      "type": "shell",
+      "command": "code",
+      "args": [
+        "vendor/shopware/storefront/Resources/views/storefront/component/buy-widget/buy-widget.html.twig"
+      ],
+      "problemMatcher": [],
+      "group": "none"
+    },
+    {
+      "label": "Open Product Detail Template",
+      "type": "shell",
+      "command": "code",
+      "args": [
+        "vendor/shopware/storefront/Resources/views/storefront/page/content/product-detail.html.twig"
+      ],
+      "problemMatcher": [],
+      "group": "none"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "cssClass",
+      "type": "promptString",
+      "description": "Enter CSS class name to search for",
+      "default": "btn-buy"
+    }
+  ]
+}

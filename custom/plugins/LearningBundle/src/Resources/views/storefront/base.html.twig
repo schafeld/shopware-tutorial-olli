@@ -1,0 +1,33 @@
+{% sw_extends '@Storefront/storefront/base.html.twig' %}
+
+{# ============================================================
+   GTM BODY SCRIPTS
+   Include dataLayer and GTM at start of body via base_noscript
+   This works because product detail pages don't override base_noscript
+   ============================================================ #}
+{% block base_noscript %}
+    {# GTM DataLayer - must come BEFORE GTM container #}
+    {% sw_include '@LearningBundle/storefront/component/gtm/gtm-datalayer.html.twig' %}
+    
+    {# GTM Container Code (head portion - placed in body for reliability) #}
+    {% sw_include '@LearningBundle/storefront/component/gtm/gtm-container-head.html.twig' %}
+    
+    {# GTM noscript fallback #}
+    {% sw_include '@LearningBundle/storefront/component/gtm/gtm-container-body.html.twig' %}
+    
+    {{ parent() }}
+{% endblock %}
+
+{# ============================================================
+   BODY INNER CONTENT
+   Original plugin content + GTM tracking attribute
+   ============================================================ #}
+{% block base_body_inner %}
+    {# Add GTM tracking data attribute for JS plugin #}
+    <div data-gtm-tracking="true" style="display:none;"></div>
+    
+    {{ parent() }}
+
+    {# Include compare bar here #}
+    {% sw_include '@LearningBundle/storefront/component/product/compare-modal.html.twig' %}
+{% endblock %}

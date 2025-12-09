@@ -1,0 +1,220 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <!-- Register Counter Service -->
+        <service id ="Learning\Bundle\Service\CounterService">
+            <argument type="service" id="logger"/>
+            <argument type="string">%kernel.project_dir%</argument>
+        </service>
+
+        <!-- Register Counter Command -->
+        <service id="Learning\Bundle\Command\CounterCommand">
+            <argument type="service" id="Learning\Bundle\Service\CounterService"/>
+            <tag name="console.command"/>
+        </service>
+
+        <!-- Register MessageService from onboarding week 3 day 1 tutorial -->
+        <service id="Learning\Bundle\Service\MessageService">
+            <argument type="service" id="logger"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Learning\Bundle\Service\CounterService"/>
+            <argument type="service" id="Learning\Bundle\Service\ValidationService"/>
+            <argument type="service" id="Symfony\Contracts\EventDispatcher\EventDispatcherInterface"/>
+        </service>
+
+        <!-- Register custom command from onboarding week 3 day 1 tutorial -->
+        <service id="Learning\Bundle\Command\TestMessageCommand">
+            <argument type="service" id="Learning\Bundle\Service\MessageService"/>
+            <tag name="console.command"/>
+        </service>
+
+        <!-- Register ValidationService -->
+        <service id="Learning\Bundle\Service\ValidationService">
+            <!-- No dependencies -->
+        </service>
+
+        <!-- Register Event Subscriber CustomerSubscriber -->
+        <service id="Learning\Bundle\Subscriber\CustomerSubscriber">
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Register Event Subscriber ProductSubscriber -->
+        <service id="Learning\Bundle\Subscriber\ProductSubscriber">
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Order State Subscriber -->
+        <service id="Learning\Bundle\Subscriber\OrderSubscriber">
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Cart Subscriber -->
+        <service id="Learning\Bundle\Subscriber\CartSubscriber">
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Example of service decoration -->
+        <service id="Learning\Bundle\Service\Decorator\CustomPriceCalculator" 
+            decorates="Shopware\Core\Checkout\Cart\Price\QuantityPriceCalculator">
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <service id="Learning\Bundle\Subscriber\WelcomeMessageSubscriber">
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Register TestWelcomeCommand to test custom events -->
+        <service id="Learning\Bundle\Command\TestWelcomeCommand">
+            <argument type="service" id="Learning\Bundle\Service\MessageService"/>
+            <tag name="console.command"/>
+        </service>
+
+        <!-- Product View Counter Service -->
+        <service id="Learning\Bundle\Service\ProductViewCounterService">
+            <argument type="service" id="logger"/>
+            <argument type="string">%kernel.project_dir%</argument>
+        </service>
+
+        <!-- Product View Subscriber -->
+        <service id="Learning\Bundle\Subscriber\ProductViewSubscriber">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewCounterService"/>
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Top Products Command -->
+        <service id="Learning\Bundle\Command\TopProductsCommand">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewCounterService"/>
+            <argument type="service" id="product.repository"/>
+            <tag name="console.command"/>
+        </service>
+
+        <!-- Discount Service -->
+        <service id="Learning\Bundle\Service\DiscountService">
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="logger"/>
+            <argument type="string">%kernel.project_dir%</argument>
+        </service>
+
+        <!-- Discount Subscriber -->
+        <service id="Learning\Bundle\Subscriber\DiscountSubscriber">
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Apply Discount Command -->
+        <service id="Learning\Bundle\Command\ApplyDiscountCommand">
+            <argument type="service" id="Learning\Bundle\Service\DiscountService"/>
+            <tag name="console.command"/>
+        </service>
+
+        <!-- Base Product Info Service -->
+        <service id="Learning\Bundle\Service\ProductInfo\BaseProductInfoService">
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <!-- First Decorator: Add Price -->
+        <service id="Learning\Bundle\Service\ProductInfo\PriceProductInfoDecorator"
+                decorates="Learning\Bundle\Service\ProductInfo\BaseProductInfoService"
+                decoration-priority="100">
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <!-- Second Decorator: Add Stock -->
+        <service id="Learning\Bundle\Service\ProductInfo\StockProductInfoDecorator"
+                decorates="Learning\Bundle\Service\ProductInfo\BaseProductInfoService"
+                decoration-priority="50">
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <!-- Alias for easy injection -->
+        <service id="Learning\Bundle\Service\ProductInfo\ProductInfoServiceInterface"
+                alias="Learning\Bundle\Service\ProductInfo\BaseProductInfoService"/>
+
+        <!-- Product Info Command -->
+        <service id="Learning\Bundle\Command\ProductInfoCommand">
+            <argument type="service" id="Learning\Bundle\Service\ProductInfo\ProductInfoServiceInterface"/>
+            <argument type="service" id="product.repository"/>
+            <tag name="console.command"/>
+        </service>
+
+        <!-- Price range filter-->
+        <service id="Learning\Bundle\Subscriber\ProductListingSubscriber">
+            <argument type="service" id="request_stack"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Entity Definition -->
+        <service id="Learning\Bundle\Core\Content\ProductView\ProductViewDefinition">
+            <tag name="shopware.entity.definition" entity="learning_product_view"/>
+        </service>
+
+        <!-- Product View Service -->
+        <service id="Learning\Bundle\Service\ProductViewService">
+            <argument type="service" id="learning_product_view.repository"/>
+        </service>
+
+        <!-- Test Product View Command -->
+        <service id="Learning\Bundle\Command\TestProductViewCommand">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+            <tag name="console.command"/>
+        </service>
+
+        <!-- Product View Analytics Service -->
+        <service id="Learning\Bundle\Service\ProductViewAnalyticsService">
+            <argument type="service" id="learning_product_view.repository"/>
+        </service>
+
+        <service id="Learning\Bundle\Command\TestAnalyticsCommand">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewAnalyticsService"/>
+            <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+            <tag name="console.command"/>
+        </service>
+
+        <!-- ================================================================
+             GOOGLE TAG MANAGER SERVICES
+             ================================================================ -->
+        
+        <!-- GTM DataLayer Service -->
+        <service id="Learning\Bundle\Service\Gtm\GtmDataLayerService">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <!-- GTM Page Event Subscriber -->
+        <service id="Learning\Bundle\Subscriber\Gtm\GtmPageSubscriber">
+            <argument type="service" id="Learning\Bundle\Service\Gtm\GtmDataLayerService"/>
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- GTM Cart Event Subscriber -->
+        <service id="Learning\Bundle\Subscriber\Gtm\GtmCartSubscriber">
+            <argument type="service" id="Learning\Bundle\Service\Gtm\GtmDataLayerService"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="request_stack"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- GTM Twig Extension -->
+        <service id="Learning\Bundle\Twig\GtmTwigExtension">
+            <argument type="service" id="Learning\Bundle\Service\Gtm\GtmDataLayerService"/>
+            <tag name="twig.extension"/>
+        </service>
+
+    </services>
+</container>

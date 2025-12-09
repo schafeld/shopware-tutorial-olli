@@ -1,0 +1,25 @@
+{% sw_extends '@Storefront/storefront/page/content/product-detail.html.twig' %}
+
+{# Add a custom banner above product details #}
+{% block page_content %}
+    <div class="learning-product-banner alert alert-info">
+        <strong>🎉 Welcome!</strong> This is a custom banner added by LearningBundle plugin.
+    </div>
+
+    {# Keep original content #}
+    {{ parent() }}
+{% endblock %}
+
+{# data attribute binding for tracking #}
+{# The trackingUrl endpoint doesn't exist yet, so there'll be an error 404 #}
+{% block base_main_inner %}
+    <div data-product-view-tracker
+         data-product-id="{{ page.product.id }}"
+         data-product-view-tracker-options="{{ {
+             trackingUrl: 'store-api/learning/product-view',
+             trackingDelay: 2000
+             }|json_encode }}">
+             
+             {{ parent() }}
+    </div>
+{% endblock %}

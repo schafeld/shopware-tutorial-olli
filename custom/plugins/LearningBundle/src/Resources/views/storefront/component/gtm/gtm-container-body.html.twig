@@ -1,0 +1,19 @@
+{#
+    GTM Container Code - Body Section (noscript fallback)
+    
+    This template outputs the Google Tag Manager noscript iframe that goes
+    immediately after the opening <body> tag.
+    
+    Usage:
+    {% sw_include '@LearningBundle/storefront/component/gtm/gtm-container-body.html.twig' %}
+#}
+
+{% set gtmContainerId = config('LearningBundle.config.gtmContainerId') %}
+{% set gtmEnabled = config('LearningBundle.config.gtmEnabled') %}
+
+{% if gtmEnabled and gtmContainerId %}
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ gtmContainerId }}"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+{% endif %}

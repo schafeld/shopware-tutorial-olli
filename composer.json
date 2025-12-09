@@ -42,11 +42,17 @@
     "prefer-stable": true,
     "config": {
         "allow-plugins": {
+            "php-http/discovery": false,
             "symfony/flex": true,
             "symfony/runtime": true
         },
         "optimize-autoloader": true,
-        "sort-packages": true
+        "sort-packages": true,
+        "audit": {
+            "abandoned": "report",
+            "ignore": ["PKSA-w3qy-s9h7-2hqr", "PKSA-365x-2zjk-pt47", "PKSA-hr4y-jwk2-1yb9"]
+        },
+        "platform-check": false
     },
     "scripts": {
         "auto-scripts": {
@@ -67,5 +73,10 @@
                 "flex://defaults"
             ]
         }
+    },
+    "require-dev": {
+        "frosh/development-helper": "^3.0",
+        "shopware/dev-tools": "^1.5",
+        "symfony/web-profiler-bundle": "^7.3"
     }
 }

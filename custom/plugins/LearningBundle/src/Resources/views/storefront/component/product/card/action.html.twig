@@ -1,0 +1,15 @@
+{% sw_extends '@Storefront/storefront/component/product/card/action.html.twig' %}
+
+{% block component_product_box_action_inner %}
+    {{ parent() }}
+    
+    {# Add compare button #}
+    <button class="btn btn-sm btn-outline-secondary mt-2 w-100 product-compare-btn"
+            data-product-compare
+            data-product-id="{{ product.id }}"
+            data-product-name="{{ product.translated.name }}"
+            data-product-image="{% if product.cover.media %}{{ product.cover.media.url }}{% endif %}"
+            data-product-price="{{ product.calculatedPrice.totalPrice }}">
+        <i class="fas fa-balance-scale"></i> Compare
+    </button>
+{% endblock %}

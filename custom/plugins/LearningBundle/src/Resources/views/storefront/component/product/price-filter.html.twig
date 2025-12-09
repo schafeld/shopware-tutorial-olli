@@ -1,0 +1,84 @@
+{# Price Range Filter Component - Horizontal Layout #}
+<div class="price-filter-widget filter-range filter-panel-item"
+     data-price-filter
+     data-price-filter-options='{{ {
+         updateDelay: 300
+     }|json_encode }}'>
+
+    {# Filter Toggle Button (like other filters) #}
+    <button class="filter-panel-item-toggle btn"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#customPriceFilter"
+            aria-expanded="false"
+            aria-controls="customPriceFilter">
+        Custom Price Range
+        {% sw_icon 'arrow-medium-down' style {pack: 'solid', size: 'xs', class: 'filter-panel-item-toggle'} %}
+    </button>
+
+    {# Collapsible Filter Content #}
+    <div class="collapse filter-panel-item-dropdown" id="customPriceFilter">
+        <div class="filter-panel-item-body" style="min-height: 240px;">
+            
+            {# Horizontal Price Display & Controls #}
+            <div class="row g-2 align-items-end mb-3">
+                {# Min Price #}
+                <div class="col-6">
+                    <label for="priceMin" class="form-label small text-muted mb-1">Minimum</label>
+                    <div class="price-display mb-2">
+                        <strong data-price-display-min>€ 0</strong>
+                    </div>
+                    <input type="range"
+                           class="form-range"
+                           id="priceMin"
+                           min="0"
+                           max="1000"
+                           step="10"
+                           value="0"
+                           data-price-filter-min
+                           aria-label="Minimum Price">
+                </div>
+
+                {# Max Price #}
+                <div class="col-6">
+                    <label for="priceMax" class="form-label small text-muted mb-1">Maximum</label>
+                    <div class="price-display mb-2">
+                        <strong data-price-display-max>€ 1000</strong>
+                    </div>
+                    <input type="range"
+                           class="form-range"
+                           id="priceMax"
+                           min="0"
+                           max="1000"
+                           step="10"
+                           value="1000"
+                           data-price-filter-max
+                           aria-label="Maximum Price">
+                </div>
+            </div>
+
+            {# Action Buttons - Horizontal #}
+            <div class="d-flex gap-2">
+                <button type="button"
+                        class="btn btn-primary btn-sm flex-grow-1"
+                        data-price-filter-apply>
+                    Apply
+                </button>
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm"
+                        data-price-filter-reset>
+                    Reset
+                </button>
+            </div>
+
+            {# Active filter indicator #}
+            {% if app.request.query.get('min-price') or app.request.query.get('max-price') %}
+                <div class="alert alert-info mt-2 mb-0 py-2 px-2" role="info">
+                    <small>
+                        Active: {{ app.request.get('min-price', '0') }}€ - {{ app.request.get('max-price', '1000') }}€
+                    </small>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
+
+    <card>
+        <title>Basic Configuration</title>
+        <title lang="de-DE">Basis Konfiguration</title>
+        <title lang="en-GB">Basic Configuration</title>
+
+        <input-field>
+            <name>welcomePrefix</name>
+            <label>Welcome Message Prefix (Custom selected)</label>
+            <label lang="de-DE">Willkommensnachricht Präfix (Benutzerdefiniert)</label>
+            <label lang="en-GB">Welcome Message Prefix (Custom)</label>
+            <defaultValue>Welcome to Shopware Development</defaultValue>
+            <helpText>This prefix will be used in custom welcome messages</helpText>
+        </input-field>
+
+        <!-- New language selection for greeting message -->
+        <input-field type="single-select">
+            <name>greetingLanguage</name>
+            <label>Greeting Language</label>
+            <label lang="de-DE">Begrüßungssprache</label>
+            <label lang="en-GB">Greeting Language</label>
+            <options>
+                <option>
+                    <id>de</id>
+                    <name>German</name>
+                    <name lang="de-DE">Deutsch</name>
+                    <name lang="en-GB">German</name>
+                </option>
+                <option>
+                    <id>en</id>
+                    <name>English</name>
+                    <name lang="de-DE">Englisch</name>
+                    <name lang="en-GB">English</name>
+                </option>
+                <option>
+                    <id>es</id>
+                    <name>Spanish</name>
+                    <name lang="de-DE">Spanisch</name>
+                    <name lang="en-GB">Spanish</name>
+                </option>
+            </options>
+            <defaultValue>en</defaultValue>
+            <helpText>Select the language for greeting messages</helpText>
+        </input-field>
+
+        <input-field type="bool">
+            <name>enableLogging</name>
+            <label>Enable Logging</label>
+            <label lang="de-DE">Logging aktivieren</label>
+            <label lang="en-GB">Enable Logging</label>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="int">
+            <name>maxMessages</name>
+            <label>Maximum Messages per Day</label>
+            <label lang="de-DE">Maximale Nachrichten pro Tag</label>
+            <label lang="en-GB">Maximum Messages per Day</label>
+            <defaultValue>100</defaultValue>
+        </input-field>
+    </card>
+
+    <card>
+        <title>Advanced Settings</title>
+        <title lang="de-DE">Erweiterte Einstellungen</title>
+
+        <input-field type="single-select">
+            <name>messageFormat</name>
+            <label>Message Format</label>
+            <label lang="de-DE">Nachrichtenformat</label>
+            <label lang="en-GB">Message Format</label>
+            <options>
+                <option>
+                    <id>simple</id>
+                    <name>Simple</name>
+                    <name lang="de-DE">Einfach</name>
+                    <name lang="en-GB">Simple</name>
+                </option>
+                <option>
+                    <id>detailed</id>
+                    <name>Detailed</name>
+                    <name lang="de-DE">Detailliert</name>
+                    <name lang="en-GB">Detailed</name>
+                </option>
+                <option>
+                    <id>custom</id>
+                    <name>Custom</name>
+                    <name lang="de-DE">Benutzerdefiniert</name>
+                    <name lang="en-GB">Custom</name>
+                </option>
+            </options>
+            <defaultValue>simple</defaultValue>
+        </input-field>
+    </card>
+
+    <!-- ================================================================
+         GOOGLE TAG MANAGER CONFIGURATION
+         ================================================================ -->
+    <card>
+        <title>Google Tag Manager</title>
+        <title lang="de-DE">Google Tag Manager</title>
+        <title lang="en-GB">Google Tag Manager</title>
+
+        <input-field type="bool">
+            <name>gtmEnabled</name>
+            <label>Enable GTM Tracking</label>
+            <label lang="de-DE">GTM Tracking aktivieren</label>
+            <label lang="en-GB">Enable GTM Tracking</label>
+            <defaultValue>false</defaultValue>
+            <helpText>Enable or disable Google Tag Manager integration</helpText>
+            <helpText lang="de-DE">Google Tag Manager Integration aktivieren oder deaktivieren</helpText>
+        </input-field>
+
+        <input-field>
+            <name>gtmContainerId</name>
+            <label>GTM Container ID</label>
+            <label lang="de-DE">GTM Container ID</label>
+            <label lang="en-GB">GTM Container ID</label>
+            <placeholder>GTM-XXXXXXX</placeholder>
+            <helpText>Enter your Google Tag Manager Container ID (e.g., GTM-XXXXXXX)</helpText>
+            <helpText lang="de-DE">Geben Sie Ihre Google Tag Manager Container ID ein (z.B. GTM-XXXXXXX)</helpText>
+        </input-field>
+
+        <input-field type="bool">
+            <name>gtmDebugMode</name>
+            <label>Debug Mode</label>
+            <label lang="de-DE">Debug Modus</label>
+            <label lang="en-GB">Debug Mode</label>
+            <defaultValue>false</defaultValue>
+            <helpText>Enable debug logging for GTM events in browser console and server logs</helpText>
+            <helpText lang="de-DE">Debug-Logging für GTM Events in Browser-Konsole und Server-Logs aktivieren</helpText>
+        </input-field>
+
+        <input-field type="bool">
+            <name>gtmTrackUserData</name>
+            <label>Track User Data</label>
+            <label lang="de-DE">Benutzerdaten tracken</label>
+            <label lang="en-GB">Track User Data</label>
+            <defaultValue>true</defaultValue>
+            <helpText>Include hashed user data (customer ID, email hash) for logged-in users. Data is anonymized.</helpText>
+            <helpText lang="de-DE">Anonymisierte Benutzerdaten (Kunden-ID, E-Mail-Hash) für eingeloggte Benutzer einschließen.</helpText>
+        </input-field>
+
+        <input-field type="int">
+            <name>gtmMaxListingItems</name>
+            <label>Max Products in Listings</label>
+            <label lang="de-DE">Max. Produkte in Listings</label>
+            <label lang="en-GB">Max Products in Listings</label>
+            <defaultValue>50</defaultValue>
+            <helpText>Maximum number of products to include in view_item_list events (for performance)</helpText>
+            <helpText lang="de-DE">Maximale Anzahl der Produkte in view_item_list Events (für Performance)</helpText>
+        </input-field>
+    </card>
+
+</config>

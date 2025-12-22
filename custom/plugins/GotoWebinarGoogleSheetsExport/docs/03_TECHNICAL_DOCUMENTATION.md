@@ -27,60 +27,60 @@
 ### 1.1 High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         Shopware 6                              │
-│                                                                 │
-│  ┌────────────────┐        ┌──────────────────────────────┐   │
-│  │  Storefront    │        │  Administration Panel         │   │
-│  │  (Customer)    │        │  - Dashboard                  │   │
-│  └────────┬───────┘        │  - Configuration              │   │
-│           │                │  - OAuth Setup                │   │
-│           │ Place Order    │  - Manual Export              │   │
-│           ▼                └───────────┬──────────────────┘   │
-│  ┌────────────────────────────────────┴──────────────────┐   │
-│  │         BlauwasserGoogleSheetsExport Plugin            │   │
-│  │                                                         │   │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐ │   │
-│  │  │ OrderPlaced  │  │ Scheduled    │  │ Admin API   │ │   │
-│  │  │ Subscriber   │  │ Task Handler │  │ Controller  │ │   │
-│  │  └──────┬───────┘  └──────┬───────┘  └──────┬──────┘ │   │
-│  │         │                  │                  │        │   │
-│  │         │  Creates Pending Export Logs        │        │   │
-│  │         ▼                  ▼                  ▼        │   │
+┌──────────────────────────────────────────────────────────────┐
+│                         Shopware 6                           │
+│                                                              │
+│  ┌────────────────┐        ┌─────────────────────────────┐   │
+│  │  Storefront    │        │  Administration Panel       │   │
+│  │  (Customer)    │        │  - Dashboard                │   │
+│  └────────┬───────┘        │  - Configuration            │   │
+│           │                │  - OAuth Setup              │   │
+│           │ Place Order    │  - Manual Export            │   │
+│           ▼                └───────────┬───────────-─────┘   │
+│  ┌────────────────────────────────────┴──────────────-───┐   │
+│  │         BlauwasserGoogleSheetsExport Plugin           │   │
+│  │                                                       │   │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐  │   │
+│  │  │ OrderPlaced  │  │ Scheduled    │  │ Admin API   │  │   │
+│  │  │ Subscriber   │  │ Task Handler │  │ Controller  │  │   │
+│  │  └──────┬───────┘  └──────┬───────┘  └──────┬──────┘  │   │
+│  │         │                  │                  │       │   │
+│  │         │  Creates Pending Export Logs        │       │   │
+│  │         ▼                  ▼                  ▼       │   │
 │  │  ┌──────────────────────────────────────────────────┐ │   │
 │  │  │         OrderExportService                       │ │   │
 │  │  │  - Extract order data                            │ │   │
 │  │  │  - Filter by category                            │ │   │
 │  │  │  - Create export logs                            │ │   │
 │  │  └──────────────────┬───────────────────────────────┘ │   │
-│  │                     │                                  │   │
-│  │                     ▼                                  │   │
+│  │                     │                                 │   │
+│  │                     ▼                                 │   │
 │  │  ┌──────────────────────────────────────────────────┐ │   │
 │  │  │         GoogleSheetsService                      │ │   │
 │  │  │  - OAuth2 authentication                         │ │   │
 │  │  │  - Token management                              │ │   │
 │  │  │  - Batch API calls                               │ │   │
 │  │  └──────────────────┬───────────────────────────────┘ │   │
-│  │                     │                                  │   │
-│  └─────────────────────┼──────────────────────────────────┘   │
-│                        │                                      │
-│  ┌─────────────────────┴──────────────────────────────────┐   │
-│  │         Database (MySQL/MariaDB)                        │   │
-│  │  - blauwasser_order_export table                       │   │
-│  │  - system_config (OAuth tokens)                        │   │
-│  └──────────────────────┬──────────────────────────────────┘   │
-└─────────────────────────┼──────────────────────────────────────┘
+│  │                     │                                 │   │
+│  └─────────────────────┼─────────────────────────────────┘   │
+│                        │                                     │
+│  ┌─────────────────────┴─────────────────────────────────┐   │
+│  │         Database (MySQL/MariaDB)                      │   │
+│  │  - blauwasser_order_export table                      │   │
+│  │  - system_config (OAuth tokens)                       │   │
+│  └──────────────────────┬────────────────────────────────┘   │
+└─────────────────────────┼────────────────────────────────────┘
                           │ HTTPS
                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     Google Cloud Platform                        │
-│                                                                  │
+┌────────────────────────────────────────────────────────────────┐
+│                     Google Cloud Platform                      │
+│                                                                │
 │  ┌──────────────────┐          ┌────────────────────────────┐  │
-│  │  OAuth 2.0       │          │  Google Sheets API          │  │
-│  │  Authorization   │◄─────────┤  - Append rows              │  │
-│  │  Server          │          │  - Batch operations         │  │
+│  │  OAuth 2.0       │          │  Google Sheets API         │  │
+│  │  Authorization   │◄─────────┤  - Append rows             │  │
+│  │  Server          │          │  - Batch operations        │  │
 │  └──────────────────┘          └────────────────────────────┘  │
-└──────────────────────────────────┬──────────────────────────────┘
+└──────────────────────────────────┬─────────────────────────────┘
                                    │
                                    ▼
                         ┌──────────────────────┐
@@ -168,14 +168,14 @@ For each lineItem in order.lineItems:
 │        LIMIT [batchSize]                                   │
 └──────────────────────┬─────────────────────────────────────┘
                        ▼
-┌────────────────────────────────────────────────────────────┐
-│ Step 3: Prepare Google Sheets Rows                         │
-│ Transform: OrderExportEntity[] → array[]                   │
+┌─────────────────────────────────────────────────────–───────┐
+│ Step 3: Prepare Google Sheets Rows                          │
+│ Transform: OrderExportEntity[] → array[]                    │
 │ Format: [                                                   │
 │   ['Max', 'Mustermann', '10001', 'BW-WEB-01', 'Store', ...],│
-│   ['Anna', 'Schmidt', '10002', 'BW-WEB-02', 'Store', ...], │
+│   ['Anna', 'Schmidt', '10002', 'BW-WEB-02', 'Store', ...],  │
 │ ]                                                           │
-└──────────────────────┬─────────────────────────────────────┘
+└──────────────────────┬────────────────────────────────────–─┘
                        ▼
 ┌────────────────────────────────────────────────────────────┐
 │ Step 4: Check OAuth Token                                  │
@@ -185,29 +185,29 @@ For each lineItem in order.lineItems:
 ┌────────────────────────────────────────────────────────────┐
 │ Step 5: Call Google Sheets API                             │
 │ Method: spreadsheets.values.append()                       │
-│ Params: {                                                   │
+│ Params: {                                                  │
 │   spreadsheetId: 'configuredSheetId',                      │
 │   range: 'Bestellungen!A:F',                               │
 │   valueInputOption: 'RAW',                                 │
 │   insertDataOption: 'INSERT_ROWS',                         │
 │   values: [rows from step 3]                               │
-│ }                                                           │
+│ }                                                          │
 └──────────────────────┬─────────────────────────────────────┘
                        ▼
 ┌────────────────────────────────────────────────────────────┐
 │ Step 6: Update Export Status                               │
-│ On Success:                                                 │
+│ On Success:                                                │
 │   UPDATE blauwasser_order_export                           │
 │   SET export_status='success',                             │
 │       exported_at=NOW()                                    │
 │   WHERE id IN (exported_ids)                               │
-│                                                             │
-│ On Error:                                                   │
+│                                                            │
+│ On Error:                                                  │
 │   UPDATE blauwasser_order_export                           │
 │   SET export_status='failed',                              │
 │       error_message='[error details]'                      │
 │   WHERE id IN (failed_ids)                                 │
-└─────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────┘
 ```
 
 ---

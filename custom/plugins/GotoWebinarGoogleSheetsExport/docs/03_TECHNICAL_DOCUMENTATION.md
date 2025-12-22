@@ -1,4 +1,4 @@
-# BlauwasserGoogleSheetsExport - Technical Documentation
+# GotoWebinarGoogleSheetsExport - Technical Documentation
 
 **Version:** 1.0.0  
 **Last Updated:** December 22, 2025  
@@ -467,12 +467,12 @@ Plugin configuration is stored in Shopware's `system_config` table:
 ```sql
 -- Example configuration entries
 INSERT INTO system_config (id, configuration_key, configuration_value, created_at) VALUES
-(UUID(), 'BlauwasserGoogleSheetsExport.config.enabled', '{"_value": true}', NOW()),
-(UUID(), 'BlauwasserGoogleSheetsExport.config.categoryId', '{"_value": "01234567890"}', NOW()),
-(UUID(), 'BlauwasserGoogleSheetsExport.config.googleSheetId', '{"_value": "1Bx..."}', NOW()),
-(UUID(), 'BlauwasserGoogleSheetsExport.config.googleClientId', '{"_value": "123..."}', NOW()),
-(UUID(), 'BlauwasserGoogleSheetsExport.config.googleClientSecret', '{"_value": "GOCSPX..."}', NOW()),
-(UUID(), 'BlauwasserGoogleSheetsExport.config.googleRefreshToken', '{"_value": "1//..."}', NOW());
+(UUID(), 'GotoWebinarGoogleSheetsExport.config.enabled', '{"_value": true}', NOW()),
+(UUID(), 'GotoWebinarGoogleSheetsExport.config.categoryId', '{"_value": "01234567890"}', NOW()),
+(UUID(), 'GotoWebinarGoogleSheetsExport.config.googleSheetId', '{"_value": "1Bx..."}', NOW()),
+(UUID(), 'GotoWebinarGoogleSheetsExport.config.googleClientId', '{"_value": "123..."}', NOW()),
+(UUID(), 'GotoWebinarGoogleSheetsExport.config.googleClientSecret', '{"_value": "GOCSPX..."}', NOW()),
+(UUID(), 'GotoWebinarGoogleSheetsExport.config.googleRefreshToken', '{"_value": "1//..."}', NOW());
 ```
 
 **Security Note:** Sensitive values (Client Secret, Refresh Token) should be encrypted at rest. Consider using Shopware's `EncryptedConfigValue` for sensitive fields.
@@ -527,7 +527,7 @@ $response = $client->fetchAccessTokenWithAuthCode($authCode);
 
 // Store refresh_token in system config
 $this->systemConfigService->set(
-    'BlauwasserGoogleSheetsExport.config.googleRefreshToken',
+    'GotoWebinarGoogleSheetsExport.config.googleRefreshToken',
     $response['refresh_token']
 );
 
@@ -542,7 +542,7 @@ $client = new Google_Client();
 // ... configure client ...
 
 $refreshToken = $this->systemConfigService->get(
-    'BlauwasserGoogleSheetsExport.config.googleRefreshToken'
+    'GotoWebinarGoogleSheetsExport.config.googleRefreshToken'
 );
 
 $client->fetchAccessTokenWithRefreshToken($refreshToken);
@@ -1290,7 +1290,7 @@ bin/console scheduled-task:list | grep blauwasser
        export_status,
        COUNT(*) as count,
        COUNT(*) * 100.0 / SUM(COUNT(*)) OVER () as percentage
-   FROM blauwasser_order_export
+   FROM gotowebinar_order_export
    WHERE created_at > DATE_SUB(NOW(), INTERVAL 7 DAY)
    GROUP BY export_status;
    ```
@@ -1299,7 +1299,7 @@ bin/console scheduled-task:list | grep blauwasser
    ```sql
    SELECT 
        AVG(TIMESTAMPDIFF(SECOND, created_at, exported_at)) as avg_latency_seconds
-   FROM blauwasser_order_export
+   FROM gotowebinar_order_export
    WHERE export_status = 'success'
        AND created_at > DATE_SUB(NOW(), INTERVAL 7 DAY);
    ```
@@ -1311,7 +1311,7 @@ bin/console scheduled-task:list | grep blauwasser
        product_number,
        error_message,
        created_at
-   FROM blauwasser_order_export
+   FROM gotowebinar_order_export
    WHERE export_status = 'failed'
    ORDER BY created_at DESC
    LIMIT 10;
@@ -1320,15 +1320,15 @@ bin/console scheduled-task:list | grep blauwasser
 **Log Monitoring:**
 ```bash
 # Watch for errors
-tail -f var/log/prod.log | grep -E '(ERROR|CRITICAL)' | grep -i blauwasser
+tail -f var/log/prod.log | grep -E '(ERROR|CRITICAL)' | grep -i gotowebinar
 
 # Monitor export activity
-tail -f var/log/prod.log | grep -i 'export' | grep -i blauwasser
+tail -f var/log/prod.log | grep -i 'export' | grep -i gotowebinar
 ```
 
 **Health Check Command:**
 ```bash
-# Create custom command: bin/console blauwasser:health-check
+# Create custom command: bin/console gotowebinar:health-check
 # Checks:
 # - Plugin is active
 # - OAuth token is valid
@@ -1336,7 +1336,7 @@ tail -f var/log/prod.log | grep -i 'export' | grep -i blauwasser
 # - No stuck pending exports (>24 hours old)
 # - Scheduled task is running
 
-bin/console blauwasser:health-check
+bin/console gotowebinar:health-check
 ```
 
 ### 10.3 Backup & Recovery
@@ -1344,35 +1344,35 @@ bin/console blauwasser:health-check
 **Database Backup:**
 ```bash
 # Backup export log table
-mysqldump -u shopware -p shopware blauwasser_order_export > blauwasser_export_backup.sql
+mysqldump -u shopware -p shopware gotowebinar_order_export > gotowebinar_export_backup.sql
 
 # Backup plugin configuration
-mysqldump -u shopware -p shopware system_config --where="configuration_key LIKE 'BlauwasserGoogleSheetsExport%'" > blauwasser_config_backup.sql
+mysqldump -u shopware -p shopware system_config --where="configuration_key LIKE 'GotoWebinarGoogleSheetsExport%'" > gotowebinar_config_backup.sql
 ```
 
 **Recovery:**
 ```bash
 # Restore export log
-mysql -u shopware -p shopware < blauwasser_export_backup.sql
+mysql -u shopware -p shopware < gotowebinar_export_backup.sql
 
 # Restore configuration
-mysql -u shopware -p shopware < blauwasser_config_backup.sql
+mysql -u shopware -p shopware < gotowebinar_config_backup.sql
 ```
 
 ### 10.4 Troubleshooting Commands
 
 ```bash
 # Check plugin status
-bin/console plugin:list | grep Blauwasser
+bin/console plugin:list | grep GotoWebinar
 
 # View recent exports
-bin/console dbal:run-sql "SELECT * FROM blauwasser_order_export ORDER BY created_at DESC LIMIT 10"
+bin/console dbal:run-sql "SELECT * FROM gotowebinar_order_export ORDER BY created_at DESC LIMIT 10"
 
 # Count pending exports
-bin/console dbal:run-sql "SELECT COUNT(*) FROM blauwasser_order_export WHERE export_status='pending'"
+bin/console dbal:run-sql "SELECT COUNT(*) FROM gotowebinar_order_export WHERE export_status='pending'"
 
 # Manually trigger scheduled task
-bin/console scheduled-task:run blauwasser.google_sheets_export
+bin/console scheduled-task:run gotowebinar.google_sheets_export
 
 # Clear cache
 bin/console cache:clear
@@ -1388,7 +1388,7 @@ bin/console cache:clear
 
 **Step 1: Update Database Schema**
 ```sql
-ALTER TABLE blauwasser_order_export
+ALTER TABLE gotowebinar_order_export
 ADD COLUMN order_total DECIMAL(10,2) NULL AFTER sales_channel_name;
 ```
 
@@ -1479,7 +1479,7 @@ class WebhookService
 {
     public function sendExportNotification(array $exportData): void
     {
-        $webhookUrl = $this->systemConfigService->get('BlauwasserGoogleSheetsExport.config.webhookUrl');
+        $webhookUrl = $this->systemConfigService->get('GotoWebinarGoogleSheetsExport.config.webhookUrl');
         
         if (!$webhookUrl) {
             return; // Webhook not configured

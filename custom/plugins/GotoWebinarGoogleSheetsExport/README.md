@@ -1,4 +1,4 @@
-# BlauwasserGoogleSheetsExport Plugin
+# GotoWebinarGoogleSheetsExport Plugin
 
 **Version:** 1.0.0  
 **Shopware Version:** 6.5.0+  
@@ -8,7 +8,7 @@
 
 ## Overview
 
-This Shopware 6 plugin automatically exports order data to Google Sheets when customers purchase products from a configurable category (default: "Blauwasser Webinar"). The plugin supports both scheduled automatic exports and manual on-demand exports via an administration dashboard.
+This Shopware 6 plugin automatically exports order data to Google Sheets when customers purchase products from a configurable category (default: "GotoWebinar"). The plugin supports both scheduled automatic exports and manual on-demand exports via an administration dashboard.
 
 ## Features
 
@@ -156,7 +156,7 @@ composer require google/apiclient
 
 # Refresh and install plugin
 bin/console plugin:refresh
-bin/console plugin:install --activate BlauwasserGoogleSheetsExport
+bin/console plugin:install --activate GotoWebinarGoogleSheetsExport
 
 # Clear cache
 bin/console cache:clear
@@ -165,7 +165,7 @@ bin/console cache:clear
 ## Configuration
 
 All configuration is managed via Shopware Administration:
-- **Settings → System → Plugins → BlauwasserGoogleSheetsExport**
+- **Settings → System → Plugins → GotoWebinarGoogleSheetsExport**
 
 Key settings:
 - Enable/disable plugin
@@ -189,7 +189,7 @@ Monitor export health via:
 
 ### Backup
 Regular backups recommended for:
-- `blauwasser_order_export` table
+- `gotowebinar_order_export` table
 - Plugin configuration in `system_config` table
 - Google Sheets (use Google's version history)
 
@@ -216,7 +216,7 @@ MIT License (or specify your license)
 
 ## Author
 
-Oliver Schafeld / Blauwasser
+Oliver Schafeld / GotoWebinar Integration
 
 ## Contributing
 

@@ -1,4 +1,4 @@
-# BlauwasserGoogleSheetsExport - User Manual & Setup Guide
+# GotoWebinarGoogleSheetsExport - User Manual & Setup Guide
 
 **Version:** 1.0.0  
 **Last Updated:** December 22, 2025
@@ -20,9 +20,9 @@
 
 ## 1. Introduction
 
-### What is BlauwasserGoogleSheetsExport?
+### What is GotoWebinarGoogleSheetsExport?
 
-This Shopware 6 plugin automatically exports order data to a Google Sheets spreadsheet when customers order products from a specific category (default: "Blauwasser Webinar").
+This Shopware 6 plugin automatically exports order data to a Google Sheets spreadsheet when customers order products from a specific category (default: "GotoWebinar").
 
 ### What data is exported?
 
@@ -72,7 +72,7 @@ Before installing this plugin, ensure you have:
 
 1. Go to [Google Sheets](https://sheets.google.com)
 2. Click **"+ Blank"** to create a new spreadsheet
-3. Name your spreadsheet (e.g., "Blauwasser Webinar Orders")
+3. Name your spreadsheet (e.g., "GotoWebinar Orders")
 4. Create/rename the first worksheet/tab (e.g., "Bestellungen" or "Orders")
 
 ### Step 2: Set Up Column Headers (Recommended)
@@ -151,15 +151,15 @@ You'll need these two pieces of information for configuration:
 1. Go to **"APIs & Services"** → **"Credentials"**
 2. Click **"+ Create Credentials"** → **"OAuth client ID"**
 3. **Application type:** Select `Web application`
-4. **Name:** `Shopware Blauwasser Plugin`
+4. **Name:** `Shopware GotoWebinar Plugin`
 
 **Authorized redirect URIs:**
 - Click **"+ Add URI"**
 - Enter your Shopware admin URL with this path:
   ```
-  https://your-shop-domain.com/admin#/blauwasser/sheets/oauth/callback
+  https://your-shop-domain.com/admin#/gotowebinar/sheets/oauth/callback
   ```
-  Example: `https://shop.example.com/admin#/blauwasser/sheets/oauth/callback`
+  Example: `https://shop.example.com/admin#/gotowebinar/sheets/oauth/callback`
   
   > ⚠️ **Important:** Replace `your-shop-domain.com` with your actual Shopware URL
 
@@ -183,7 +183,7 @@ A popup will appear with your credentials:
 1. Package the plugin directory as ZIP:
    ```bash
    cd custom/plugins
-   zip -r BlauwasserGoogleSheetsExport.zip BlauwasserGoogleSheetsExport/
+   zip -r GotoWebinarGoogleSheetsExport.zip GotoWebinarGoogleSheetsExport/
    ```
 
 2. In Shopware Admin, go to: **Extensions → My extensions**
@@ -202,12 +202,12 @@ If you received the plugin as a ZIP file:
 cd /path/to/shopware/custom/plugins
 
 # Extract plugin
-unzip BlauwasserGoogleSheetsExport.zip
+unzip GotoWebinarGoogleSheetsExport.zip
 
 # Or if you have direct access, clone/copy plugin directory
 ```
 
-If plugin is already in `custom/plugins/BlauwasserGoogleSheetsExport/`, proceed to Step 2.
+If plugin is already in `custom/plugins/GotoWebinarGoogleSheetsExport/`, proceed to Step 2.
 
 #### Step 2: Install Composer Dependencies
 
@@ -238,24 +238,24 @@ Plugin list refreshed
 
 ```bash
 # Install the plugin (this creates database tables)
-bin/console plugin:install BlauwasserGoogleSheetsExport
+bin/console plugin:install GotoWebinarGoogleSheetsExport
 ```
 
 Expected output:
 ```
-Plugin "BlauwasserGoogleSheetsExport" has been installed successfully.
+Plugin "GotoWebinarGoogleSheetsExport" has been installed successfully.
 ```
 
 #### Step 5: Activate Plugin
 
 ```bash
 # Activate the plugin
-bin/console plugin:activate BlauwasserGoogleSheetsExport
+bin/console plugin:activate GotoWebinarGoogleSheetsExport
 ```
 
 Expected output:
 ```
-Plugin "BlauwasserGoogleSheetsExport" has been activated successfully.
+Plugin "GotoWebinarGoogleSheetsExport" has been activated successfully.
 ```
 
 #### Step 6: Clear Cache
@@ -276,7 +276,7 @@ bin/build-administration.sh
 
 1. Log into Shopware Administration
 2. Go to: **Settings → System → Plugins**
-3. Search for: `BlauwasserGoogleSheetsExport`
+3. Search for: `GotoWebinarGoogleSheetsExport`
 4. Status should show: ✅ **Active**
 
 ---
@@ -287,12 +287,12 @@ bin/build-administration.sh
 
 **Option A: Via Plugin List**
 1. Go to: **Settings → System → Plugins**
-2. Find **"BlauwasserGoogleSheetsExport"**
+2. Find **"GotoWebinarGoogleSheetsExport"**
 3. Click the **three dots (⋮)** → **"Configure"**
 
 **Option B: Via Plugin Dashboard**
 1. Go to: **Extensions → My extensions**
-2. Find **"BlauwasserGoogleSheetsExport"**
+2. Find **"GotoWebinarGoogleSheetsExport"**
 3. Click **"Configure"**
 
 ### Step 2: Feature Activation
@@ -301,7 +301,7 @@ bin/build-administration.sh
 
 - **✅ Enable Plugin:** Toggle ON to activate export functionality
 - **📁 Category:** Select the product category to monitor
-  - Default: "Blauwasser Webinar"
+  - Default: "GotoWebinar"
   - Click the field and search for your category
   - Only orders containing products from this category will be exported
 
@@ -338,7 +338,7 @@ Fill in the information you gathered earlier:
 ### Step 4: Connect to Google Account
 
 1. **Save** the configuration above
-2. Navigate to: **Custom Menu → Blauwasser Sheets Export** (new menu item)
+2. Navigate to: **Custom Menu → GotoWebinar Sheets Export** (new menu item)
 3. Click: **"Connect to Google"** button
 4. You'll be redirected to Google's authorization page
 5. **Sign in** with the Google account that owns the spreadsheet
@@ -403,7 +403,7 @@ Once configured, the plugin works automatically:
 
 To export pending orders immediately:
 
-1. Go to: **Custom Menu → Blauwasser Sheets Export**
+1. Go to: **Custom Menu → GotoWebinar Sheets Export**
 2. You'll see the dashboard with:
    - Total exports
    - Last export time
@@ -431,7 +431,7 @@ To download a CSV file of recent exports:
 
 1. Go to: **Custom Menu → Blauwasser Sheets Export**
 2. Click: **"Download CSV"** button
-3. A file named `blauwasser_exports_YYYY-MM-DD.csv` will be downloaded
+3. A file named `gotowebinar_exports_YYYY-MM-DD.csv` will be downloaded
 
 **CSV Contents:**
 - Last 100 export entries
@@ -477,12 +477,12 @@ bin/console cache:clear
 bin/build-administration.sh
 
 # 4. Check plugin is activated
-bin/console plugin:list | grep Blauwasser
+bin/console plugin:list | grep GotoWebinar
 ```
 
 **Expected output:**
 ```
-BlauwasserGoogleSheetsExport  1.0.0  Yes        Installed  Active
+GotoWebinarGoogleSheetsExport  1.0.0  Yes        Installed  Active
 ```
 
 ### Problem 2: OAuth Connection Fails
@@ -717,10 +717,10 @@ See section below.
 ### Option 1: Uninstall via Administration
 
 1. Go to: **Settings → System → Plugins**
-2. Find **"BlauwasserGoogleSheetsExport"**
+2. Find **"GotoWebinarGoogleSheetsExport"**
 3. Click the **three dots (⋮)** → **"Deactivate"**
 4. Wait for confirmation
-5. Click the **three dots (⋮)** again → **"Uninstall"**
+5. Click the **three dots (⋮)** again → **"Uninstall"****
 6. Choose one of:
    - **"Remove all plugin data"** - Deletes export history from database
    - **"Keep plugin data"** - Preserves export history
@@ -732,13 +732,13 @@ See section below.
 cd /path/to/shopware
 
 # Deactivate plugin
-bin/console plugin:deactivate BlauwasserGoogleSheetsExport
+bin/console plugin:deactivate GotoWebinarGoogleSheetsExport
 
 # Uninstall plugin (keeps data)
-bin/console plugin:uninstall BlauwasserGoogleSheetsExport
+bin/console plugin:uninstall GotoWebinarGoogleSheetsExport
 
 # Or uninstall and remove all data
-bin/console plugin:uninstall --remove-data BlauwasserGoogleSheetsExport
+bin/console plugin:uninstall --remove-data GotoWebinarGoogleSheetsExport
 
 # Clear cache
 bin/console cache:clear
@@ -750,7 +750,7 @@ After uninstalling via one of the methods above:
 
 ```bash
 # Remove plugin files
-rm -rf custom/plugins/BlauwasserGoogleSheetsExport
+rm -rf custom/plugins/GotoWebinarGoogleSheetsExport
 
 # Regenerate autoloader
 composer dump-autoload
@@ -767,7 +767,7 @@ composer dump-autoload
 1. **Check Troubleshooting Section** - Most common issues are covered above
 2. **Check Shopware Logs:**
    ```bash
-   tail -f var/log/prod.log | grep -i blauwasser
+   tail -f var/log/prod.log | grep -i gotowebinar
    ```
 3. **Review Google Cloud Console** - Check OAuth credentials and API quota
 

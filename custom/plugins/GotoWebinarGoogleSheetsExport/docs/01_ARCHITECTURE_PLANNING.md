@@ -1,4 +1,4 @@
-# BlauwasserGoogleSheetsExport - Architecture & Planning Document
+# GotoWebinarGoogleSheetsExport - Architecture & Planning Document
 
 **Version:** 1.0.0  
 **Date:** December 22, 2025  
@@ -9,10 +9,10 @@
 ## 1. Project Overview
 
 ### 1.1 Plugin Name
-**BlauwasserGoogleSheetsExport**
+**GotoWebinarGoogleSheetsExport**
 
 ### 1.2 Purpose
-Export specific order data to Google Sheets when orders contain products from a configurable category (default: "Blauwasser Webinar").
+Export specific order data to Google Sheets when orders contain products from a configurable category (default: "GotoWebinar").
 
 ### 1.3 Key Requirements
 - **Trigger:** Orders containing items from specified category
@@ -31,9 +31,9 @@ Export specific order data to Google Sheets when orders contain products from a 
 ### 2.1 Component Overview
 
 ```
-BlauwasserGoogleSheetsExport/
+GotoWebinarGoogleSheetsExport/
 ├── src/
-│   ├── BlauwasserGoogleSheetsExport.php       # Main plugin class
+│   ├── GotoWebinarGoogleSheetsExport.php       # Main plugin class
 │   ├── Resources/
 │   │   ├── config/
 │   │   │   ├── services.xml                    # DI container configuration
@@ -42,7 +42,7 @@ BlauwasserGoogleSheetsExport/
 │   │       └── administration/
 │   │           └── src/
 │   │               └── module/
-│   │                   └── blauwasser-sheets/  # Admin module
+│   │                   └── gotowebinar-sheets/  # Admin module
 │   ├── Service/
 │   │   ├── GoogleSheetsService.php            # Google Sheets API integration
 │   │   ├── OrderExportService.php             # Order data export logic
@@ -74,10 +74,10 @@ BlauwasserGoogleSheetsExport/
 
 ### 2.2 Database Schema
 
-**Table: `blauwasser_order_export`**
+**Table: `gotowebinar_order_export`**
 
 ```sql
-CREATE TABLE `blauwasser_order_export` (
+CREATE TABLE `gotowebinar_order_export` (
     `id` BINARY(16) NOT NULL,
     `order_id` BINARY(16) NOT NULL,
     `order_number` VARCHAR(255) NOT NULL,
@@ -123,7 +123,7 @@ CREATE TABLE `blauwasser_order_export` (
 
 **Card 1: Feature Activation**
 - `enabled` (bool): Enable/disable plugin functionality
-- `categoryId` (entity-select): Category to monitor (default: "Blauwasser Webinar")
+- `categoryId` (entity-select): Category to monitor (default: "GotoWebinar")
 
 **Card 2: Google Sheets Configuration**
 - `googleSheetId` (text): Google Sheet ID from URL
@@ -144,11 +144,11 @@ CREATE TABLE `blauwasser_order_export` (
 - `batchSize` (int): Number of orders to export per batch (default: 50)
 
 ### 3.2 Configuration Keys
-All configuration accessible via: `BlauwasserGoogleSheetsExport.config.<field_name>`
+All configuration accessible via: `GotoWebinarGoogleSheetsExport.config.<field_name>`
 
 Example:
 ```php
-$this->systemConfigService->get('BlauwasserGoogleSheetsExport.config.enabled');
+$this->systemConfigService->get('GotoWebinarGoogleSheetsExport.config.enabled');
 ```
 
 ---
@@ -322,7 +322,7 @@ class ExportOrdersTask extends ScheduledTask
 {
     public static function getTaskName(): string
     {
-        return 'blauwasser.google_sheets_export';
+        return 'gotowebinar.google_sheets_export';
     }
 
     public static function getDefaultInterval(): int
@@ -358,7 +358,7 @@ class ExportOrdersTask extends ScheduledTask
 
 ### 7.1 Custom Admin Module
 
-**Location:** `Resources/app/administration/src/module/blauwasser-sheets/`
+**Location:** `Resources/app/administration/src/module/gotowebinar-sheets/`
 
 **Components:**
 - Overview page with export statistics
@@ -369,33 +369,33 @@ class ExportOrdersTask extends ScheduledTask
 - Configuration form (links to system config)
 
 **Admin Routes:**
-- `/blauwasser/sheets` - Main dashboard
-- `/blauwasser/sheets/config` - Configuration (redirect to system config)
-- `/blauwasser/sheets/export` - Manual export trigger
+- `/gotowebinar/sheets` - Main dashboard
+- `/gotowebinar/sheets/config` - Configuration (redirect to system config)
+- `/gotowebinar/sheets/export` - Manual export trigger
 
 ### 7.2 AdminApiController
 
 **Endpoints:**
 
-**POST** `/api/_action/blauwasser-sheets/oauth/authorize`
+**POST** `/api/_action/gotowebinar-sheets/oauth/authorize`
 - Generate Google OAuth URL
 - Return: `{ authUrl: string }`
 
-**POST** `/api/_action/blauwasser-sheets/oauth/callback`
+**POST** `/api/_action/gotowebinar-sheets/oauth/callback`
 - Body: `{ code: string }`
 - Exchange authorization code for tokens
 - Store refresh token in config
 - Return: `{ success: boolean }`
 
-**POST** `/api/_action/blauwasser-sheets/export/manual`
+**POST** `/api/_action/gotowebinar-sheets/export/manual`
 - Trigger immediate export of pending entries
 - Return: `{ exported: int, failed: int }`
 
-**GET** `/api/_action/blauwasser-sheets/export/csv`
+**GET** `/api/_action/gotowebinar-sheets/export/csv`
 - Query: `?limit=100`
 - Return CSV file download
 
-**GET** `/api/_action/blauwasser-sheets/export/stats`
+**GET** `/api/_action/gotowebinar-sheets/export/stats`
 - Return: `{ totalExports: int, lastExport: datetime, pendingExports: int }`
 
 ---
@@ -617,7 +617,7 @@ class ExportOrdersTask extends ScheduledTask
 
 ### Core Plugin Files
 - [ ] `composer.json`
-- [ ] `src/BlauwasserGoogleSheetsExport.php`
+- [ ] `src/GotoWebinarGoogleSheetsExport.php`
 
 ### Configuration
 - [ ] `src/Resources/config/services.xml`
@@ -647,8 +647,8 @@ class ExportOrdersTask extends ScheduledTask
 
 ### Administration (JavaScript/Vue)
 - [ ] `src/Resources/app/administration/src/main.js`
-- [ ] `src/Resources/app/administration/src/module/blauwasser-sheets/index.js`
-- [ ] `src/Resources/app/administration/src/module/blauwasser-sheets/page/blauwasser-sheets-overview/index.js`
+- [ ] `src/Resources/app/administration/src/module/gotowebinar-sheets/index.js`
+- [ ] `src/Resources/app/administration/src/module/gotowebinar-sheets/page/gotowebinar-sheets-overview/index.js`
 
 ### Commands (Optional, for CLI access)
 - [ ] `src/Command/ExportOrdersCommand.php`

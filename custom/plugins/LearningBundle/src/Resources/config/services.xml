@@ -224,7 +224,6 @@
 
         <service id="Learning\Bundle\Core\Content\ProductView\SalesChannel\AbstractProductViewRoute" 
                  alias="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute" public="true"/>
-        </service>
 
         <!-- Admin API Controller -->
         <service id="Learning\Bundle\Core\Api\ProductViewAnalyticsController" public="true">

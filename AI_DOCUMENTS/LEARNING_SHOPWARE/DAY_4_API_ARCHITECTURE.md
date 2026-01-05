@@ -673,9 +673,15 @@ Update `services.xml`:
 5. Save and copy the keys
 
 **Method 2: Via Database (CLI)**
+
+> **Important:** When using heredoc (`<<EOF`) with `docker compose exec`, you must add the `-T` flag to disable TTY allocation, otherwise you'll get "the input device is not a TTY" error.
+
 ```bash
-# Option A: Via Docker (recommended)
-docker compose exec database mariadb -u root -proot shopware <<EOF
+# Option A: Via Docker with inline SQL (recommended - simpler)
+docker compose exec database mariadb -u root -proot shopware -e "INSERT INTO integration (id, label, access_key, secret_access_key, created_at) VALUES (UNHEX(REPLACE(UUID(), '-', '')), 'Learning Plugin API', 'LEARNINGACCESSKEY', 'LEARNINGSECRETKEY', NOW())"
+
+# Option B: Via Docker with heredoc (requires -T flag)
+docker compose exec -T database mariadb -u root -proot shopware <<'EOF'
 INSERT INTO integration (id, label, access_key, secret_access_key, created_at)
 VALUES (
     UNHEX(REPLACE(UUID(), '-', '')),
@@ -686,20 +692,12 @@ VALUES (
 );
 EOF
 
-# Option B: Using MySQL client with port from .env
-mysql -h localhost -P 51116 -u root -proot shopware <<EOF
-INSERT INTO integration (id, label, access_key, secret_access_key, created_at)
-VALUES (
-    UNHEX(REPLACE(UUID(), '-', '')),
-    'Learning Plugin API',
-    'LEARNINGACCESSKEY',
-    'LEARNINGSECRETKEY',
-    NOW()
-);
-EOF
+# Option C: Using MySQL client with port from .env (check your DATABASE_URL for the port)
+# Note: Port may vary - check your .env file for DATABASE_URL
+mysql -h localhost -P 50399 -u root -proot shopware -e "INSERT INTO integration (id, label, access_key, secret_access_key, created_at) VALUES (UNHEX(REPLACE(UUID(), '-', '')), 'Learning Plugin API', 'LEARNINGACCESSKEY', 'LEARNINGSECRETKEY', NOW())"
 
 # View existing integrations
-docker compose exec database mariadb -u root -proot shopware -e "SELECT label, access_key FROM integration"
+docker compose exec database mariadb -u root -proot shopware -e "SELECT label, access_key, secret_access_key FROM integration"
 ```
 
 ### Step 4: Authenticate and Test Admin API

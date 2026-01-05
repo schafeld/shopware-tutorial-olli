@@ -702,9 +702,11 @@ docker compose exec database mariadb -u root -proot shopware -e "SELECT label, a
 
 ### Step 4: Authenticate and Test Admin API
 
+> **Important:** Use HTTPS (not HTTP) - Shopware 6.7+ redirects HTTP to HTTPS for all API requests, including OAuth token endpoint.
+
 ```bash
-# Get OAuth token
-curl -X POST "http://localhost:8000/api/oauth/token" \
+# Get OAuth token (note: use HTTPS with -k flag)
+curl -k -X POST "https://localhost:8000/api/oauth/token" \
   -H "Content-Type: application/json" \
   -d '{
     "client_id": "administration",
@@ -714,7 +716,15 @@ curl -X POST "http://localhost:8000/api/oauth/token" \
     "password": "shopware"
   }'
 
-# Save the access token
+# Expected response:
+# {
+#   "token_type": "Bearer",
+#   "expires_in": 600,
+#   "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJI...",
+#   "refresh_token": "def5020051f6305bd25ef..."
+# }
+
+# Save the access token from the response
 export SW_ACCESS_TOKEN="your-access-token-here"
 
 # Test analytics overview
@@ -1044,6 +1054,19 @@ public function testProductViewApi(): void
 **Problem:** HTTPS/SSL certificate errors in development
 - **Solution:** Use `-k` flag with curl to ignore self-signed certificates
 - Or configure proper SSL certificates in Docker/development environment
+
+**Problem:** OAuth token request returns empty response or redirects
+- **Cause:** Using HTTP instead of HTTPS - Shopware 6.7+ redirects all API requests to HTTPS
+- **Solution:** Always use `https://localhost:8000` (not `http://`) with the `-k` flag for development
+
+**Problem:** XML parsing errors when accessing any route (even OAuth)
+- **Cause:** Syntax error in `services.xml` file (unclosed tags, extra closing tags, etc.)
+- **Error message:** "Opening and ending tag mismatch" or "Extra content at the end of the document"
+- **Solution:** 
+  1. Check services.xml for XML syntax errors
+  2. Common issue: Self-closing tags `/>` followed by an extra `</service>` tag
+  3. Validate XML structure - every `<service>` must have exactly one matching `</service>` OR be self-closing `/>`
+  4. Clear cache after fixing: `php -d memory_limit=512M bin/console cache:clear`
 
 ---
 

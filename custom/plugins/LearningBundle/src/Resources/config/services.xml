@@ -224,6 +224,21 @@
 
         <service id="Learning\Bundle\Core\Content\ProductView\SalesChannel\AbstractProductViewRoute" 
                  alias="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute" public="true"/>
+        </service>
 
+        <!-- Admin API Controller -->
+        <service id="Learning\Bundle\Core\Api\ProductViewAnalyticsController" public="true">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewAnalyticsService"/>
+            <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <!-- Analytics Service -->
+        <service id="Learning\Bundle\Service\ProductViewAnalyticsService">
+            <argument type="service" id="learning_product_view.repository"/>
+        </service>
     </services>
 </container>

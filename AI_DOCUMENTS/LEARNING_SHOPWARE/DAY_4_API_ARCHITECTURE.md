@@ -728,16 +728,16 @@ curl -k -X POST "https://localhost:8000/api/oauth/token" \
 export SW_ACCESS_TOKEN="your-access-token-here"
 
 # Test analytics overview
-curl -X GET "http://localhost:8000/api/_action/learning/product-view/analytics/overview?days=7" \
+curl -X GET "https://localhost:8000/api/_action/learning/product-view/analytics/overview?days=7" \
   -H "Authorization: Bearer $SW_ACCESS_TOKEN" \
   -H "Content-Type: application/json"
 
 # Test product-specific analytics
-curl -X GET "http://localhost:8000/api/_action/learning/product-view/analytics/product/YOUR_PRODUCT_ID" \
+curl -X GET "https://localhost:8000/api/_action/learning/product-view/analytics/product/YOUR_PRODUCT_ID" \
   -H "Authorization: Bearer $SW_ACCESS_TOKEN"
 
 # Test popular products
-curl -X GET "http://localhost:8000/api/_action/learning/product-view/analytics/popular?limit=10" \
+curl -X GET "https://localhost:8000/api/_action/learning/product-view/analytics/popular?limit=10" \
   -H "Authorization: Bearer $SW_ACCESS_TOKEN"
 ```
 

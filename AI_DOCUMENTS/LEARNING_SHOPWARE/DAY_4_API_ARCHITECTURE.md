@@ -5,6 +5,13 @@
 
 > **Note for Beginners:** API development builds on Days 1-3. Make sure you're comfortable with services and repositories before starting. Testing APIs takes time!
 
+> **⚠️ IMPORTANT UPDATES (Shopware 6.7+):**
+> - Use **PHP 8 Attributes** (#[Route]) instead of @Route annotations
+> - Must create **routes.xml** file for route discovery
+> - Place **specific routes BEFORE parameterized routes** (e.g., `/popular` before `/{productId}`)
+> - Routes require **HTTPS** in production (not HTTP)
+> - Namespace must match composer.json autoload configuration
+
 ## Learning Objectives
 
 - Understand Store API vs Admin API
@@ -63,6 +70,11 @@ Request → Authentication → Route → Controller → Service → Response
 
 ### Step 1: Create Route Definition
 
+> **⚠️ Key Points:**
+> - Use PHP 8 `#[Route]` attributes, not `@Route` annotations
+> - Place specific routes (like `/popular`) BEFORE parameterized routes (like `/{productId}`)
+> - Use namespace `Learning\Bundle` to match composer.json autoload
+
 Create `custom/plugins/LearningBundle/src/Core/Content/ProductView/SalesChannel/ProductViewRoute.php`:
 
 ```php
@@ -71,16 +83,14 @@ Create `custom/plugins/LearningBundle/src/Core/Content/ProductView/SalesChannel/
 namespace Learning\Bundle\Core\Content\ProductView\SalesChannel;
 
 use Learning\Bundle\Service\ProductViewService;
-use OpenApi\Annotations as OA;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRouteResponse;
+use Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewResult;
 
-/**
- * @Route(defaults={"_routeScope"={"store-api"}})
- */
+#[Route(defaults: ['_routeScope' => ['store-api']])]
 class ProductViewRoute extends AbstractProductViewRoute
 {
     private ProductViewService $productViewService;
@@ -92,64 +102,41 @@ class ProductViewRoute extends AbstractProductViewRoute
 
     public function getDecorated(): AbstractProductViewRoute
     {
-        throw new \Exception('This route is not decorated');
+        throw new \Exception('This route is not decorated.');
     }
 
-    /**
-     * @OA\Get(
-     *     path="/store-api/learning/product-view/{productId}",
-     *     summary="Get product view statistics",
-     *     operationId="getProductViews",
-     *     tags={"Store API", "Learning", "Product View"},
-     *     @OA\Parameter(
-     *         name="productId",
-     *         in="path",
-     *         required=true,
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="Product view statistics"
-     *     )
-     * )
-     * @Route(
-     *     "/store-api/learning/product-view/{productId}",
-     *     name="store-api.learning.product-view.detail",
-     *     methods={"GET"}
-     * )
-     */
-    public function load(string $productId, Request $request, SalesChannelContext $context): ProductViewRouteResponse
-    {
-        $viewCount = $this->productViewService->getProductViewCount($productId, $context->getContext());
+    // IMPORTANT: Place specific routes BEFORE parameterized routes
+    #[Route(path: '/store-api/learning/product-view/popular', name: 'store-api.learning.product-view.popular', methods: ['GET'])]
+    public function popular(
+        Request $request,
+        SalesChannelContext $context
+    ): JsonResponse {
+        $limit = (int) $request->query->get('limit', 10);
+        $popularProducts = $this->productViewService->getMostViewedProducts($limit, $context->getContext());
 
+        return new JsonResponse([
+            'success' => true,
+            'data' => $popularProducts,
+            'total' => count($popularProducts)
+        ]);
+    }
+
+    #[Route(path: '/store-api/learning/product-view/{productId}', name: 'store-api.learning.product-view.detail', methods: ['GET'])]
+    public function load(
+        string $productId,
+        Request $request,
+        SalesChannelContext $context
+    ): ProductViewRouteResponse {
+        $viewCount = $this->productViewService->getProductViewCount($productId, $context->getContext());
         return new ProductViewRouteResponse(new ProductViewResult($productId, $viewCount));
     }
 
-    /**
-     * @OA\Post(
-     *     path="/store-api/learning/product-view/{productId}",
-     *     summary="Record a product view",
-     *     operationId="recordProductView",
-     *     tags={"Store API", "Learning", "Product View"},
-     *     @OA\Parameter(
-     *         name="productId",
-     *         in="path",
-     *         required=true,
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="View recorded successfully"
-     *     )
-     * )
-     * @Route(
-     *     "/store-api/learning/product-view/{productId}",
-     *     name="store-api.learning.product-view.record",
-     *     methods={"POST"}
-     * )
-     */
-    public function record(string $productId, Request $request, SalesChannelContext $context): JsonResponse
-    {
+    #[Route(path: '/store-api/learning/product-view/{productId}', name: 'store-api.learning.product-view.record', methods: ['POST'])]
+    public function record(
+        string $productId,
+        Request $request,
+        SalesChannelContext $context
+    ): JsonResponse {
         $customerId = $context->getCustomer()?->getId();
         $userAgent = $request->headers->get('User-Agent');
 
@@ -159,48 +146,29 @@ class ProductViewRoute extends AbstractProductViewRoute
             $userAgent,
             $context->getContext()
         );
-
         return new JsonResponse([
             'success' => true,
-            'message' => 'View recorded successfully',
-        ]);
-    }
-
-    /**
-     * @OA\Get(
-     *     path="/store-api/learning/product-view/popular",
-     *     summary="Get most viewed products",
-     *     operationId="getMostViewedProducts",
-     *     tags={"Store API", "Learning", "Product View"},
-     *     @OA\Parameter(
-     *         name="limit",
-     *         in="query",
-     *         @OA\Schema(type="integer", default=10)
-     *     ),
-     *     @OA\Response(
-     *         response="200",
-     *         description="List of most viewed products"
-     *     )
-     * )
-     * @Route(
-     *     "/store-api/learning/product-view/popular",
-     *     name="store-api.learning.product-view.popular",
-     *     methods={"GET"}
-     * )
-     */
-    public function popular(Request $request, SalesChannelContext $context): JsonResponse
-    {
-        $limit = (int) $request->query->get('limit', 10);
-        
-        $popularProducts = $this->productViewService->getMostViewedProducts($limit, $context->getContext());
-
-        return new JsonResponse([
-            'success' => true,
-            'data' => $popularProducts,
-            'total' => count($popularProducts),
+            'message' => 'Product view recorded successfully'
         ]);
     }
 }
+```
+
+### Step 1b: Create Routes Configuration File
+
+> **⚠️ REQUIRED:** Shopware 6.7+ needs this file for route discovery!
+
+Create `custom/plugins/LearningBundle/src/Resources/config/routes.xml`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<routes xmlns="http://symfony.com/schema/routing"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://symfony.com/schema/routing
+        https://symfony.com/schema/routing/routing-1.0.xsd">
+
+    <import resource="../../Core/Content/ProductView/SalesChannel/*Route.php" type="attribute" />
+</routes>
 ```
 
 ### Step 2: Create Abstract Route
@@ -254,6 +222,11 @@ class ProductViewResult extends Struct
     {
         return $this->viewCount;
     }
+
+    public function getApiAlias(): string
+    {
+        return 'learning_bundle_core_content_product_view_sales_channel_product_view_result';
+    }
 }
 ```
 
@@ -268,59 +241,281 @@ use Shopware\Core\System\SalesChannel\StoreApiResponse;
 
 class ProductViewRouteResponse extends StoreApiResponse
 {
-    protected ProductViewResult $result;
+    protected $object;
 
     public function __construct(ProductViewResult $result)
     {
         parent::__construct($result);
-        $this->result = $result;
+        $this->object = $result;
     }
 
     public function getResult(): ProductViewResult
     {
-        return $this->result;
+        return $this->object;
     }
 }
 ```
+### Step 4: Register Service
 
-### Step 4: Register Route
-
-Update `services.xml`:
+Update `custom/plugins/LearningBundle/src/Resources/config/services.xml`:
 
 ```xml
-<!-- Store API Route -->
-<service id="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute" public="true">
-    <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
-</service>
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <!-- Product View Route -->
+        <service id="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute" public="true">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <!-- Other services... -->
+    </services>
+</container>
 ```
 
-### Step 5: Test Store API
+> **Note on `controller.service_arguments` tag:** This tag is required for Store API routes in Shopware 6.7+. It tells Symfony to properly inject dependencies and handle the route as a controller service.
+
+### Step 5: Testing Your Store API
+
+After clearing cache (`bin/console cache:clear`), test your endpoints:
+
+**Understanding Store API Authentication:**
+
+In Shopware 6.7, Store API requests require an `sw-access-key` header (the sales channel access key). 
+
+**What is SW_ACCESS_KEY?**
+- Every sales channel has a unique access key
+- Acts as API identifier for that specific sales channel
+- Determines which products, prices, currencies are available
+- Required for ALL Store API requests
+- Found in: Administration → Sales Channels → [Your Channel] → API access
+
+**How to get SW_ACCESS_KEY:**
+
+**Method 1: From Administration UI (Recommended)**
+1. Login to Shopware Administration (http://localhost:8000/admin)
+2. Go to: **Sales Channels** → Select your sales channel (e.g., "Storefront")
+3. Scroll down to **API access** section
+4. Copy the **Access key** value
+
+**Method 2: From Database via Docker**
 
 ```bash
-# Clear cache
-bin/console cache:clear
+# Get the access key
+docker compose exec database mariadb -u root -proot shopware -e "SELECT COALESCE(sct.name, sc.short_name, 'Unnamed') as name, sc.access_key FROM sales_channel sc LEFT JOIN sales_channel_translation sct ON sc.id = sct.sales_channel_id GROUP BY sc.id"
+```
 
-# Get context token (needed for Store API)
-curl -X POST "http://localhost:8000/store-api/context" \
-  -H "sw-access-key: SWSCMDVXUEVWCVD1S0FXSXHBSQ"
+**Example Output:**
+```
++------------+----------------------------+
+| name       | access_key                 |
++------------+----------------------------+
+| Storefront | SWSCQJDIU3D3SUDTDEHDNVH2UW |
+| Headless   | SWSCSMNNEWDJCWPVOTJNCXUYEA |
++------------+----------------------------+
+```
 
-# Use the returned token in subsequent requests
-export SW_CONTEXT_TOKEN="your-token-here"
+**Testing the Endpoints:**
+
+> **Important:** Use HTTPS (not HTTP) - Shopware 6.7+ redirects HTTP to HTTPS. Use `-k` flag to ignore SSL certificate warnings in development.
+
+**1. Get Popular Products:**
+```bash
+curl -X GET "https://localhost:8000/store-api/learning/product-view/popular?limit=5" \
+  -H "sw-access-key: SWSCQJDIU3D3SUDTDEHDNVH2UW" -k
+```
+
+**Expected Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "product_id": "019b45b39b297056be5b38f00b1c8aee",
+      "product_name": "Variant product",
+      "view_count": 172,
+      "last_viewed": "2025-01-19 14:23:45"
+    },
+    {
+      "product_id": "019b464c1b0e7098b82fef6a6bc95ced",
+      "product_name": "Main product with properties",
+      "view_count": 133,
+      "last_viewed": "2025-01-19 14:23:44"
+    }
+  ],
+  "total": 4
+}
+```
+
+**2. Get Specific Product View Count:**
+```bash
+curl -X GET "https://localhost:8000/store-api/learning/product-view/019b4610a6697180b4fd97770223e1da" \
+  -H "sw-access-key: SWSCQJDIU3D3SUDTDEHDNVH2UW" -k
+```
+
+**Expected Response:**
+```json
+{
+  "productId": "019b4610a6697180b4fd97770223e1da",
+  "viewCount": 4
+}
+```
+
+**3. Record a Product View (POST):**
+```bash
+curl -X POST "https://localhost:8000/store-api/learning/product-view/019b4610a6697180b4fd97770223e1da" \
+  -H "sw-access-key: SWSCQJDIU3D3SUDTDEHDNVH2UW" -k
+```
+
+**Expected Response:**
+```json
+{
+  "success": true,
+  "message": "Product view recorded successfully"
+}
+```
+
+**4. Verify View Count Increased:**
+```bash
+# After recording, check count again - should increase by 1
+curl -X GET "https://localhost:8000/store-api/learning/product-view/019b4610a6697180b4fd97770223e1da" \
+  -H "sw-access-key: SWSCQJDIU3D3SUDTDEHDNVH2UW" -k
+```
+
+**Expected Response:**
+```json
+{
+  "productId": "019b4610a6697180b4fd97770223e1da",
+  "viewCount": 5
+}
+```
+
+### Common Issues & Troubleshooting
+
+**Issue: "No route found" error**
+- **Cause:** Missing routes.xml or cache not cleared
+- **Solution:** 
+  1. Ensure routes.xml exists at `src/Resources/config/routes.xml`
+  2. Run `bin/console cache:clear`
+  3. Verify route is registered: `bin/console debug:router | grep product-view`
+
+**Issue: Popular endpoint returns error about "productId"**
+- **Cause:** Wrong route matched - Symfony matched `/{productId}` instead of `/popular`
+- **Solution:** Ensure `popular()` method is defined BEFORE `load()` method in ProductViewRoute.php
+- **Why:** Method order in PHP file determines Symfony route matching priority. Specific routes (no parameters) must come before parameterized routes.
+
+**Issue: "Service not found" error**
+- **Cause:** Missing `controller.service_arguments` tag or incorrect namespace
+- **Solution:** 
+  1. Add `<tag name="controller.service_arguments"/>` to your service definition
+  2. Ensure namespace matches composer.json (e.g., `Learning\Bundle`, not `LearningBundle`)
+
+**Issue: 401 Unauthorized**
+- **Cause:** Missing or incorrect access key
+- **Solution:** Get access key from Admin > Sales Channels > Your Channel > API Access
+
+**Issue: HTTPS certificate errors**
+- **Cause:** Self-signed SSL certificate in development
+- **Solution:** Use `-k` flag with curl to ignore certificate warnings
+
+Copy the `access_key` for the "Storefront" channel.
+
+**What is SW_CONTEXT_TOKEN?**
+A `sw-context-token` is **optional** for most read operations but **required** for:
+- Cart operations (add to cart, checkout)
+- Customer-specific data (wishlists, orders)
+- Session-dependent features
+
+For simple operations like viewing product statistics, the access key alone is sufficient.
+
+```bash
+# Clear cache with increased memory
+php -d memory_limit=512M bin/console cache:clear
+
+# Note: You may see "Connection refused" warnings during cache clear - this is normal
+# when Docker is managing the database. The commands below use Docker directly.
+
+# ==========================================
+# Step 1: Get a product ID
+# ==========================================
+
+docker compose exec database mariadb -u root -proot shopware -e "SELECT LOWER(HEX(id)) as id, product_number FROM product LIMIT 3"
+
+# Example output:
+# +----------------------------------+---------------------+
+# | id                               | product_number      |
+# +----------------------------------+---------------------+
+# | 019b4610a6697180b4fd97770223e1da | 5807372378675640149 |
+# +----------------------------------+---------------------+
+
+# Set your product ID (copy one from above)
+export PRODUCT_ID="019b4610a6697180b4fd97770223e1da"
+
+# ==========================================
+# Step 2: Get your sales channel access key
+# ==========================================
+
+docker compose exec database mariadb -u root -proot shopware -e "SELECT COALESCE(sct.name, sc.short_name, 'Unnamed') as name, sc.access_key FROM sales_channel sc LEFT JOIN sales_channel_translation sct ON sc.id = sct.sales_channel_id GROUP BY sc.id"
+
+# Example output:
+# +------------+----------------------------+
+# | name       | access_key                 |
+# +------------+----------------------------+
+# | Storefront | SWSCQJDIU3D3SUDTDEHDNVH2UW |
+# +------------+----------------------------+
+
+# Set the access key (copy from above)
+export SW_ACCESS_KEY="SWSCQJDIU3D3SUDTDEHDNVH2UW"
+
+# ==========================================
+# Method 1: Simple requests (no context token needed)
+# ==========================================
 
 # Record a view
-curl -X POST "http://localhost:8000/store-api/learning/product-view/YOUR_PRODUCT_ID" \
-  -H "sw-access-key: SWSCMDVXUEVWCVD1S0FXSXHBSQ" \
-  -H "sw-context-token: $SW_CONTEXT_TOKEN"
+curl -X POST "http://localhost:8000/store-api/learning/product-view/${PRODUCT_ID}" \
+  -H "sw-access-key: ${SW_ACCESS_KEY}"
 
 # Get view count
-curl -X GET "http://localhost:8000/store-api/learning/product-view/YOUR_PRODUCT_ID" \
-  -H "sw-access-key: SWSCMDVXUEVWCVD1S0FXSXHBSQ" \
-  -H "sw-context-token: $SW_CONTEXT_TOKEN"
+curl -X GET "http://localhost:8000/store-api/learning/product-view/${PRODUCT_ID}" \
+  -H "sw-access-key: ${SW_ACCESS_KEY}"
 
 # Get popular products
 curl -X GET "http://localhost:8000/store-api/learning/product-view/popular?limit=5" \
-  -H "sw-access-key: SWSCMDVXUEVWCVD1S0FXSXHBSQ" \
-  -H "sw-context-token: $SW_CONTEXT_TOKEN"
+  -H "sw-access-key: ${SW_ACCESS_KEY}"
+
+# ==========================================
+# Method 2: If you need a context token (for session/customer-specific operations)
+# ==========================================
+
+# Get a context token by calling the context endpoint
+# This creates a new session and returns a context token
+curl -X GET "http://localhost:8000/store-api/context" \
+  -H "sw-access-key: ${SW_ACCESS_KEY}" | jq -r '.contextToken'
+
+# Save the token (replace with actual token from response)
+export SW_CONTEXT_TOKEN="your-context-token-here"
+
+# Now use both headers for authenticated requests
+curl -X POST "http://localhost:8000/store-api/learning/product-view/${PRODUCT_ID}" \
+  -H "sw-access-key: ${SW_ACCESS_KEY}" \
+  -H "sw-context-token: ${SW_CONTEXT_TOKEN}"
+
+# ==========================================
+# Debugging
+# ==========================================
+
+# List all routes to verify yours exist
+bin/console debug:router | grep learning
+
+# Check if your service is registered
+bin/console debug:container ProductViewRoute
 ```
 
 ---
@@ -342,11 +537,9 @@ use Shopware\Core\Framework\Context;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
-/**
- * @Route(defaults={"_routeScope"={"api"}})
- */
+#[Route(defaults: ['_routeScope' => ['api']])]
 class ProductViewAnalyticsController extends AbstractController
 {
     private ProductViewAnalyticsService $analyticsService;
@@ -360,13 +553,11 @@ class ProductViewAnalyticsController extends AbstractController
         $this->productViewService = $productViewService;
     }
 
-    /**
-     * @Route(
-     *     "/api/_action/learning/product-view/analytics/overview",
-     *     name="api.action.learning.product-view.analytics.overview",
-     *     methods={"GET"}
-     * )
-     */
+    #[Route(
+        path: '/api/_action/learning/product-view/analytics/overview',
+        name: 'api.action.learning.product-view.analytics.overview',
+        methods: ['GET']
+    )]
     public function getOverview(Request $request, Context $context): JsonResponse
     {
         $days = (int) $request->query->get('days', 30);
@@ -390,13 +581,11 @@ class ProductViewAnalyticsController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route(
-     *     "/api/_action/learning/product-view/analytics/product/{productId}",
-     *     name="api.action.learning.product-view.analytics.product",
-     *     methods={"GET"}
-     * )
-     */
+    #[Route(
+        path: '/api/_action/learning/product-view/analytics/product/{productId}',
+        name: 'api.action.learning.product-view.analytics.product',
+        methods: ['GET']
+    )]
     public function getProductAnalytics(string $productId, Request $request, Context $context): JsonResponse
     {
         $viewCount = $this->productViewService->getProductViewCount($productId, $context);
@@ -410,13 +599,11 @@ class ProductViewAnalyticsController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route(
-     *     "/api/_action/learning/product-view/analytics/popular",
-     *     name="api.action.learning.product-view.analytics.popular",
-     *     methods={"GET"}
-     * )
-     */
+    #[Route(
+        path: '/api/_action/learning/product-view/analytics/popular',
+        name: 'api.action.learning.product-view.analytics.popular',
+        methods: ['GET']
+    )]
     public function getPopularProducts(Request $request, Context $context): JsonResponse
     {
         $limit = (int) $request->query->get('limit', 10);
@@ -433,13 +620,11 @@ class ProductViewAnalyticsController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route(
-     *     "/api/_action/learning/product-view/reset/{productId}",
-     *     name="api.action.learning.product-view.reset",
-     *     methods={"POST"}
-     * )
-     */
+    #[Route(
+        path: '/api/_action/learning/product-view/reset/{productId}',
+        name: 'api.action.learning.product-view.reset',
+        methods: ['POST']
+    )]
     public function resetProductViews(string $productId, Context $context): JsonResponse
     {
         // This would require a new method in ProductViewService
@@ -451,6 +636,9 @@ class ProductViewAnalyticsController extends AbstractController
         ]);
     }
 }
+```
+
+> **Note:** Admin API controllers use the same PHP 8 #[Route] attribute syntax as Store API routes. The key difference is the `_routeScope` set to `['api']` instead of `['store-api']`.
 ```
 
 ### Step 2: Register Controller
@@ -465,6 +653,7 @@ Update `services.xml`:
     <call method="setContainer">
         <argument type="service" id="service_container"/>
     </call>
+    <tag name="controller.service_arguments"/>
 </service>
 
 <!-- Analytics Service -->
@@ -475,12 +664,19 @@ Update `services.xml`:
 
 ### Step 3: Get Admin API Credentials
 
-```bash
-# Create integration in Administration or via CLI
-# Go to Settings > System > Integrations > Add Integration
-# Or use SQL:
+**Method 1: Via Administration UI (Recommended)**
+1. Login to Administration (http://localhost:8000/admin)
+2. Go to: **Settings** → **System** → **Integrations**
+3. Click **Add integration**
+4. Fill in:
+   - Label: "Learning Plugin API"
+   - Generate keys or set custom access/secret keys
+5. Save and copy the keys
 
-bin/console dbal:run-sql "
+**Method 2: Via Database (CLI)**
+```bash
+# Option A: Via Docker (recommended)
+docker compose exec database mariadb -u root -proot shopware <<EOF
 INSERT INTO integration (id, label, access_key, secret_access_key, created_at)
 VALUES (
     UNHEX(REPLACE(UUID(), '-', '')),
@@ -489,7 +685,22 @@ VALUES (
     'LEARNINGSECRETKEY',
     NOW()
 );
-"
+EOF
+
+# Option B: Using MySQL client with port from .env
+mysql -h localhost -P 51116 -u root -proot shopware <<EOF
+INSERT INTO integration (id, label, access_key, secret_access_key, created_at)
+VALUES (
+    UNHEX(REPLACE(UUID(), '-', '')),
+    'Learning Plugin API',
+    'LEARNINGACCESSKEY',
+    'LEARNINGSECRETKEY',
+    NOW()
+);
+EOF
+
+# View existing integrations
+docker compose exec database mariadb -u root -proot shopware -e "SELECT label, access_key FROM integration"
 ```
 
 ### Step 4: Authenticate and Test Admin API
@@ -564,7 +775,7 @@ class ProductViewNotFoundException extends ShopwareHttpException
 Usage in controller:
 
 ```php
-use Learning\Bundle\Core\Api\Exception\ProductViewNotFoundException;
+use LearningBundle\Core\Api\Exception\ProductViewNotFoundException;
 
 public function getProductAnalytics(string $productId, Request $request, Context $context): JsonResponse
 {
@@ -691,7 +902,7 @@ class ApiResponse
 Usage:
 
 ```php
-use Learning\Bundle\Core\Api\Response\ApiResponse;
+use LearningBundle\Core\Api\Response\ApiResponse;
 
 public function getPopularProducts(Request $request, Context $context): JsonResponse
 {
@@ -790,30 +1001,52 @@ public function testProductViewApi(): void
 ## Key Takeaways
 
 ✅ **You've learned:**
-- Difference between Store API and Admin API
-- Creating custom Store API routes
-- Creating custom Admin API endpoints
-- API authentication flows
-- Request validation and error handling
-- Response formatting best practices
-- OpenAPI documentation
-- Testing APIs with cURL and Postman
+- **Shopware 6.7+ Requirements:**
+  - Use PHP 8 `#[Route]` attributes instead of `@Route` annotations
+  - Create `routes.xml` for route discovery
+  - Namespace must match composer.json (e.g., `Learning\Bundle`)
+  - Route method order matters (specific routes before parameterized)
+  - Add `controller.service_arguments` tag to service definitions
+- **API Fundamentals:**
+  - Difference between Store API and Admin API
+  - Creating custom Store API routes with proper response objects
+  - Creating custom Admin API endpoints
+  - API authentication flows (access keys vs OAuth tokens)
+- **Best Practices:**
+  - Request validation and error handling
+  - Response formatting with StoreApiResponse
+  - OpenAPI documentation (when needed)
+  - Testing APIs with cURL and proper HTTPS handling
 
 ## Common Issues
 
 **Problem:** Route not found (404)
-- Clear cache: `bin/console cache:clear`
-- Check route annotation and path
-- Verify `_routeScope` is correct
+- **Solution:** 
+  - Ensure `routes.xml` exists at `src/Resources/config/routes.xml`
+  - Clear cache: `php -d memory_limit=512M bin/console cache:clear` or `rm -rf var/cache/*`
+  - Verify route is registered: `bin/console debug:router | grep learning`
+  - Check PHP 8 attribute syntax is correct
+
+**Problem:** Specific route (e.g., `/popular`) returns error about route parameter
+- **Solution:** 
+  - Reorder methods in controller - specific routes MUST come before parameterized routes
+  - Example: `popular()` method before `load($productId)` method
+  - Clear cache after reordering
+
+**Problem:** "Service not found" or dependency injection errors
+- **Solution:**
+  - Add `<tag name="controller.service_arguments"/>` to service definition
+  - Verify namespace matches composer.json autoload configuration
+  - Ensure all dependencies are properly registered in services.xml
 
 **Problem:** Authentication fails
-- Check access key for Store API
-- Verify OAuth token for Admin API
-- Ensure permissions are correct
+- **Store API:** Check access key from Sales Channels > Your Channel > API Access
+- **Admin API:** Verify OAuth token from Settings > System > Integrations
+- Ensure proper headers: `sw-access-key` for Store API, `Authorization: Bearer` for Admin API
 
-**Problem:** CORS errors
-- Configure CORS in `.env`: `CORS_ALLOW_ORIGIN=*`
-- Or in `config/packages/framework.yaml`
+**Problem:** HTTPS/SSL certificate errors in development
+- **Solution:** Use `-k` flag with curl to ignore self-signed certificates
+- Or configure proper SSL certificates in Docker/development environment
 
 ---
 

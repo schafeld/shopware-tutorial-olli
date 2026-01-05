@@ -639,7 +639,6 @@ class ProductViewAnalyticsController extends AbstractController
 ```
 
 > **Note:** Admin API controllers use the same PHP 8 #[Route] attribute syntax as Store API routes. The key difference is the `_routeScope` set to `['api']` instead of `['store-api']`.
-```
 
 ### Step 2: Register Controller
 

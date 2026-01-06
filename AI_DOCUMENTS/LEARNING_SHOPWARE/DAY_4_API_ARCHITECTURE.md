@@ -747,7 +747,22 @@ curl -X GET "https://localhost:8000/api/_action/learning/product-view/analytics/
 
 ### Practice 1: Error Handling
 
-Create proper error responses:
+**File Structure:**
+```
+custom/plugins/LearningBundle/src/
+├── Core/
+│   ├── Api/
+│   │   ├── Exception/
+│   │   │   ├── ProductViewNotFoundException.php
+│   │   │   ├── InvalidAnalyticsRequestException.php
+│   │   │   └── ProductViewLimitExceededException.php
+│   │   ├── ProductViewAnalyticsController.php  (update this)
+│   │   └── ...
+```
+
+**Step 1: Create Exception Classes**
+
+Create `custom/plugins/LearningBundle/src/Core/Api/Exception/ProductViewNotFoundException.php`:
 
 ```php
 <?php declare(strict_types=1);
@@ -779,15 +794,83 @@ class ProductViewNotFoundException extends ShopwareHttpException
 }
 ```
 
-Usage in controller:
+Create `custom/plugins/LearningBundle/src/Core/Api/Exception/InvalidAnalyticsRequestException.php`:
 
 ```php
-use LearningBundle\Core\Api\Exception\ProductViewNotFoundException;
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Core\Api\Exception;
+
+use Shopware\Core\Framework\ShopwareHttpException;
+use Symfony\Component\HttpFoundation\Response;
+
+class InvalidAnalyticsRequestException extends ShopwareHttpException
+{
+    public function __construct(array $errors)
+    {
+        parent::__construct(
+            'Invalid request parameters: {{ errors }}',
+            ['errors' => json_encode($errors)]
+        );
+    }
+
+    public function getErrorCode(): string
+    {
+        return 'LEARNING__INVALID_ANALYTICS_REQUEST';
+    }
+
+    public function getStatusCode(): int
+    {
+        return Response::HTTP_BAD_REQUEST;
+    }
+}
+```
+
+Create `custom/plugins/LearningBundle/src/Core/Api/Exception/ProductViewLimitExceededException.php`:
+
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Core\Api\Exception;
+
+use Shopware\Core\Framework\ShopwareHttpException;
+use Symfony\Component\HttpFoundation\Response;
+
+class ProductViewLimitExceededException extends ShopwareHttpException
+{
+    public function __construct(int $limit, int $requested)
+    {
+        parent::__construct(
+            'Requested limit {{ requested }} exceeds maximum allowed {{ limit }}',
+            ['limit' => $limit, 'requested' => $requested]
+        );
+    }
+
+    public function getErrorCode(): string
+    {
+        return 'LEARNING__PRODUCT_VIEW_LIMIT_EXCEEDED';
+    }
+
+    public function getStatusCode(): int
+    {
+        return Response::HTTP_BAD_REQUEST;
+    }
+}
+```
+
+**Step 2: Update Controller with Error Handling**
+
+Update `custom/plugins/LearningBundle/src/Core/Api/ProductViewAnalyticsController.php`:
+
+```php
+use Learning\Bundle\Core\Api\Exception\ProductViewNotFoundException;
+use Learning\Bundle\Core\Api\Exception\ProductViewLimitExceededException;
 
 public function getProductAnalytics(string $productId, Request $request, Context $context): JsonResponse
 {
     $viewCount = $this->productViewService->getProductViewCount($productId, $context);
     
+    // Throw exception if product has no views
     if ($viewCount === 0) {
         throw new ProductViewNotFoundException($productId);
     }
@@ -800,11 +883,44 @@ public function getProductAnalytics(string $productId, Request $request, Context
         ],
     ]);
 }
+
+public function getPopularProducts(Request $request, Context $context): JsonResponse
+{
+    $limit = (int) $request->query->get('limit', 10);
+    
+    // Validate limit (max 100)
+    if ($limit > 100) {
+        throw new ProductViewLimitExceededException(100, $limit);
+    }
+    
+    $popularProducts = $this->productViewService->getMostViewedProducts($limit, $context);
+
+    return new JsonResponse([
+        'success' => true,
+        'data' => $popularProducts,
+        'meta' => [
+            'total' => count($popularProducts),
+            'limit' => $limit,
+        ],
+    ]);
+}
 ```
 
 ### Practice 2: Request Validation
 
-Create request validators:
+**File Structure:**
+```
+custom/plugins/LearningBundle/src/
+├── Core/
+│   ├── Api/
+│   │   ├── Validator/
+│   │   │   └── AnalyticsRequestValidator.php  (create this)
+│   │   ├── ProductViewAnalyticsController.php  (update this)
+```
+
+**Step 1: Create Validator Class**
+
+Create `custom/plugins/LearningBundle/src/Core/Api/Validator/AnalyticsRequestValidator.php`:
 
 ```php
 <?php declare(strict_types=1);
@@ -830,12 +946,44 @@ class AnalyticsRequestValidator
 
         $constraints = new Assert\Collection([
             'days' => [
-                new Assert\Type('integer'),
-                new Assert\Range(['min' => 1, 'max' => 365]),
+                new Assert\Type(['type' => 'integer', 'message' => 'Days must be an integer']),
+                new Assert\Range([
+                    'min' => 1,
+                    'max' => 365,
+                    'notInRangeMessage' => 'Days must be between {{ min }} and {{ max }}',
+                ]),
             ],
         ]);
 
-        $violations = $this->validator->validate(['days' => $days], $constraints);
+        $violations = $this->validator->validate(['days' => (int)$days], $constraints);
+
+        $errors = [];
+        foreach ($violations as $violation) {
+            $errors[] = [
+                'property' => $violation->getPropertyPath(),
+                'message' => $violation->getMessage(),
+            ];
+        }
+
+        return $errors;
+    }
+
+    public function validatePopularRequest(Request $request): array
+    {
+        $limit = $request->query->get('limit', 10);
+
+        $constraints = new Assert\Collection([
+            'limit' => [
+                new Assert\Type(['type' => 'integer', 'message' => 'Limit must be an integer']),
+                new Assert\Range([
+                    'min' => 1,
+                    'max' => 100,
+                    'notInRangeMessage' => 'Limit must be between {{ min }} and {{ max }}',
+                ]),
+            ],
+        ]);
+
+        $violations = $this->validator->validate(['limit' => (int)$limit], $constraints);
 
         $errors = [];
         foreach ($violations as $violation) {
@@ -850,9 +998,109 @@ class AnalyticsRequestValidator
 }
 ```
 
+**Step 2: Register Validator in services.xml**
+
+Update `custom/plugins/LearningBundle/src/Resources/config/services.xml`:
+
+```xml
+<!-- Request Validator -->
+<service id="Learning\Bundle\Core\Api\Validator\AnalyticsRequestValidator">
+    <argument type="service" id="validator"/>
+</service>
+```
+
+**Step 3: Use Validator in Controller**
+
+Update `custom/plugins/LearningBundle/src/Core/Api/ProductViewAnalyticsController.php`:
+
+```php
+use Learning\Bundle\Core\Api\Validator\AnalyticsRequestValidator;
+use Learning\Bundle\Core\Api\Exception\InvalidAnalyticsRequestException;
+
+class ProductViewAnalyticsController extends AbstractController
+{
+    private ProductViewAnalyticsService $analyticsService;
+    private ProductViewService $productViewService;
+    private AnalyticsRequestValidator $validator;
+
+    public function __construct(
+        ProductViewAnalyticsService $analyticsService,
+        ProductViewService $productViewService,
+        AnalyticsRequestValidator $validator
+    ) {
+        $this->analyticsService = $analyticsService;
+        $this->productViewService = $productViewService;
+        $this->validator = $validator;
+    }
+
+    #[Route(
+        path: '/api/_action/learning/product-view/analytics/overview',
+        name: 'api.action.learning.product-view.analytics.overview',
+        methods: ['GET']
+    )]
+    public function getOverview(Request $request, Context $context): JsonResponse
+    {
+        // Validate request
+        $errors = $this->validator->validateOverviewRequest($request);
+        if (!empty($errors)) {
+            throw new InvalidAnalyticsRequestException($errors);
+        }
+
+        $days = (int) $request->query->get('days', 30);
+
+        $viewsPerDay = $this->analyticsService->getViewsForLastDays($days, $context);
+        $totalViews = $this->analyticsService->getTotalViewsByProduct($context);
+        $browserStats = $this->analyticsService->getViewsByBrowser($context);
+
+        return new JsonResponse([
+            'success' => true,
+            'data' => [
+                'period' => [
+                    'days' => $days,
+                    'start' => (new \DateTime())->modify("-{$days} days")->format('Y-m-d'),
+                    'end' => (new \DateTime())->format('Y-m-d'),
+                ],
+                'views_per_day' => $viewsPerDay,
+                'total_views_by_product' => $totalViews,
+                'browser_statistics' => $browserStats,
+            ],
+        ]);
+    }
+}
+```
+
+**Step 4: Update Controller Service Definition**
+
+Update the controller service in `services.xml` to inject the validator:
+
+```xml
+<!-- Admin API Controller -->
+<service id="Learning\Bundle\Core\Api\ProductViewAnalyticsController" public="true">
+    <argument type="service" id="Learning\Bundle\Service\ProductViewAnalyticsService"/>
+    <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+    <argument type="service" id="Learning\Bundle\Core\Api\Validator\AnalyticsRequestValidator"/>
+    <call method="setContainer">
+        <argument type="service" id="service_container"/>
+    </call>
+    <tag name="controller.service_arguments"/>
+</service>
+```
+
 ### Practice 3: Response Formatting
 
-Create consistent response structure:
+**File Structure:**
+```
+custom/plugins/LearningBundle/src/
+├── Core/
+│   ├── Api/
+│   │   ├── Response/
+│   │   │   └── ApiResponse.php  (create this)
+│   │   ├── ProductViewAnalyticsController.php  (update this)
+```
+
+**Step 1: Create Response Helper Class**
+
+Create `custom/plugins/LearningBundle/src/Core/Api/Response/ApiResponse.php`:
 
 ```php
 <?php declare(strict_types=1);
@@ -903,16 +1151,81 @@ class ApiResponse
             ],
         ];
     }
+
+    public static function collection($data, array $meta = []): array
+    {
+        return [
+            'success' => true,
+            'data' => $data,
+            'meta' => array_merge([
+                'total' => count($data),
+                'timestamp' => (new \DateTime())->format(\DateTime::ATOM),
+            ], $meta),
+        ];
+    }
 }
 ```
 
-Usage:
+**Step 2: Apply to All Controller Methods**
+
+Update `custom/plugins/LearningBundle/src/Core/Api/ProductViewAnalyticsController.php`:
 
 ```php
-use LearningBundle\Core\Api\Response\ApiResponse;
+use Learning\Bundle\Core\Api\Response\ApiResponse;
+
+public function getOverview(Request $request, Context $context): JsonResponse
+{
+    $errors = $this->validator->validateOverviewRequest($request);
+    if (!empty($errors)) {
+        throw new InvalidAnalyticsRequestException($errors);
+    }
+
+    $days = (int) $request->query->get('days', 30);
+
+    $viewsPerDay = $this->analyticsService->getViewsForLastDays($days, $context);
+    $totalViews = $this->analyticsService->getTotalViewsByProduct($context);
+    $browserStats = $this->analyticsService->getViewsByBrowser($context);
+
+    return new JsonResponse(
+        ApiResponse::success([
+            'period' => [
+                'days' => $days,
+                'start' => (new \DateTime())->modify("-{$days} days")->format('Y-m-d'),
+                'end' => (new \DateTime())->format('Y-m-d'),
+            ],
+            'views_per_day' => $viewsPerDay,
+            'total_views_by_product' => $totalViews,
+            'browser_statistics' => $browserStats,
+        ], [
+            'version' => '1.0',
+            'endpoint' => 'overview',
+        ])
+    );
+}
+
+public function getProductAnalytics(string $productId, Request $request, Context $context): JsonResponse
+{
+    $viewCount = $this->productViewService->getProductViewCount($productId, $context);
+    
+    if ($viewCount === 0) {
+        throw new ProductViewNotFoundException($productId);
+    }
+
+    return new JsonResponse(
+        ApiResponse::success([
+            'product_id' => $productId,
+            'total_views' => $viewCount,
+        ])
+    );
+}
 
 public function getPopularProducts(Request $request, Context $context): JsonResponse
 {
+    $errors = $this->validator->validatePopularRequest($request);
+    if (!empty($errors)) {
+        throw new InvalidAnalyticsRequestException($errors);
+    }
+
     $limit = (int) $request->query->get('limit', 10);
     $page = (int) $request->query->get('page', 1);
     
@@ -920,6 +1233,20 @@ public function getPopularProducts(Request $request, Context $context): JsonResp
 
     return new JsonResponse(
         ApiResponse::paginated($popularProducts, count($popularProducts), $page, $limit)
+    );
+}
+
+public function resetProductViews(string $productId, Context $context): JsonResponse
+{
+    // Reset logic would go here
+    
+    return new JsonResponse(
+        ApiResponse::success([
+            'product_id' => $productId,
+            'reset' => true,
+        ], [
+            'message' => "View count for product {$productId} has been reset",
+        ])
     );
 }
 ```
@@ -953,24 +1280,824 @@ bin/console framework:schema -f openapi > openapi.json
 
 ---
 
-## Part 6: Exercises (90 minutes)
+## Part 6: Exercises (90-120 minutes)
 
-### Exercise 1: Wishlist API
+### Exercise 1: Wishlist API (45 minutes)
 
-Create complete Store API endpoints for wishlist:
-- `POST /store-api/learning/wishlist/add` - Add product to wishlist
-- `DELETE /store-api/learning/wishlist/remove/{productId}` - Remove from wishlist
-- `GET /store-api/learning/wishlist` - Get customer's wishlist
+**Goal:** Create a complete Store API for customer wishlists with proper authentication, validation, and error handling.
 
-### Exercise 2: Product Comparison API
+**File Structure to Create:**
+```
+custom/plugins/LearningBundle/src/
+├── Core/
+│   ├── Content/
+│   │   ├── Wishlist/
+│   │   │   ├── SalesChannel/
+│   │   │   │   ├── AbstractWishlistRoute.php
+│   │   │   │   ├── WishlistRoute.php
+│   │   │   │   ├── WishlistAddRoute.php
+│   │   │   │   ├── WishlistRemoveRoute.php
+│   │   │   │   ├── WishlistResult.php
+│   │   │   │   └── WishlistRouteResponse.php
+│   │   │   └── WishlistEntity.php
+├── Service/
+│   └── WishlistService.php
+```
 
-Create Admin API for product comparisons:
-- `GET /api/_action/learning/comparison/stats` - Get comparison statistics
-- `GET /api/_action/learning/comparison/popular-combinations` - Most compared products together
+**Step 1: Create Wishlist Service**
 
-### Exercise 3: Rate Limiting
+Create `custom/plugins/LearningBundle/src/Service/WishlistService.php`:
 
-Implement simple rate limiting for your API endpoints (track requests per IP/customer).
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Service;
+
+use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\Uuid\Uuid;
+
+class WishlistService
+{
+    private EntityRepository $customerWishlistRepository;
+    private EntityRepository $productRepository;
+
+    public function __construct(
+        EntityRepository $customerWishlistRepository,
+        EntityRepository $productRepository
+    ) {
+        $this->customerWishlistRepository = $customerWishlistRepository;
+        $this->productRepository = $productRepository;
+    }
+
+    public function addProduct(string $customerId, string $productId, Context $context): void
+    {
+        // Check if product exists
+        $criteria = new Criteria([$productId]);
+        $product = $this->productRepository->search($criteria, $context)->first();
+        
+        if (!$product) {
+            throw new \InvalidArgumentException("Product {$productId} not found");
+        }
+
+        // Check if already in wishlist
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('customerId', $customerId));
+        $criteria->addFilter(new EqualsFilter('productId', $productId));
+        
+        $existing = $this->customerWishlistRepository->search($criteria, $context)->first();
+        if ($existing) {
+            return; // Already in wishlist
+        }
+
+        // Add to wishlist
+        $this->customerWishlistRepository->create([[
+            'id' => Uuid::randomHex(),
+            'customerId' => $customerId,
+            'productId' => $productId,
+            'createdAt' => new \DateTime(),
+        ]], $context);
+    }
+
+    public function removeProduct(string $customerId, string $productId, Context $context): void
+    {
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('customerId', $customerId));
+        $criteria->addFilter(new EqualsFilter('productId', $productId));
+        
+        $wishlistItem = $this->customerWishlistRepository->search($criteria, $context)->first();
+        
+        if (!$wishlistItem) {
+            throw new \InvalidArgumentException("Product {$productId} not in wishlist");
+        }
+
+        $this->customerWishlistRepository->delete([[
+            'id' => $wishlistItem->getId(),
+        ]], $context);
+    }
+
+    public function getWishlist(string $customerId, Context $context): array
+    {
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('customerId', $customerId));
+        $criteria->addAssociation('product');
+        $criteria->addAssociation('product.cover');
+        
+        $wishlistItems = $this->customerWishlistRepository->search($criteria, $context);
+        
+        $products = [];
+        foreach ($wishlistItems as $item) {
+            $product = $item->getProduct();
+            $products[] = [
+                'wishlist_item_id' => $item->getId(),
+                'product_id' => $product->getId(),
+                'product_number' => $product->getProductNumber(),
+                'name' => $product->getTranslation('name'),
+                'price' => $product->getPrice(),
+                'added_at' => $item->getCreatedAt()->format('Y-m-d H:i:s'),
+            ];
+        }
+        
+        return $products;
+    }
+}
+```
+
+**Step 2: Create Store API Routes**
+
+Create `custom/plugins/LearningBundle/src/Core/Content/Wishlist/SalesChannel/WishlistRoute.php`:
+
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Core\Content\Wishlist\SalesChannel;
+
+use Learning\Bundle\Service\WishlistService;
+use Shopware\Core\System\SalesChannel\SalesChannelContext;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Attribute\Route;
+
+#[Route(defaults: ['_routeScope' => ['store-api'], '_loginRequired' => true])]
+class WishlistRoute
+{
+    private WishlistService $wishlistService;
+
+    public function __construct(WishlistService $wishlistService)
+    {
+        $this->wishlistService = $wishlistService;
+    }
+
+    #[Route(
+        path: '/store-api/learning/wishlist',
+        name: 'store-api.learning.wishlist.get',
+        methods: ['GET']
+    )]
+    public function load(
+        Request $request,
+        SalesChannelContext $context
+    ): JsonResponse {
+        $customer = $context->getCustomer();
+        
+        if (!$customer) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Customer not logged in',
+            ], 401);
+        }
+
+        $wishlist = $this->wishlistService->getWishlist($customer->getId(), $context->getContext());
+
+        return new JsonResponse([
+            'success' => true,
+            'data' => $wishlist,
+            'total' => count($wishlist),
+        ]);
+    }
+
+    #[Route(
+        path: '/store-api/learning/wishlist/add',
+        name: 'store-api.learning.wishlist.add',
+        methods: ['POST']
+    )]
+    public function add(
+        Request $request,
+        SalesChannelContext $context
+    ): JsonResponse {
+        $customer = $context->getCustomer();
+        
+        if (!$customer) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Customer not logged in',
+            ], 401);
+        }
+
+        $productId = $request->request->get('productId');
+        
+        if (!$productId) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Product ID is required',
+            ], 400);
+        }
+
+        try {
+            $this->wishlistService->addProduct(
+                $customer->getId(),
+                $productId,
+                $context->getContext()
+            );
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Product added to wishlist',
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    #[Route(
+        path: '/store-api/learning/wishlist/remove/{productId}',
+        name: 'store-api.learning.wishlist.remove',
+        methods: ['DELETE']
+    )]
+    public function remove(
+        string $productId,
+        Request $request,
+        SalesChannelContext $context
+    ): JsonResponse {
+        $customer = $context->getCustomer();
+        
+        if (!$customer) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Customer not logged in',
+            ], 401);
+        }
+
+        try {
+            $this->wishlistService->removeProduct(
+                $customer->getId(),
+                $productId,
+                $context->getContext()
+            );
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Product removed from wishlist',
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+}
+```
+
+**Step 3: Register Services**
+
+Update `custom/plugins/LearningBundle/src/Resources/config/services.xml`:
+
+```xml
+<!-- Wishlist Service -->
+<service id="Learning\Bundle\Service\WishlistService">
+    <argument type="service" id="customer_wishlist_product.repository"/>
+    <argument type="service" id="product.repository"/>
+</service>
+
+<!-- Wishlist Routes -->
+<service id="Learning\Bundle\Core\Content\Wishlist\SalesChannel\WishlistRoute" public="true">
+    <argument type="service" id="Learning\Bundle\Service\WishlistService"/>
+    <call method="setContainer">
+        <argument type="service" id="service_container"/>
+    </call>
+    <tag name="controller.service_arguments"/>
+</service>
+```
+
+**Step 4: Update routes.xml**
+
+Update `custom/plugins/LearningBundle/src/Resources/config/routes.xml`:
+
+```xml
+<import resource="../../Core/Content/Wishlist/SalesChannel/*Route.php" type="attribute" />
+```
+
+**Step 5: Test the Wishlist API**
+
+```bash
+# Clear cache
+php -d memory_limit=512M bin/console cache:clear
+
+# Get context token (with customer login)
+curl -X POST "https://localhost:8000/store-api/account/login" \
+  -H "sw-access-key: ${SW_ACCESS_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "customer@example.com",
+    "password": "shopware"
+  }' -k
+
+# Save the context token from response
+export SW_CONTEXT_TOKEN="your-context-token"
+
+# Add product to wishlist
+curl -X POST "https://localhost:8000/store-api/learning/wishlist/add" \
+  -H "sw-access-key: ${SW_ACCESS_KEY}" \
+  -H "sw-context-token: ${SW_CONTEXT_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{"productId": "YOUR_PRODUCT_ID"}' -k
+
+# Get wishlist
+curl -X GET "https://localhost:8000/store-api/learning/wishlist" \
+  -H "sw-access-key: ${SW_ACCESS_KEY}" \
+  -H "sw-context-token: ${SW_CONTEXT_TOKEN}" -k
+
+# Remove from wishlist
+curl -X DELETE "https://localhost:8000/store-api/learning/wishlist/remove/YOUR_PRODUCT_ID" \
+  -H "sw-access-key: ${SW_ACCESS_KEY}" \
+  -H "sw-context-token: ${SW_CONTEXT_TOKEN}" -k
+```
+
+---
+
+### Exercise 2: Product Comparison API (45 minutes)
+
+**Goal:** Create Admin API endpoints to track and analyze product comparisons.
+
+**File Structure to Create:**
+```
+custom/plugins/LearningBundle/src/
+├── Core/
+│   ├── Api/
+│   │   └── ProductComparisonController.php
+├── Service/
+│   └── ProductComparisonService.php
+```
+
+**Step 1: Create Database Migration**
+
+Create `custom/plugins/LearningBundle/src/Migration/Migration1704556800ProductComparison.php`:
+
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Migration;
+
+use Doctrine\DBAL\Connection;
+use Shopware\Core\Framework\Migration\MigrationStep;
+
+class Migration1704556800ProductComparison extends MigrationStep
+{
+    public function getCreationTimestamp(): int
+    {
+        return 1704556800;
+    }
+
+    public function update(Connection $connection): void
+    {
+        $sql = <<<SQL
+CREATE TABLE IF NOT EXISTS `learning_product_comparison` (
+    `id` BINARY(16) NOT NULL,
+    `product_id_1` BINARY(16) NOT NULL,
+    `product_id_2` BINARY(16) NOT NULL,
+    `customer_id` BINARY(16) NULL,
+    `comparison_count` INT NOT NULL DEFAULT 1,
+    `created_at` DATETIME(3) NOT NULL,
+    `updated_at` DATETIME(3) NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_product_pair` (`product_id_1`, `product_id_2`),
+    CONSTRAINT `fk_learning_comparison_product_1` FOREIGN KEY (`product_id_1`) REFERENCES `product` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_learning_comparison_product_2` FOREIGN KEY (`product_id_2`) REFERENCES `product` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_learning_comparison_customer` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+SQL;
+        $connection->executeStatement($sql);
+    }
+
+    public function updateDestructive(Connection $connection): void
+    {
+        // Implement if needed
+    }
+}
+```
+
+**Step 2: Create Comparison Service**
+
+Create `custom/plugins/LearningBundle/src/Service/ProductComparisonService.php`:
+
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Service;
+
+use Doctrine\DBAL\Connection;
+use Shopware\Core\Framework\Context;
+
+class ProductComparisonService
+{
+    private Connection $connection;
+
+    public function __construct(Connection $connection)
+    {
+        $this->connection = $connection;
+    }
+
+    public function recordComparison(
+        string $productId1,
+        string $productId2,
+        ?string $customerId,
+        Context $context
+    ): void {
+        // Ensure consistent ordering (smaller ID first)
+        if ($productId1 > $productId2) {
+            [$productId1, $productId2] = [$productId2, $productId1];
+        }
+
+        $sql = <<<SQL
+INSERT INTO learning_product_comparison 
+    (id, product_id_1, product_id_2, customer_id, comparison_count, created_at, updated_at)
+VALUES 
+    (UNHEX(?), UNHEX(?), UNHEX(?), ?, 1, NOW(3), NOW(3))
+ON DUPLICATE KEY UPDATE 
+    comparison_count = comparison_count + 1,
+    updated_at = NOW(3)
+SQL;
+
+        $this->connection->executeStatement($sql, [
+            bin2hex(random_bytes(16)),
+            $productId1,
+            $productId2,
+            $customerId ? hex2bin($customerId) : null,
+        ]);
+    }
+
+    public function getComparisonStats(Context $context): array
+    {
+        $sql = <<<SQL
+SELECT 
+    COUNT(DISTINCT id) as total_comparisons,
+    COUNT(DISTINCT customer_id) as unique_customers,
+    AVG(comparison_count) as avg_comparisons_per_pair
+FROM learning_product_comparison
+SQL;
+
+        return $this->connection->fetchAssociative($sql) ?: [];
+    }
+
+    public function getPopularCombinations(int $limit, Context $context): array
+    {
+        $sql = <<<SQL
+SELECT 
+    LOWER(HEX(lpc.product_id_1)) as product_id_1,
+    LOWER(HEX(lpc.product_id_2)) as product_id_2,
+    p1.product_number as product_number_1,
+    p2.product_number as product_number_2,
+    pt1.name as product_name_1,
+    pt2.name as product_name_2,
+    SUM(lpc.comparison_count) as total_comparisons
+FROM learning_product_comparison lpc
+LEFT JOIN product p1 ON lpc.product_id_1 = p1.id
+LEFT JOIN product p2 ON lpc.product_id_2 = p2.id
+LEFT JOIN product_translation pt1 ON p1.id = pt1.product_id AND pt1.language_id = UNHEX(?)
+LEFT JOIN product_translation pt2 ON p2.id = pt2.product_id AND pt2.language_id = UNHEX(?)
+GROUP BY lpc.product_id_1, lpc.product_id_2
+ORDER BY total_comparisons DESC
+LIMIT ?
+SQL;
+
+        $languageId = $context->getLanguageId();
+        return $this->connection->fetchAllAssociative($sql, [
+            $languageId,
+            $languageId,
+            $limit,
+        ]);
+    }
+}
+```
+
+**Step 3: Create Admin API Controller**
+
+Create `custom/plugins/LearningBundle/src/Core/Api/ProductComparisonController.php`:
+
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Core\Api;
+
+use Learning\Bundle\Service\ProductComparisonService;
+use Learning\Bundle\Core\Api\Response\ApiResponse;
+use Shopware\Core\Framework\Context;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Attribute\Route;
+
+#[Route(defaults: ['_routeScope' => ['api']])]
+class ProductComparisonController extends AbstractController
+{
+    private ProductComparisonService $comparisonService;
+
+    public function __construct(ProductComparisonService $comparisonService)
+    {
+        $this->comparisonService = $comparisonService;
+    }
+
+    #[Route(
+        path: '/api/_action/learning/comparison/stats',
+        name: 'api.action.learning.comparison.stats',
+        methods: ['GET']
+    )]
+    public function getStats(Request $request, Context $context): JsonResponse
+    {
+        $stats = $this->comparisonService->getComparisonStats($context);
+
+        return new JsonResponse(
+            ApiResponse::success($stats, [
+                'endpoint' => 'comparison-stats',
+            ])
+        );
+    }
+
+    #[Route(
+        path: '/api/_action/learning/comparison/popular-combinations',
+        name: 'api.action.learning.comparison.popular',
+        methods: ['GET']
+    )]
+    public function getPopularCombinations(Request $request, Context $context): JsonResponse
+    {
+        $limit = (int) $request->query->get('limit', 20);
+        
+        $combinations = $this->comparisonService->getPopularCombinations($limit, $context);
+
+        return new JsonResponse(
+            ApiResponse::collection($combinations, [
+                'endpoint' => 'popular-combinations',
+                'limit' => $limit,
+            ])
+        );
+    }
+}
+```
+
+**Step 4: Register Services**
+
+Update `services.xml`:
+
+```xml
+<!-- Product Comparison Service -->
+<service id="Learning\Bundle\Service\ProductComparisonService">
+    <argument type="service" id="Doctrine\DBAL\Connection"/>
+</service>
+
+<!-- Product Comparison Controller -->
+<service id="Learning\Bundle\Core\Api\ProductComparisonController" public="true">
+    <argument type="service" id="Learning\Bundle\Service\ProductComparisonService"/>
+    <call method="setContainer">
+        <argument type="service" id="service_container"/>
+    </call>
+    <tag name="controller.service_arguments"/>
+</service>
+```
+
+**Step 5: Run Migration and Test**
+
+```bash
+# Run migration
+bin/console database:migrate --all
+
+# Clear cache
+php -d memory_limit=512M bin/console cache:clear
+
+# Get admin token
+curl -k -X POST "https://localhost:8000/api/oauth/token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "client_id": "administration",
+    "grant_type": "password",
+    "scopes": "write",
+    "username": "admin",
+    "password": "shopware"
+  }'
+
+export SW_ACCESS_TOKEN="your-token"
+
+# Get comparison stats
+curl -X GET "https://localhost:8000/api/_action/learning/comparison/stats" \
+  -H "Authorization: Bearer $SW_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" -k
+
+# Get popular combinations
+curl -X GET "https://localhost:8000/api/_action/learning/comparison/popular-combinations?limit=10" \
+  -H "Authorization: Bearer $SW_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" -k
+```
+
+---
+
+### Exercise 3: Rate Limiting (30 minutes)
+
+**Goal:** Implement simple rate limiting to prevent API abuse.
+
+**File Structure to Create:**
+```
+custom/plugins/LearningBundle/src/
+├── Core/
+│   ├── Api/
+│   │   ├── RateLimiter/
+│   │   │   ├── RateLimiterInterface.php
+│   │   │   └── SimpleRateLimiter.php
+│   │   └── Exception/
+│   │       └── RateLimitExceededException.php
+```
+
+**Step 1: Create Rate Limiter**
+
+Create `custom/plugins/LearningBundle/src/Core/Api/RateLimiter/SimpleRateLimiter.php`:
+
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Core\Api\RateLimiter;
+
+use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Symfony\Component\HttpFoundation\Request;
+
+class SimpleRateLimiter
+{
+    private AdapterInterface $cache;
+    private int $maxRequests;
+    private int $windowSeconds;
+
+    public function __construct(
+        AdapterInterface $cache,
+        int $maxRequests = 100,
+        int $windowSeconds = 60
+    ) {
+        $this->cache = $cache;
+        $this->maxRequests = $maxRequests;
+        $this->windowSeconds = $windowSeconds;
+    }
+
+    public function check(Request $request): bool
+    {
+        $key = $this->getKey($request);
+        $cacheItem = $this->cache->getItem($key);
+
+        if (!$cacheItem->isHit()) {
+            $cacheItem->set(1);
+            $cacheItem->expiresAfter($this->windowSeconds);
+            $this->cache->save($cacheItem);
+            return true;
+        }
+
+        $count = $cacheItem->get();
+        
+        if ($count >= $this->maxRequests) {
+            return false;
+        }
+
+        $cacheItem->set($count + 1);
+        $this->cache->save($cacheItem);
+        return true;
+    }
+
+    public function getRemainingRequests(Request $request): int
+    {
+        $key = $this->getKey($request);
+        $cacheItem = $this->cache->getItem($key);
+
+        if (!$cacheItem->isHit()) {
+            return $this->maxRequests;
+        }
+
+        $count = $cacheItem->get();
+        return max(0, $this->maxRequests - $count);
+    }
+
+    private function getKey(Request $request): string
+    {
+        // Use IP address or customer ID as key
+        $identifier = $request->getClientIp();
+        return 'rate_limit_' . md5($identifier);
+    }
+}
+```
+
+**Step 2: Create Exception**
+
+Create `custom/plugins/LearningBundle/src/Core/Api/Exception/RateLimitExceededException.php`:
+
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Core\Api\Exception;
+
+use Shopware\Core\Framework\ShopwareHttpException;
+use Symfony\Component\HttpFoundation\Response;
+
+class RateLimitExceededException extends ShopwareHttpException
+{
+    public function __construct(int $retryAfter)
+    {
+        parent::__construct(
+            'Rate limit exceeded. Try again in {{ seconds }} seconds.',
+            ['seconds' => $retryAfter]
+        );
+    }
+
+    public function getErrorCode(): string
+    {
+        return 'LEARNING__RATE_LIMIT_EXCEEDED';
+    }
+
+    public function getStatusCode(): int
+    {
+        return Response::HTTP_TOO_MANY_REQUESTS;
+    }
+}
+```
+
+**Step 3: Apply to Controllers**
+
+Update `ProductViewRoute.php` to use rate limiting:
+
+```php
+use Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter;
+use Learning\Bundle\Core\Api\Exception\RateLimitExceededException;
+
+class ProductViewRoute extends AbstractProductViewRoute
+{
+    private ProductViewService $productViewService;
+    private SimpleRateLimiter $rateLimiter;
+
+    public function __construct(
+        ProductViewService $productViewService,
+        SimpleRateLimiter $rateLimiter
+    ) {
+        $this->productViewService = $productViewService;
+        $this->rateLimiter = $rateLimiter;
+    }
+
+    #[Route(path: '/store-api/learning/product-view/{productId}', name: 'store-api.learning.product-view.record', methods: ['POST'])]
+    public function record(
+        string $productId,
+        Request $request,
+        SalesChannelContext $context
+    ): JsonResponse {
+        // Check rate limit
+        if (!$this->rateLimiter->check($request)) {
+            throw new RateLimitExceededException(60);
+        }
+
+        $customerId = $context->getCustomer()?->getId();
+        $userAgent = $request->headers->get('User-Agent');
+
+        $this->productViewService->recordView(
+            $productId,
+            $customerId,
+            $userAgent,
+            $context->getContext()
+        );
+        
+        return new JsonResponse([
+            'success' => true,
+            'message' => 'Product view recorded successfully',
+            'rate_limit' => [
+                'remaining' => $this->rateLimiter->getRemainingRequests($request),
+            ],
+        ]);
+    }
+}
+```
+
+**Step 4: Register Rate Limiter**
+
+Update `services.xml`:
+
+```xml
+<!-- Rate Limiter -->
+<service id="Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter">
+    <argument type="service" id="cache.app"/>
+    <argument>100</argument> <!-- max requests -->
+    <argument>60</argument>  <!-- window in seconds -->
+</service>
+
+<!-- Update ProductViewRoute service -->
+<service id="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute" public="true">
+    <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+    <argument type="service" id="Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter"/>
+    <call method="setContainer">
+        <argument type="service" id="service_container"/>
+    </call>
+    <tag name="controller.service_arguments"/>
+</service>
+```
+
+**Step 5: Test Rate Limiting**
+
+```bash
+# Clear cache
+php -d memory_limit=512M bin/console cache:clear
+
+# Test by making many requests quickly
+for i in {1..105}; do
+  curl -X POST "https://localhost:8000/store-api/learning/product-view/${PRODUCT_ID}" \
+    -H "sw-access-key: ${SW_ACCESS_KEY}" -k
+  echo " - Request $i"
+done
+
+# After 100 requests, you should see rate limit errors
+```
 
 ---
 

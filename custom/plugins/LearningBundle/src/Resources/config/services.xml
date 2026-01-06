@@ -245,5 +245,20 @@
         <service id="Learning\Bundle\Core\Api\Validator\AnalyticsRequestValidator">
             <argument type="service" id="validator"/>
         </service>
+
+        <!-- Wishlist Service -->
+        <service id="Learning\Bundle\Service\WishlistService">
+            <argument type="service" id="customer_wishlist_product.repository"/>
+            <argument type="service" id="product.repository"/>
+        </service>
+
+        <!-- Wishlist Routes -->
+        <service id="Learning\Bundle\Core\Content\Wishlist\SalesChannel\WishlistRoute" public="true">
+            <argument type="service" id="Learning\Bundle\Service\WishlistService"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+            <tag name="controller.service_arguments"/>
+        </service>
     </services>
 </container>

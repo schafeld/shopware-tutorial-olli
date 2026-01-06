@@ -260,5 +260,20 @@
             </call>
             <tag name="controller.service_arguments"/>
         </service>
+        
+        <!-- Product Comparison Service -->
+        <service id="Learning\Bundle\Service\ProductComparisonService">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <!-- Product Comparison Controller -->
+        <service id="Learning\Bundle\Core\Api\ProductComparisonController" public="true">
+            <argument type="service" id="Learning\Bundle\Service\ProductComparisonService"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+            <tag name="controller.service_arguments"/>
+        </service>
+
     </services>
 </container>

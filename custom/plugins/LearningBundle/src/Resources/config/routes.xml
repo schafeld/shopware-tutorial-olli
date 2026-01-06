@@ -4,6 +4,10 @@
         xsi:schemaLocation="http://symfony.com/schema/routing
         https://symfony.com/schema/routing/routing-1.0.xsd">
 
+    <!-- Store API Routes -->
     <import resource="../../Core/Content/ProductView/SalesChannel/*Route.php" type="attribute" />
     <import resource="../../Core/Content/Wishlist/SalesChannel/*Route.php" type="attribute" />
+    
+    <!-- Admin API Routes -->
+    <import resource="../../Core/Api/*Controller.php" type="attribute" />
 </routes>

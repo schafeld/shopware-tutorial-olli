@@ -415,7 +415,7 @@ curl -X GET "https://localhost:8000/store-api/learning/product-view/019b4610a669
 - **Cause:** Missing `controller.service_arguments` tag or incorrect namespace
 - **Solution:** 
   1. Add `<tag name="controller.service_arguments"/>` to your service definition
-  2. Ensure namespace matches composer.json (e.g., `Learning\Bundle`, not `LearningBundle`)
+  2. Verify namespace matches composer.json (e.g., `Learning\Bundle`, not `LearningBundle`)
 
 **Issue: 401 Unauthorized**
 - **Cause:** Missing or incorrect access key
@@ -875,13 +875,12 @@ public function getProductAnalytics(string $productId, Request $request, Context
         throw new ProductViewNotFoundException($productId);
     }
 
-    return new JsonResponse([
-        'success' => true,
-        'data' => [
+    return new JsonResponse(
+        ApiResponse::success([
             'product_id' => $productId,
             'total_views' => $viewCount,
-        ],
-    ]);
+        ])
+    );
 }
 
 public function getPopularProducts(Request $request, Context $context): JsonResponse
@@ -895,14 +894,23 @@ public function getPopularProducts(Request $request, Context $context): JsonResp
     
     $popularProducts = $this->productViewService->getMostViewedProducts($limit, $context);
 
-    return new JsonResponse([
-        'success' => true,
-        'data' => $popularProducts,
-        'meta' => [
-            'total' => count($popularProducts),
-            'limit' => $limit,
-        ],
-    ]);
+    return new JsonResponse(
+        ApiResponse::paginated($popularProducts, count($popularProducts), $page, $limit)
+    );
+}
+
+public function resetProductViews(string $productId, Context $context): JsonResponse
+{
+    // Reset logic would go here
+    
+    return new JsonResponse(
+        ApiResponse::success([
+            'product_id' => $productId,
+            'reset' => true,
+        ], [
+            'message' => "View count for product {$productId} has been reset",
+        ])
+    );
 }
 ```
 
@@ -1052,9 +1060,8 @@ class ProductViewAnalyticsController extends AbstractController
         $totalViews = $this->analyticsService->getTotalViewsByProduct($context);
         $browserStats = $this->analyticsService->getViewsByBrowser($context);
 
-        return new JsonResponse([
-            'success' => true,
-            'data' => [
+        return new JsonResponse(
+            ApiResponse::success([
                 'period' => [
                     'days' => $days,
                     'start' => (new \DateTime())->modify("-{$days} days")->format('Y-m-d'),
@@ -1063,8 +1070,11 @@ class ProductViewAnalyticsController extends AbstractController
                 'views_per_day' => $viewsPerDay,
                 'total_views_by_product' => $totalViews,
                 'browser_statistics' => $browserStats,
-            ],
-        ]);
+            ], [
+                'version' => '1.0',
+                'endpoint' => 'overview',
+            ])
+        );
     }
 }
 ```
@@ -1257,26 +1267,168 @@ public function resetProductViews(string $productId, Context $context): JsonResp
 
 ### Generate API Documentation
 
-Shopware uses OpenAPI (Swagger) annotations for API documentation.
+Shopware uses OpenAPI (Swagger) for API documentation. You can generate the schema in multiple ways:
 
-### View Generated Documentation
+**Method 1: Generate File Using CLI (Recommended for Import)**
 
 ```bash
-# Generate OpenAPI schema
-bin/console framework:schema -f openapi > openapi.json
+# Generate OpenAPI schema for Admin API
+bin/console framework:schema --schema-format=openapi3 openapi-admin.json
 
-# View in browser (if using API Platform)
-# Navigate to: http://localhost:8000/api/_info/openapi3.json
+# Or using short form
+bin/console framework:schema -s openapi3 openapi-admin.json
+
+# Pretty-printed JSON (more readable)
+bin/console framework:schema -s openapi3 --pretty openapi-admin.json
+
+# For Store API specifically
+bin/console framework:schema -s openapi3 --store-api openapi-store.json
 ```
 
-### Test with Postman
+> **Note:** You may see a warning: `Warning: Failed to load plugins. Message: An exception occurred in the driver: SQLSTATE[HY000] [2002] Connection refused`
+> 
+> This warning is **harmless** and can be safely ignored. It occurs because the command tries to connect to the database during plugin loading, but the schema generation doesn't actually need database data - it reads from your route attributes and service definitions.
+>
+> **To verify it worked:** Check that the file was created: `ls -lh openapi-admin.json` (should be 50KB+)
 
-1. Import OpenAPI schema into Postman
-2. Create environment with variables:
-   - `base_url`: http://localhost:8000
-   - `access_token`: your-token
-   - `context_token`: your-context-token
-3. Test all endpoints
+**Suppress the Warning (Optional):**
+
+```bash
+# Option 1: Redirect stderr to suppress warnings
+bin/console framework:schema -s openapi3 openapi-admin.json 2>/dev/null
+
+# Option 2: Ensure database is fully started before running
+docker compose up -d database
+sleep 5
+bin/console framework:schema -s openapi3 openapi-admin.json
+```
+
+**Method 2: Access Live API Endpoints (Best for Testing)**
+
+```bash
+# Admin API schema
+curl -k https://localhost:8000/api/_info/openapi3.json | jq . > openapi-admin.json
+
+# Store API schema (requires access key)
+curl -k https://localhost:8000/store-api/_info/openapi3.json \
+  -H "sw-access-key: YOUR_ACCESS_KEY" | jq . > openapi-store.json
+```
+
+> **Note:** Use `-k` flag to ignore self-signed SSL certificate warnings in development.
+
+### Verify Your Routes Appear in the Schema
+
+```bash
+# Search for your custom routes
+grep -A 5 "learning" openapi-admin.json
+
+# Or view specific sections
+cat openapi-admin.json | jq '.paths | keys[] | select(contains("learning"))'
+```
+
+### Import into API Testing Tools
+
+**Option 1: Postman**
+1. Open Postman
+2. Click **Import** button
+3. Select the generated `openapi-admin.json` file
+4. Postman will create a collection with all endpoints
+
+**Option 2: Swagger UI**
+1. Install Swagger UI: `npm install -g swagger-ui-watcher`
+2. Run: `swagger-ui-watcher openapi-admin.json`
+3. Open browser to view interactive documentation
+
+**Option 3: Use Shopware's Built-in Documentation**
+- Navigate to: `https://localhost:8000/api/_info/swagger.html` (Admin API)
+- Navigate to: `https://localhost:8000/store-api/_info/swagger.html` (Store API)
+
+### Create Postman Environment
+
+After importing the collection, create an environment with these variables:
+
+```json
+{
+  "base_url": "https://localhost:8000",
+  "access_key": "YOUR_SALES_CHANNEL_ACCESS_KEY",
+  "context_token": "will_be_set_after_login",
+  "admin_token": "will_be_set_after_oauth"
+}
+```
+
+### Test All Endpoints
+
+1. **Store API Endpoints:**
+   - Get popular products
+   - Record product view
+   - Get specific product view count
+
+2. **Admin API Endpoints:**
+   - Get analytics overview
+   - Get product-specific analytics
+   - Get popular products (admin)
+
+3. **Verify Response Format:**
+   - All responses should follow your ApiResponse structure
+   - Check timestamps, metadata, pagination where applicable
+   - Verify error responses for invalid requests
+
+### Common Issues & Troubleshooting
+
+**Issue: "The `-f` option does not exist" error**
+- **Cause:** Wrong command syntax - Shopware 6.7+ uses `--schema-format` not `-f`
+- **Solution:** 
+  ```bash
+  # Correct syntax:
+  bin/console framework:schema --schema-format=openapi3 openapi.json
+  # Or short form:
+  bin/console framework:schema -s openapi3 openapi.json
+  ```
+
+**Issue: "Connection refused" warning appears but file is created**
+- **Cause:** Command tries to load plugins and connect to database, but doesn't actually need it for schema generation
+- **Status:** ✅ **This is normal and harmless** - the file was created successfully
+- **Verification:** 
+  ```bash
+  # Check file was created
+  ls -lh openapi.json
+  # Should show a file 50KB+ in size
+  
+  # Verify your routes are in the schema
+  grep "learning" openapi.json
+  ```
+- **To suppress warning (optional):**
+  ```bash
+  bin/console framework:schema -s openapi3 openapi.json 2>/dev/null
+  ```
+
+**Issue: Generated file is empty or very small (<1KB)**
+- **Cause:** Command failed but didn't show clear error message
+- **Solution:** 
+  1. Ensure routes.xml exists and is properly configured
+  2. Clear cache: `php -d memory_limit=512M bin/console cache:clear`
+  3. Verify routes are registered: `bin/console debug:router | grep learning`
+  4. Try accessing the live endpoint instead: `curl -k https://localhost:8000/api/_info/openapi3.json`
+
+**Issue: Schema doesn't include custom routes**
+- **Cause:** Routes not properly discovered or cache issue
+- **Solution:**
+  1. Verify routes.xml exists at `src/Resources/config/routes.xml`
+  2. Check route attributes use `#[Route]` syntax (not old `@Route` annotations)
+  3. Clear cache thoroughly: `rm -rf var/cache/*`
+  4. Regenerate: `bin/console framework:schema -s openapi3 openapi.json`
+
+**Issue: Cannot access live OpenAPI endpoint (404)**
+- **Cause:** Trying to use HTTP instead of HTTPS, or wrong path
+- **Solution:**
+  ```bash
+  # Admin API - correct URL with HTTPS and -k flag
+  curl -k https://localhost:8000/api/_info/openapi3.json
+  
+  # Store API - needs access key
+  curl -k https://localhost:8000/store-api/_info/openapi3.json \
+    -H "sw-access-key: YOUR_ACCESS_KEY"
+  ```
 
 ---
 

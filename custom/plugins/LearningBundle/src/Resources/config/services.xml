@@ -216,5 +216,72 @@
             <tag name="twig.extension"/>
         </service>
 
+        <!-- Store API Route -->
+        <service id="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute" public="true">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+            <argument type="service" id="Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter"/>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <service id="Learning\Bundle\Core\Content\ProductView\SalesChannel\AbstractProductViewRoute" 
+                 alias="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute" public="true"/>
+
+        <!-- Admin API Controller -->
+        <service id="Learning\Bundle\Core\Api\ProductViewAnalyticsController" public="true">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewAnalyticsService"/>
+            <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+            <argument type="service" id="Learning\Bundle\Core\Api\Validator\AnalyticsRequestValidator"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <!-- Analytics Service -->
+        <service id="Learning\Bundle\Service\ProductViewAnalyticsService">
+            <argument type="service" id="learning_product_view.repository"/>
+        </service>
+
+        <!-- Request Validator -->
+        <service id="Learning\Bundle\Core\Api\Validator\AnalyticsRequestValidator">
+            <argument type="service" id="validator"/>
+        </service>
+
+        <!-- Wishlist Service -->
+        <service id="Learning\Bundle\Service\WishlistService">
+            <argument type="service" id="customer_wishlist_product.repository"/>
+            <argument type="service" id="product.repository"/>
+        </service>
+
+        <!-- Wishlist Routes -->
+        <service id="Learning\Bundle\Core\Content\Wishlist\SalesChannel\WishlistRoute" public="true">
+            <argument type="service" id="Learning\Bundle\Service\WishlistService"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <!-- Product Comparison Service -->
+        <service id="Learning\Bundle\Service\ProductComparisonService">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <!-- Product Comparison Controller -->
+        <service id="Learning\Bundle\Core\Api\ProductComparisonController" public="true">
+            <argument type="service" id="Learning\Bundle\Service\ProductComparisonService"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+            <tag name="controller.service_arguments"/>
+        </service>
+
+        <!-- Rate Limiter -->
+        <service id="Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter">
+            <argument type="service" id="cache.system"/>
+            <argument>100</argument> <!-- max requests -->
+            <argument>60</argument>  <!-- window in seconds -->
+            <argument type="service" id="logger"/>
+        </service>
     </services>
 </container>

@@ -322,14 +322,60 @@ docker compose exec database mariadb -u root -proot shopware -e "SELECT COALESCE
 +------------+----------------------------+
 ```
 
+**What is SW_CONTEXT_TOKEN?**
+
+The `sw-context-token` is returned by the Store API login endpoint and is used for:
+- **Authentication:** Identifies the logged-in customer
+- **Session management:** Maintains cart, wishlist, and customer state
+- **Customer-specific operations:** Required for checkout, orders, wishlists
+
+**Key Facts:**
+- ⚠️ **The token is in the HTTP RESPONSE HEADER, not the JSON body**
+- Header name: `sw-context-token`
+- Token length: 32 characters
+- Valid for the session duration
+- Required for cart operations, checkout, customer-specific data
+
 **Testing the Endpoints:**
 
 > **Important:** Use HTTPS (not HTTP) - Shopware 6.7+ redirects HTTP to HTTPS. Use `-k` flag to ignore SSL certificate warnings in development.
 
-**1. Get Popular Products:**
+**Setup: Get Your Access Key and Product ID**
+
+```bash
+# 1. Get your sales channel access key
+docker compose exec database mariadb -u root -proot shopware -e "SELECT COALESCE(sct.name, sc.short_name, 'Unnamed') as name, sc.access_key FROM sales_channel sc LEFT JOIN sales_channel_translation sct ON sc.id = sct.sales_channel_id GROUP BY sc.id"
+
+# Example output:
+# +------------+----------------------------+
+# | name       | access_key                 |
+# +------------+----------------------------+
+# | Storefront | SWSCQJDIU3D3SUDTDEHDNVH2UW |
+# +------------+----------------------------+
+
+# Save it as a variable
+export SW_ACCESS_KEY="SWSCQJDIU3D3SUDTDEHDNVH2UW"
+
+# 2. Get a product ID for testing
+docker compose exec database mariadb -u root -proot shopware -e "SELECT LOWER(HEX(id)) as id, product_number FROM product WHERE parent_id IS NULL LIMIT 3"
+
+# Example output:
+# +----------------------------------+---------------------+
+# | id                               | product_number      |
+# +----------------------------------+---------------------+
+# | 019b4610a6697180b4fd97770223e1da | 5807372378675640149 |
+# | 11dc680240b04f469ccba354cbf0b967 | SWDEMO10002         |
+# +----------------------------------+---------------------+
+
+# Save a product ID
+export PRODUCT_ID="019b4610a6697180b4fd97770223e1da"
+```
+
+**Test 1: Get Popular Products (No Authentication Required)**
+
 ```bash
 curl -X GET "https://localhost:8000/store-api/learning/product-view/popular?limit=5" \
-  -H "sw-access-key: SWSCQJDIU3D3SUDTDEHDNVH2UW" -k
+  -H "sw-access-key: ${SW_ACCESS_KEY}" -k
 ```
 
 **Expected Response:**
@@ -354,10 +400,11 @@ curl -X GET "https://localhost:8000/store-api/learning/product-view/popular?limi
 }
 ```
 
-**2. Get Specific Product View Count:**
+**Test 2: Get Specific Product View Count**
+
 ```bash
-curl -X GET "https://localhost:8000/store-api/learning/product-view/019b4610a6697180b4fd97770223e1da" \
-  -H "sw-access-key: SWSCQJDIU3D3SUDTDEHDNVH2UW" -k
+curl -X GET "https://localhost:8000/store-api/learning/product-view/${PRODUCT_ID}" \
+  -H "sw-access-key: ${SW_ACCESS_KEY}" -k
 ```
 
 **Expected Response:**
@@ -368,10 +415,11 @@ curl -X GET "https://localhost:8000/store-api/learning/product-view/019b4610a669
 }
 ```
 
-**3. Record a Product View (POST):**
+**Test 3: Record a Product View (POST)**
+
 ```bash
-curl -X POST "https://localhost:8000/store-api/learning/product-view/019b4610a6697180b4fd97770223e1da" \
-  -H "sw-access-key: SWSCQJDIU3D3SUDTDEHDNVH2UW" -k
+curl -X POST "https://localhost:8000/store-api/learning/product-view/${PRODUCT_ID}" \
+  -H "sw-access-key: ${SW_ACCESS_KEY}" -k
 ```
 
 **Expected Response:**
@@ -382,11 +430,15 @@ curl -X POST "https://localhost:8000/store-api/learning/product-view/019b4610a66
 }
 ```
 
-**4. Verify View Count Increased:**
+**Test 4: Verify View Count Increased**
+
+```bash
+**Test 4: Verify View Count Increased**
+
 ```bash
 # After recording, check count again - should increase by 1
-curl -X GET "https://localhost:8000/store-api/learning/product-view/019b4610a6697180b4fd97770223e1da" \
-  -H "sw-access-key: SWSCQJDIU3D3SUDTDEHDNVH2UW" -k
+curl -X GET "https://localhost:8000/store-api/learning/product-view/${PRODUCT_ID}" \
+  -H "sw-access-key: ${SW_ACCESS_KEY}" -k
 ```
 
 **Expected Response:**
@@ -395,6 +447,75 @@ curl -X GET "https://localhost:8000/store-api/learning/product-view/019b4610a669
   "productId": "019b4610a6697180b4fd97770223e1da",
   "viewCount": 5
 }
+```
+
+**Test 5: Customer Login and Context Token (For Authenticated Operations)**
+
+```bash
+# Login to get context token (replace with your actual customer credentials)
+curl -X POST "https://localhost:8000/store-api/account/login" \
+  -H "sw-access-key: ${SW_ACCESS_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "shopware"
+  }' -k -s -i | head -30
+```
+
+**What to look for:**
+- HTTP status: `HTTP/2 200` (success)
+- Response header: `sw-context-token: <32-character-token>`
+- JSON body: `{"apiAlias":"array_struct","redirectUrl":null}`
+
+**⚠️ IMPORTANT:** The context token is in the **HTTP response header**, NOT in the JSON body!
+
+**Extract the token automatically:**
+
+```bash
+# Extract context token from header
+SW_CONTEXT_TOKEN=$(curl -X POST "https://localhost:8000/store-api/account/login" \
+  -H "sw-access-key: ${SW_ACCESS_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "shopware"
+  }' -k -s -i 2>/dev/null | grep -i "sw-context-token:" | cut -d' ' -f2 | tr -d '\r')
+
+echo "Context Token: ${SW_CONTEXT_TOKEN}"
+echo "Token Length: ${#SW_CONTEXT_TOKEN}"
+
+# Should output:
+# Context Token: tzhR0cGeG7XaB47vYN8828CTH0wF48q0
+# Token Length: 32
+```
+
+**Test 6: Verify Token Works - Get Customer Information**
+
+```bash
+curl -X GET "https://localhost:8000/store-api/account/customer" \
+  -H "sw-access-key: ${SW_ACCESS_KEY}" \
+  -H "sw-context-token: ${SW_CONTEXT_TOKEN}" \
+  -k -s | jq '{firstName: .firstName, lastName: .lastName, email: .email, active: .active}'
+```
+
+**Expected Response:**
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "test@example.com",
+  "active": true
+}
+```
+
+**Test 7: Use Context Token with Product Views**
+
+```bash
+# Record view with customer context (tracks which customer viewed)
+curl -X POST "https://localhost:8000/store-api/learning/product-view/${PRODUCT_ID}" \
+  -H "sw-access-key: ${SW_ACCESS_KEY}" \
+  -H "sw-context-token: ${SW_CONTEXT_TOKEN}" \
+  -k
 ```
 
 ### Common Issues & Troubleshooting

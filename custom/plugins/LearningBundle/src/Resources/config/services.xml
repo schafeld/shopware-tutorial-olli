@@ -219,6 +219,7 @@
         <!-- Store API Route -->
         <service id="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute" public="true">
             <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+            <argument type="service" id="Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter"/>
             <tag name="controller.service_arguments"/>
         </service>
 
@@ -260,7 +261,7 @@
             </call>
             <tag name="controller.service_arguments"/>
         </service>
-        
+
         <!-- Product Comparison Service -->
         <service id="Learning\Bundle\Service\ProductComparisonService">
             <argument type="service" id="Doctrine\DBAL\Connection"/>
@@ -275,5 +276,12 @@
             <tag name="controller.service_arguments"/>
         </service>
 
+        <!-- Rate Limiter -->
+        <service id="Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter">
+            <argument type="service" id="cache.system"/>
+            <argument>100</argument> <!-- max requests -->
+            <argument>60</argument>  <!-- window in seconds -->
+            <argument type="service" id="logger"/>
+        </service>
     </services>
 </container>

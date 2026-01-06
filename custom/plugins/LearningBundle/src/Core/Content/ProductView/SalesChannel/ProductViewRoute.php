@@ -10,15 +10,21 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRouteResponse;
 use Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewResult;
+use Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter;
+use Learning\Bundle\Core\Api\Exception\RateLimitExceededException;
 
 #[Route(defaults: ['_routeScope' => ['store-api']])]
 class ProductViewRoute extends AbstractProductViewRoute
 {
     private ProductViewService $productViewService;
+    private SimpleRateLimiter $rateLimiter;
 
-    public function __construct(ProductViewService $productViewService)
-    {
+    public function __construct(
+        ProductViewService $productViewService,
+        SimpleRateLimiter $rateLimiter
+    ) {
         $this->productViewService = $productViewService;
+        $this->rateLimiter = $rateLimiter;
     }
 
     public function getDecorated(): AbstractProductViewRoute
@@ -57,6 +63,11 @@ class ProductViewRoute extends AbstractProductViewRoute
         Request $request,
         SalesChannelContext $context
     ) : JsonResponse {
+        // Check rate limit
+        if (!$this->rateLimiter->check($request)) {
+            throw new RateLimitExceededException(60);
+        }
+
         $customerId = $context->getCustomer()?->getId();
         $userAgent = $request->headers->get('User-Agent');
 
@@ -68,7 +79,10 @@ class ProductViewRoute extends AbstractProductViewRoute
         );
         return new JsonResponse([
             'success' => true,
-            'message' => 'Product view recorded successfully'
+            'message' => 'Product view recorded successfully',
+            'rate_limit' => [
+                'remaining' => $this->rateLimiter->getRemainingRequests($request),
+            ],
         ]);
     }
 }

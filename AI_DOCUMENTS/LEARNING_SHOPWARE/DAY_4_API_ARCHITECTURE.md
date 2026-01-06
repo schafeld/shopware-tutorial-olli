@@ -2124,9 +2124,35 @@ Update `services.xml`:
 
 **Step 5: Run Migration and Test**
 
+> **⚠️ IMPORTANT - Docker Database Connection:**
+> If you're using Docker (which you should be), running `bin/console database:migrate` from your **host machine** will fail with "Connection refused" because the command tries to connect to `localhost:3306`, but your database is in a Docker container.
+>
+> **Solution:** Create the table directly via Docker:
+
 ```bash
-# Run migration
-bin/console database:migrate --all
+# Option 1: Run migration via Docker (if you have an 'app' container)
+docker compose exec app bin/console database:migrate --all
+
+# Option 2: Create table directly via database container (recommended)
+docker compose exec -T database mariadb -u root -proot shopware -e "
+CREATE TABLE IF NOT EXISTS \`learning_product_comparison\` (
+    \`id\` BINARY(16) NOT NULL,
+    \`product_id_1\` BINARY(16) NOT NULL,
+    \`product_id_2\` BINARY(16) NOT NULL,
+    \`customer_id\` BINARY(16) NULL,
+    \`comparison_count\` INT NOT NULL DEFAULT 1,
+    \`created_at\` DATETIME(3) NOT NULL,
+    \`updated_at\` DATETIME(3) NULL,
+    PRIMARY KEY (\`id\`),
+    KEY \`idx_product_pair\` (\`product_id_1\`, \`product_id_2\`),
+    CONSTRAINT \`fk_learning_comparison_product_1\` FOREIGN KEY (\`product_id_1\`) REFERENCES \`product\` (\`id\`) ON DELETE CASCADE,
+    CONSTRAINT \`fk_learning_comparison_product_2\` FOREIGN KEY (\`product_id_2\`) REFERENCES \`product\` (\`id\`) ON DELETE CASCADE,
+    CONSTRAINT \`fk_learning_comparison_customer\` FOREIGN KEY (\`customer_id\`) REFERENCES \`customer\` (\`id\`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+"
+
+# Verify table was created
+docker compose exec -T database mariadb -u root -proot shopware -e "SHOW TABLES LIKE 'learning_product_comparison';"
 
 # Clear cache
 php -d memory_limit=512M bin/console cache:clear
@@ -2154,6 +2180,11 @@ curl -X GET "https://localhost:8000/api/_action/learning/comparison/popular-comb
   -H "Authorization: Bearer $SW_ACCESS_TOKEN" \
   -H "Content-Type: application/json" -k
 ```
+
+> **⚠️ OAuth Integration Setup Note:**
+> Setting up OAuth integrations programmatically can be challenging due to password hashing requirements. **The recommended approach is to create integrations via the Shopware Administration UI** (Settings → System → Integrations) rather than direct database insertion.
+>
+> For detailed testing instructions including OAuth setup, see: **[API Testing Guide](../API_TESTING_GUIDE.md)**
 
 ---
 
@@ -2477,6 +2508,19 @@ public function testProductViewApi(): void
 - [API Authentication](https://developer.shopware.com/docs/guides/integrations-api/authentication-authorisation)
 - [OpenAPI Specification](https://swagger.io/specification/)
 - [Postman Learning Center](https://learning.postman.com/)
+
+---
+
+## Additional Testing Resources
+
+📖 **Detailed API Testing Guide:** [API_TESTING_GUIDE.md](../API_TESTING_GUIDE.md)
+
+This comprehensive guide includes:
+- Step-by-step OAuth integration setup via Admin UI
+- Complete curl command examples with proper authentication
+- Database migration troubleshooting for Docker environments
+- Test scripts and automation examples
+- Common issues and their solutions
 
 ---
 

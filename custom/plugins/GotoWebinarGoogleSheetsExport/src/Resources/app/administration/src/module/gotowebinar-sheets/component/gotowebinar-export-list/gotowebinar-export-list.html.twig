@@ -1,0 +1,72 @@
+{% block gotowebinar_export_list %}
+    <sw-card 
+        :title="$tc('gotowebinar-sheets.exportList.title')"
+        :isLoading="isLoading"
+        class="gotowebinar-export-list">
+
+        {% block gotowebinar_export_list_toolbar %}
+            <template #toolbar>
+                <sw-button @click="onRefresh" size="small">
+                    <sw-icon name="default-action-refresh" small></sw-icon>
+                    {{ $tc('gotowebinar-sheets.exportList.refresh') }}
+                </sw-button>
+
+                <sw-button @click="onDownloadCsv" size="small">
+                    <sw-icon name="default-action-download" small></sw-icon>
+                    {{ $tc('gotowebinar-sheets.exportList.downloadCsv') }}
+                </sw-button>
+            </template>
+        {% endblock %}
+
+        {% block gotowebinar_export_list_grid %}
+            <template #grid>
+                <sw-data-grid
+                    :dataSource="exports"
+                    :columns="columns"
+                    :isLoading="isLoading"
+                    :showSelection="false"
+                    identifier="gotowebinar-export-list">
+
+                    {% block gotowebinar_export_list_column_exported_at %}
+                        <template #column-exportedAt="{ item }">
+                            {{ formatDate(item.exportedAt) }}
+                        </template>
+                    {% endblock %}
+
+                    {% block gotowebinar_export_list_column_customer_name %}
+                        <template #column-customerName="{ item }">
+                            {{ getCustomerName(item) }}
+                        </template>
+                    {% endblock %}
+
+                    {% block gotowebinar_export_list_column_status %}
+                        <template #column-exportStatus="{ item }">
+                            <sw-label :variant="getStatusVariant(item.exportStatus)">
+                                {{ getStatusLabel(item.exportStatus) }}
+                            </sw-label>
+                            <sw-help-text 
+                                v-if="item.errorMessage && item.exportStatus === 'failed'" 
+                                :text="item.errorMessage"
+                                width="300">
+                            </sw-help-text>
+                        </template>
+                    {% endblock %}
+
+                </sw-data-grid>
+
+                <sw-pagination
+                    :page="page"
+                    :limit="limit"
+                    :total="total"
+                    :total-visible="7"
+                    @page-change="onPageChange">
+                </sw-pagination>
+
+                <div v-if="total > 0" class="gotowebinar-export-list__footer">
+                    <span>{{ showingEntriesText }}</span>
+                </div>
+            </template>
+        {% endblock %}
+
+    </sw-card>
+{% endblock %}

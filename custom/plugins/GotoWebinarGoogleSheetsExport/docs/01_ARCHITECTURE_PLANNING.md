@@ -360,18 +360,31 @@ class ExportOrdersTask extends ScheduledTask
 
 **Location:** `Resources/app/administration/src/module/gotowebinar-sheets/`
 
-**Components:**
-- Overview page with export statistics
-- Google OAuth connection button
-- Manual export trigger button
-- CSV download button
-- Recent exports table (last 100 entries)
-- Configuration form (links to system config)
+**Status:** ⏳ **PENDING IMPLEMENTATION** (Planned for v1.1.0)
 
-**Admin Routes:**
-- `/gotowebinar/sheets` - Main dashboard
+**Current Implementation:**
+- ✅ Configuration form (XML-based, fully functional)
+- ✅ API endpoints for all operations
+- ✅ CLI commands for manual operations
+
+**Pending Components (Vue.js/Admin UI):**
+- ⏳ Overview page with export statistics dashboard
+- ⏳ Google OAuth connection button (browser-based flow)
+- ⏳ Manual export trigger button (one-click export)
+- ⏳ CSV download button in UI
+- ⏳ Recent exports table viewer (last 100 entries)
+- ⏳ Real-time export status updates
+
+**Planned Admin Routes:**
+- `/gotowebinar/sheets` - Main dashboard (pending)
 - `/gotowebinar/sheets/config` - Configuration (redirect to system config)
-- `/gotowebinar/sheets/export` - Manual export trigger
+- `/gotowebinar/sheets/export` - Manual export trigger (pending)
+
+**Estimated Implementation Effort:**
+- **Junior Developer (learning Vue.js + Shopware Admin):** 1-2 weeks
+- **Experienced Developer:** 3-5 days
+- **Components:** ~8-10 Vue.js components, routes, API integration
+- **Complexity:** Intermediate (requires Vue.js, Shopware Admin SDK knowledge)
 
 ### 7.2 AdminApiController
 

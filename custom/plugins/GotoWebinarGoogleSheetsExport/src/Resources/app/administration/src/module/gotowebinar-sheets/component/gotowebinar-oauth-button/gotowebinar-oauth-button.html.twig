@@ -1,0 +1,9 @@
+{% block gotowebinar_oauth_button %}
+    <sw-button
+        :variant="buttonVariant"
+        :disabled="isConnecting"
+        @click="onButtonClick">
+        <sw-icon :name="iconName" small></sw-icon>
+        {{ buttonLabel }}
+    </sw-button>
+{% endblock %}

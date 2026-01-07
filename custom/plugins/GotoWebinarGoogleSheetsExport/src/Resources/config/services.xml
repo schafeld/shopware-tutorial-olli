@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <!-- Entity Definition -->
+        <service id="GotoWebinarGoogleSheetsExport\Core\Content\OrderExport\OrderExportDefinition">
+            <tag name="shopware.entity.definition" entity="gotowebinar_order_export" />
+        </service>
+
+        <!-- Services -->
+        <service id="GotoWebinarGoogleSheetsExport\Service\GoogleSheetsService">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <service id="GotoWebinarGoogleSheetsExport\Service\CategoryFilterService">
+            <argument type="service" id="category.repository"/>
+            <argument type="service" id="product.repository"/>
+        </service>
+
+        <service id="GotoWebinarGoogleSheetsExport\Service\OrderExportService">
+            <argument type="service" id="order.repository"/>
+            <argument type="service" id="gotowebinar_order_export.repository"/>
+            <argument type="service" id="GotoWebinarGoogleSheetsExport\Service\CategoryFilterService"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+
+        <service id="GotoWebinarGoogleSheetsExport\Service\CsvExportService"/>
+
+        <!-- Event Subscriber -->
+        <service id="GotoWebinarGoogleSheetsExport\Subscriber\OrderPlacedSubscriber">
+            <argument type="service" id="GotoWebinarGoogleSheetsExport\Service\OrderExportService"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <!-- Scheduled Task -->
+        <service id="GotoWebinarGoogleSheetsExport\ScheduledTask\ExportOrdersTask">
+            <tag name="shopware.scheduled.task"/>
+        </service>
+
+        <service id="GotoWebinarGoogleSheetsExport\ScheduledTask\ExportOrdersTaskHandler">
+            <argument type="service" id="scheduled_task.repository"/>
+            <argument type="service" id="GotoWebinarGoogleSheetsExport\Service\OrderExportService"/>
+            <argument type="service" id="GotoWebinarGoogleSheetsExport\Service\GoogleSheetsService"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
+            <tag name="messenger.message_handler"/>
+        </service>
+
+        <!-- Console Command -->
+        <service id="GotoWebinarGoogleSheetsExport\Command\ExportOrdersCommand">
+            <argument type="service" id="GotoWebinarGoogleSheetsExport\Service\OrderExportService"/>
+            <argument type="service" id="GotoWebinarGoogleSheetsExport\Service\GoogleSheetsService"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <tag name="console.command"/>
+        </service>
+
+        <!-- Admin API Controller -->
+        <service id="GotoWebinarGoogleSheetsExport\Controller\AdminApiController" public="true">
+            <argument type="service" id="GotoWebinarGoogleSheetsExport\Service\GoogleSheetsService"/>
+            <argument type="service" id="GotoWebinarGoogleSheetsExport\Service\OrderExportService"/>
+            <argument type="service" id="GotoWebinarGoogleSheetsExport\Service\CsvExportService"/>
+            <argument type="service" id="gotowebinar_order_export.repository"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+    </services>
+</container>

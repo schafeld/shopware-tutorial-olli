@@ -40,7 +40,22 @@ For each product in an order that matches the configured category, the following
 The plugin supports two export methods:
 
 1. **Scheduled Automatic Export** - Runs at configurable intervals (every 15 minutes, hourly, every 4 hours, daily, or weekly)
-2. **Manual Export** - Click a button in the admin panel to export immediately
+2. **Manual Export** - Via CLI command (admin UI button planned for v1.1)
+
+**Current Version (v1.0) - CLI/API Based:**
+- ✅ Full configuration via Admin Settings panel
+- ✅ Manual export via CLI: `bin/console gotowebinar:export-orders`
+- ✅ OAuth setup via CLI scripts (see Installation Guide)
+- ✅ CSV download via API endpoint
+- ✅ Statistics via API endpoint
+
+**Planned Version (v1.1) - Enhanced Admin UI:**
+- ⏳ Dashboard widget with visual statistics
+- ⏳ One-click manual export button
+- ⏳ Browser-based OAuth flow
+- ⏳ Export log viewer with filtering
+
+For most users, scheduled automatic exports are sufficient. Manual CLI commands are available for testing or on-demand exports.
 
 ---
 

@@ -1,0 +1,32 @@
+{
+    "name": "goto/webinar-google-sheets-export",
+    "description": "Export webinar order data to Google Sheets automatically",
+    "version": "1.0.0",
+    "type": "shopware-platform-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Oliver Schafeld"
+        }
+    ],
+    "require": {
+        "shopware/core": "~6.5.0|~6.6.0",
+        "google/apiclient": "^2.15"
+    },
+    "extra": {
+        "shopware-plugin-class": "GotoWebinarGoogleSheetsExport\\GotoWebinarGoogleSheetsExport",
+        "label": {
+            "de-DE": "GoTo Webinar Google Sheets Export",
+            "en-GB": "GoTo Webinar Google Sheets Export"
+        },
+        "description": {
+            "de-DE": "Exportiert Bestelldaten von Webinar-Produkten automatisch zu Google Sheets",
+            "en-GB": "Automatically exports webinar order data to Google Sheets"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "GotoWebinarGoogleSheetsExport\\": "src/"
+        }
+    }
+}

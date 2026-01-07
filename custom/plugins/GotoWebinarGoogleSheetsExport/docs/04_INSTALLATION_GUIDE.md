@@ -165,88 +165,107 @@ GotoWebinarGoogleSheetsExport    1.0.0    Yes    Yes
 
 ## Step 4: OAuth Authentication
 
-### 4.1 Generate Authorization URL
+### 4.1 Connect via Admin Dashboard (Recommended)
 
-Currently, you need to manually generate the OAuth URL. Here's how:
+The easiest way to connect to Google Sheets is through the admin UI:
+
+1. **Access the Plugin Dashboard:**
+   - In Shopware Admin, go to **Settings → System → Plugins**
+   - Find **GotoWebinarGoogleSheetsExport**
+   - Click **Open** or navigate to the dashboard
+
+2. **Click "Connect to Google Sheets":**
+   - On the dashboard, find the **Google OAuth** section
+   - Click the **"Connect to Google Sheets"** button
+   - A popup window will open with Google's authorization page
+
+3. **Authorize the Application:**
+   - Sign in with your Google account (the one with access to your Google Sheet)
+   - Review the requested permissions
+   - Click **Allow** to grant access
+
+4. **Automatic Token Exchange:**
+   - The popup will automatically close
+   - You'll see a success notification
+   - The refresh token is automatically saved to your configuration
+   - The button will change to **"Reconnected"** (green) to indicate success
+
+5. **Verify Connection:**
+   - The dashboard will now show your export statistics
+   - You can click **"Export Now"** to test the connection
+   - Check your Google Sheet to confirm the data appears
+
+**Security Notes:**
+- ✅ The entire OAuth flow happens in your browser (secure)
+- ✅ No credentials are exposed in CLI commands
+- ✅ Popup blockers may need to be disabled for the authorization window
+- ✅ You can revoke access anytime in your [Google Account Settings](https://myaccount.google.com/permissions)
+
+### 4.2 Alternative: CLI Authentication (Advanced)
+
+If you prefer or need to use CLI (e.g., for automated deployments), you can use this method:
+
+<details>
+<summary>Click to expand CLI authentication steps</summary>
+
+**Generate Authorization URL:**
 
 ```bash
 # Create a temporary script to generate the OAuth URL
 cd /path/to/shopware
 
-# Create test script
 cat > generate_oauth_url.php << 'EOF'
 <?php
-
 require 'vendor/autoload.php';
-
 use Symfony\Component\Dotenv\Dotenv;
 
-// Load environment
 (new Dotenv())->bootEnv(dirname(__FILE__).'/.env');
-
-// Boot Shopware kernel
 $kernel = new \Shopware\Core\Kernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG']);
 $kernel->boot();
 
 $container = $kernel->getContainer();
 $googleService = $container->get('GotoWebinarGoogleSheetsExport\Service\GoogleSheetsService');
 
-// Generate OAuth URL
 $redirectUri = 'https://your-shop-domain.com/admin';
 $authUrl = $googleService->getAuthorizationUrl($redirectUri);
 
-echo "OAuth Authorization URL:\n";
-echo $authUrl . "\n\n";
+echo "OAuth Authorization URL:\n{$authUrl}\n\n";
 echo "1. Open this URL in your browser\n";
 echo "2. Authorize the application\n";
-echo "3. Copy the authorization code from the URL\n";
+echo "3. Copy the 'code' parameter from the redirect URL\n";
 EOF
 
-# Run the script
 php generate_oauth_url.php
 ```
 
-### 4.2 Authorize Application
+**Authorize and Exchange Token:**
 
-1. Copy the generated OAuth URL
-2. Open it in your browser
-3. Sign in with your Google account
-4. Click **Allow** to grant permissions
-5. You'll be redirected to your admin panel
-6. Copy the `code` parameter from the URL:
-   ```
-   https://your-shop.com/admin?code=4/0AY0e-g7...LONG_CODE_HERE...&scope=https://...
-   ```
-
-### 4.3 Exchange Code for Token
+1. Open the generated URL in a browser
+2. Sign in and authorize the application
+3. Copy the `code` from the redirect URL
+4. Exchange the code for a token:
 
 ```bash
-# Create token exchange script
 cat > exchange_oauth_token.php << 'EOF'
 <?php
-
 require 'vendor/autoload.php';
-
 use Symfony\Component\Dotenv\Dotenv;
 
 (new Dotenv())->bootEnv(dirname(__FILE__).'/.env');
-
 $kernel = new \Shopware\Core\Kernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG']);
 $kernel->boot();
 
 $container = $kernel->getContainer();
 $googleService = $container->get('GotoWebinarGoogleSheetsExport\Service\GoogleSheetsService');
 
-// Replace with your authorization code
-$authCode = 'YOUR_AUTH_CODE_HERE';
+$authCode = 'YOUR_AUTH_CODE_HERE'; // Replace with actual code
 $redirectUri = 'https://your-shop-domain.com/admin';
 
 try {
-    $token = $googleService->authenticate($authCode, $redirectUri);
+    $googleService->authenticate($authCode, $redirectUri);
     echo "✅ Successfully authenticated!\n";
-    echo "Refresh token has been saved to configuration.\n";
 } catch (\Exception $e) {
-    echo "❌ Error: " . $e->getMessage() . "\n";
+    echo "❌ Error: {$e->getMessage()}\n";
 }
 EOF
 
@@ -257,17 +276,25 @@ nano exchange_oauth_token.php
 php exchange_oauth_token.php
 ```
 
-### 4.4 Verify Connection
+</details>
+
+### 4.3 Test the Connection
+
+After authentication, test that everything works:
 
 ```bash
-# Test the connection
-bin/console gotowebinar:export-orders --force
+# Trigger a manual export via CLI
+bin/console gotowebinar:export-orders
+
+# Expected output:
+# ✅ Successfully exported X row(s) to Google Sheets
 ```
 
-If successful, you should see:
-```
-✅ Successfully exported X row(s) to Google Sheets
-```
+Or test via the admin dashboard:
+1. Go to the plugin dashboard
+2. Click **"Export Now"**
+3. Check the export statistics update
+4. Verify data appears in your Google Sheet
 
 ---
 
@@ -371,17 +398,42 @@ tail -f var/log/prod.log | grep GotoWebinar
 
 ### 7.2 Export Statistics
 
-Check stats via API:
+View stats in the admin dashboard:
+- Go to **Settings → System → Plugins → GotoWebinarGoogleSheetsExport**
+- Click **Open** to view the dashboard
+- See total exports, pending exports, last export time
+
+Or check via API:
 ```bash
 curl -X GET "https://your-shop.com/api/_action/gotowebinar-sheets/export/stats" \
   -H "Authorization: Bearer YOUR_API_TOKEN"
 ```
 
-### 7.3 Download CSV Report
+### 7.3 Manual Export
 
-In Shopware Admin:
-- The API endpoint for CSV download will be added in a future admin UI
-- For now, use the CLI or API directly
+**Via Admin Dashboard:**
+1. Open the plugin dashboard
+2. Click **"Export Now"**
+3. Configure batch size if needed
+4. Wait for confirmation
+5. Check your Google Sheet
+
+**Via CLI:**
+```bash
+bin/console gotowebinar:export-orders
+```
+
+### 7.4 View Export History
+
+**Via Admin Dashboard:**
+- The dashboard shows a paginated list of recent exports
+- Filter by status (pending, success, failed)
+- Download export history as CSV
+
+**Via Database:**
+```bash
+bin/console dbal:run-sql "SELECT * FROM gotowebinar_order_export ORDER BY created_at DESC LIMIT 20"
+```
 
 ---
 
@@ -404,9 +456,10 @@ bin/console cache:clear
 ### Problem: "No refresh token received"
 
 **Solution:**
-- Revoke app access in Google Account settings
-- Generate new OAuth URL and re-authorize
-- Ensure redirect URI matches exactly
+- In Admin UI: Click **"Connect to Google Sheets"** again to restart the OAuth flow
+- Revoke app access in [Google Account Settings](https://myaccount.google.com/permissions) first if reconnecting
+- Ensure redirect URI matches exactly (should be `https://your-domain.com/admin`)
+- Check that popup blocker isn't blocking the authorization window
 
 ### Problem: "Failed to append rows to Google Sheet"
 

@@ -353,7 +353,12 @@ crontab -e
 
 1. In Shopware Admin, go to **Catalogues → Categories**
 2. Create a category called "Test Webinars"
-3. Note the category ID
+3. **Note the category ID:**
+   - After saving, look at the browser URL
+   - Example: `https://127.0.0.1:8000/admin#/sw/category/index/019b46136a14708696dc49681ba8f774/base`
+   - The ID is the long hash in the URL: `019b46136a14708696dc49681ba8f774`
+   - This is the category's UUID (without dashes)
+   - You'll need this ID for the plugin configuration (Step 3.2)
 
 ### 6.2 Create Test Product
 

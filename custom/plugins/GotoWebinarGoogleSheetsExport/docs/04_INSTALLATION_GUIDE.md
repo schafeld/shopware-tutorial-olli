@@ -12,7 +12,7 @@ Before installing the plugin, ensure you have:
 - ✅ Google Sheets API enabled
 
 > **📝 Note on Admin UI:**  
-> Version 1.0 provides full functionality via CLI commands and API endpoints. Admin UI components (dashboard, manual export button, OAuth UI flow) are planned for v1.1. The plugin is fully functional without these UI enhancements.
+> Version 1.1.0 (current) includes a complete admin dashboard with visual statistics, one-click export, browser-based OAuth flow, and export log viewer. After installation, you'll find the dashboard at **Settings → Plugins → Webinar Export**.
 
 ---
 

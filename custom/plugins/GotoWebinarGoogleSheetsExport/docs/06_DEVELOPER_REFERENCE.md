@@ -438,115 +438,114 @@ $this->logger->debug('Custom debug message', [
 
 ---
 
-## Pending Features (v1.1) - Implementation Guide
+## Admin Dashboard Implementation (v1.1.0 - Completed)
 
 ### Admin Dashboard Widget
 
+**Status:** ✅ **FULLY IMPLEMENTED** (January 7, 2026)
+
 **Location:** `src/Resources/app/administration/src/module/gotowebinar-sheets/`
 
-**Required Files:**
+**Implemented Files:**
 ```
 Resources/app/administration/src/
+├── main.js                                    # ✅ Entry point
 ├── module/
 │   └── gotowebinar-sheets/
-│       ├── index.js                    # Module registration
+│       ├── index.js                           # ✅ Module registration
+│       ├── snippet/
+│       │   ├── de-DE.json                     # ✅ German translations
+│       │   └── en-GB.json                     # ✅ English translations
 │       ├── page/
 │       │   └── gotowebinar-sheets-dashboard/
-│       │       ├── index.js           # Dashboard page component
-│       │       └── gotowebinar-sheets-dashboard.html.twig
+│       │       ├── index.js                   # ✅ Dashboard component
+│       │       ├── gotowebinar-sheets-dashboard.html.twig  # ✅ Template
+│       │       └── gotowebinar-sheets-dashboard.scss       # ✅ Styles
 │       └── component/
 │           ├── gotowebinar-stats-card/
-│           │   ├── index.js           # Statistics card component
-│           │   └── gotowebinar-stats-card.html.twig
+│           │   ├── index.js                   # ✅ Statistics card
+│           │   ├── gotowebinar-stats-card.html.twig       # ✅ Template
+│           │   └── gotowebinar-stats-card.scss             # ✅ Styles
 │           ├── gotowebinar-export-button/
-│           │   ├── index.js           # Manual export button
-│           │   └── gotowebinar-export-button.html.twig
+│           │   ├── index.js                   # ✅ Export button
+│           │   └── gotowebinar-export-button.html.twig    # ✅ Template
 │           ├── gotowebinar-oauth-button/
-│           │   ├── index.js           # OAuth authorization button
-│           │   └── gotowebinar-oauth-button.html.twig
+│           │   ├── index.js                   # ✅ OAuth button
+│           │   └── gotowebinar-oauth-button.html.twig     # ✅ Template
 │           └── gotowebinar-export-list/
-│               ├── index.js           # Export log viewer
-│               └── gotowebinar-export-list.html.twig
-└── main.js                            # Entry point
+│               ├── index.js                   # ✅ Export log viewer
+│               ├── gotowebinar-export-list.html.twig      # ✅ Template
+│               └── gotowebinar-export-list.scss           # ✅ Styles
 ```
 
-**Implementation Steps:**
+**Total: 17 files implemented**
 
-1. **Register Admin Module** (`module/gotowebinar-sheets/index.js`):
+**Key Implementation Details:**
+
+### 1. Admin Module Registration
+
+The module is registered in Shopware's admin module system with:
+- **Route:** `gotowebinar.sheets.dashboard`
+- **Navigation:** Appears in Settings → Plugins submenu
+- **Icon:** `default-action-share` (share icon)
+- **Color:** `#ff3d58` (red theme)
+
+### 2. Dashboard Component Features
+
+**Statistics Card:**
+- Displays total exports, pending count, last export timestamp
+- Real-time refresh on export actions
+- Visual indicators (icons, colored badges)
+- Configuration status warning if OAuth not connected
+
+**Action Buttons:**
+- **OAuth Button:** Opens popup window for Google authorization
+  - Changes state: "Connect to Google" → "Connected to Google"
+  - Handles popup blocking with user notification
+  - Monitors OAuth redirect and closes popup automatically
+
+- **Export Button:** Triggers manual export with confirmation modal
+  - Configurable batch limit (default: 50)
+  - Disabled when no pending exports
+  - Shows success notification with count
+
+**Export Log Viewer:**
+- Paginated table (25 entries per page)
+- Columns: Exported At, Order Number, Product Number, Customer Name, Email, Status
+- Status badges: Success (green), Pending (blue), Failed (red)
+- Error tooltips on failed exports
+- Refresh button and CSV download
+
+### 3. API Integration
+
+All components use direct HTTP calls to existing API endpoints:
+
 ```javascript
-import './page/gotowebinar-sheets-dashboard';
+// Statistics
+this.$http.get('/_action/gotowebinar-sheets/export/stats')
 
-Shopware.Module.register('gotowebinar-sheets', {
-    type: 'plugin',
-    name: 'GotoWebinar Sheets Export',
-    title: 'gotowebinar-sheets.general.mainMenuItemGeneral',
-    description: 'gotowebinar-sheets.general.descriptionTextModule',
-    color: '#ff3d58',
-    icon: 'default-action-share',
-    
-    routes: {
-        dashboard: {
-            component: 'gotowebinar-sheets-dashboard',
-            path: 'dashboard'
-        }
-    },
-    
-    navigation: [{
-        label: 'gotowebinar-sheets.general.mainMenuItemGeneral',
-        color: '#ff3d58',
-        path: 'gotowebinar.sheets.dashboard',
-        icon: 'default-action-share',
-        position: 100
-    }]
-});
+// Manual export
+this.$http.post('/_action/gotowebinar-sheets/export/manual', { limit: 50 })
+
+// OAuth authorization
+this.$http.post('/_action/gotowebinar-sheets/oauth/authorize', { redirectUri })
+
+// OAuth callback
+this.$http.post('/_action/gotowebinar-sheets/oauth/callback', { code, redirectUri })
+
+// CSV download
+window.open('/_action/gotowebinar-sheets/export/csv?limit=100', '_blank')
 ```
 
-2. **Create Dashboard Component** (uses existing API endpoints):
-```javascript
-// Fetch stats from AdminApiController
-this.gotowebinarSheetsApiService.getStats().then((response) => {
-    this.stats = response.stats;
-});
-```
+### 4. Building Admin Assets
 
-3. **Manual Export Button** (calls existing API):
-```javascript
-this.gotowebinarSheetsApiService.triggerExport({ limit: 50 }).then((response) => {
-    this.createNotification({
-        message: `Exported ${response.exported} orders`,
-        type: 'success'
-    });
-});
-```
+After modifications, rebuild the administration:
 
-4. **OAuth Button** (uses existing API endpoints):
-```javascript
-// Get authorization URL
-this.gotowebinarSheetsApiService.getAuthUrl({ redirectUri: window.location.origin + '/admin' })
-    .then((response) => {
-        window.open(response.authUrl, '_blank');
-    });
-```
-
-**API Service Creation:**
-```javascript
-class GotowebinarSheetsApiService extends ApiService {
-    constructor(httpClient, loginService, apiEndpoint = 'gotowebinar-sheets') {
-        super(httpClient, loginService, apiEndpoint);
-    }
-
-    getStats() {
-        return this.httpClient.get('_action/gotowebinar-sheets/export/stats', {
-            headers: this.getBasicHeaders()
-        }).then((response) => ApiService.handleResponse(response));
-    }
-
-    triggerExport(params) {
-        return this.httpClient.post('_action/gotowebinar-sheets/export/manual', params, {
-            headers: this.getBasicHeaders()
-        }).then((response) => ApiService.handleResponse(response));
-    }
-}
+```bash
+bin/build-administration.sh
+# or
+bin/console bundle:dump
+./bin/build-administration.sh
 ```
 
 **Estimated Effort:**

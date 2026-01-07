@@ -1,7 +1,7 @@
 # GotoWebinarGoogleSheetsExport - User Manual & Setup Guide
 
-**Version:** 1.0.0  
-**Last Updated:** December 22, 2025
+**Version:** 1.1.0  
+**Last Updated:** January 7, 2026
 
 ---
 
@@ -40,22 +40,19 @@ For each product in an order that matches the configured category, the following
 The plugin supports two export methods:
 
 1. **Scheduled Automatic Export** - Runs at configurable intervals (every 15 minutes, hourly, every 4 hours, daily, or weekly)
-2. **Manual Export** - Via CLI command (admin UI button planned for v1.1)
+2. **Manual Export** - Via admin dashboard button or CLI command
 
-**Current Version (v1.0) - CLI/API Based:**
+**Current Version (v1.1.0) - Full Featured:**
 - ✅ Full configuration via Admin Settings panel
+- ✅ Interactive dashboard with visual statistics
+- ✅ One-click manual export button in admin UI
+- ✅ Browser-based OAuth connection flow
+- ✅ Export log viewer with pagination
+- ✅ CSV download button in admin UI
 - ✅ Manual export via CLI: `bin/console gotowebinar:export-orders`
-- ✅ OAuth setup via CLI scripts (see Installation Guide)
-- ✅ CSV download via API endpoint
-- ✅ Statistics via API endpoint
+- ✅ Real-time status updates
 
-**Planned Version (v1.1) - Enhanced Admin UI:**
-- ⏳ Dashboard widget with visual statistics
-- ⏳ One-click manual export button
-- ⏳ Browser-based OAuth flow
-- ⏳ Export log viewer with filtering
-
-For most users, scheduled automatic exports are sufficient. Manual CLI commands are available for testing or on-demand exports.
+For most users, the admin dashboard provides everything needed. CLI commands remain available for automation and advanced use cases.
 
 ---
 
@@ -353,16 +350,18 @@ Fill in the information you gathered earlier:
 ### Step 4: Connect to Google Account
 
 1. **Save** the configuration above
-2. Navigate to: **Custom Menu → GotoWebinar Sheets Export** (new menu item)
-3. Click: **"Connect to Google"** button
-4. You'll be redirected to Google's authorization page
+2. Navigate to: **Settings → Plugins → Webinar Export Dashboard** (in settings menu)
+3. Click: **"Connect to Google"** button (green button with share icon)
+4. A popup window will open to Google's authorization page
 5. **Sign in** with the Google account that owns the spreadsheet
 6. Review permissions: The app needs to **"See, edit, create, and delete your spreadsheets"**
 7. Click **"Allow"**
-8. You'll be redirected back to Shopware
-9. You should see: ✅ **"Successfully connected to Google Sheets"**
+8. The popup will close automatically
+9. You should see: ✅ **"Successfully connected to Google Sheets"** notification
+10. The button will change to ✅ **"Connected to Google"** (success variant)
 
 > ⚠️ **Important:** Use the same Google account that owns the target spreadsheet, or ensure the spreadsheet is shared with the account you use.
+> 💡 **Tip:** If the popup is blocked by your browser, you'll see a warning. Enable popups for your Shopware admin URL.
 
 ### Step 5: Export Schedule Configuration
 
@@ -418,35 +417,57 @@ Once configured, the plugin works automatically:
 
 To export pending orders immediately:
 
-1. Go to: **Custom Menu → GotoWebinar Sheets Export**
+1. Go to: **Settings → Plugins → Webinar Export** (in the settings navigation)
 2. You'll see the dashboard with:
-   - Total exports
-   - Last export time
-   - Pending exports count
-3. Click: **"Export Now"** button
-4. Wait for confirmation: **"Successfully exported X orders"**
+   - Total exports (with stack icon)
+   - Pending exports (with clock icon and count badge)
+   - Last export time (with checkmark icon)
+3. Click: **"Export Now"** button (primary blue button with share icon)
+4. A confirmation modal will appear asking for batch size (default: 50)
+5. Click **"Export Now"** in the modal to confirm
+6. Wait for success notification: **"Successfully exported X record(s)"**
+7. Dashboard statistics will automatically refresh
+
+**Alternative: CLI Export**
+```bash
+bin/console gotowebinar:export-orders --limit=50
+```
 
 ### 6.3 View Recent Exports
 
-On the dashboard you'll see a table with the last 100 exports:
+On the dashboard, scroll down to the **"Export History"** card which shows a paginated table:
 
-| Export Date | Order Number | Product Number | Customer | Status |
-|-------------|--------------|----------------|----------|--------|
-| 2025-12-22 10:30 | 10001 | BW-WEB-001 | Max Mustermann | ✅ Success |
-| 2025-12-22 10:31 | 10002 | BW-WEB-002 | Anna Schmidt | ❌ Failed |
+| Exported At | Order Number | Product Number | Customer Name | Email | Status |
+|-------------|--------------|----------------|---------------|-------|--------|
+| 2026-01-07 10:30 | 10001 | BW-WEB-001 | Max Mustermann | max@example.com | ✅ Success |
+| 2026-01-07 10:31 | 10002 | BW-WEB-002 | Anna Schmidt | anna@example.com | ❌ Failed |
 
-**Status indicators:**
-- ✅ **Success** - Exported successfully
-- ⏳ **Pending** - Waiting to be exported
-- ❌ **Failed** - Export error (click for details)
+**Status indicators (colored badges):**
+- ✅ **Success** (green badge) - Exported successfully
+- ⏳ **Pending** (blue badge) - Waiting to be exported
+- ❌ **Failed** (red badge) - Export error (hover for error details)
+
+**Table Features:**
+- 📄 **Pagination:** Shows 25 entries per page (use pagination controls to navigate)
+- 🔄 **Refresh button:** Click to reload the latest export data
+- 💾 **CSV Download:** Click "Download CSV" to export the last 100 entries
+- 📊 **Entry counter:** Shows "Showing X of Y entries" at the bottom
 
 ### 6.4 Download CSV Export
 
 To download a CSV file of recent exports:
 
-1. Go to: **Custom Menu → Blauwasser Sheets Export**
-2. Click: **"Download CSV"** button
-3. A file named `gotowebinar_exports_YYYY-MM-DD.csv` will be downloaded
+**Via Admin Dashboard:**
+1. Go to: **Settings → Plugins → Webinar Export**
+2. Scroll to the **"Export History"** card
+3. Click: **"Download CSV"** button (in the toolbar with download icon)
+4. A file will be downloaded with the last 100 exports
+
+**Via CLI:**
+```bash
+# Access CSV via API endpoint
+curl -o exports.csv "https://your-shop.com/_action/gotowebinar-sheets/export/csv?limit=100"
+```
 
 **CSV Contents:**
 - Last 100 export entries

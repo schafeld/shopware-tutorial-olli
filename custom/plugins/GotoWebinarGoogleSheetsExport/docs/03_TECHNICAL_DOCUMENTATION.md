@@ -1,7 +1,7 @@
 # GotoWebinarGoogleSheetsExport - Technical Documentation
 
-**Version:** 1.0.0  
-**Last Updated:** December 22, 2025  
+**Version:** 1.1.0  
+**Last Updated:** January 7, 2026  
 **Target Audience:** Developers, DevOps, Technical Administrators
 
 ---
@@ -38,7 +38,7 @@
 │           │ Place Order    │  - Manual Export            │   │
 │           ▼                └───────────┬───────────-─────┘   │
 │  ┌────────────────────────────────────┴──────────────-───┐   │
-│  │         BlauwasserGoogleSheetsExport Plugin           │   │
+│  │         GotoWebinarGoogleSheetsExport Plugin           │   │
 │  │                                                       │   │
 │  │  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐  │   │
 │  │  │ OrderPlaced  │  │ Scheduled    │  │ Admin API   │  │   │

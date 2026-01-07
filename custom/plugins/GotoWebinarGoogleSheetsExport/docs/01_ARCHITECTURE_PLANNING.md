@@ -360,31 +360,35 @@ class ExportOrdersTask extends ScheduledTask
 
 **Location:** `Resources/app/administration/src/module/gotowebinar-sheets/`
 
-**Status:** ⏳ **PENDING IMPLEMENTATION** (Planned for v1.1.0)
+**Status:** ✅ **IMPLEMENTED** (v1.1.0 - January 7, 2026)
 
-**Current Implementation:**
+**Implemented Components:**
 - ✅ Configuration form (XML-based, fully functional)
 - ✅ API endpoints for all operations
 - ✅ CLI commands for manual operations
+- ✅ Overview page with export statistics dashboard
+- ✅ Google OAuth connection button (browser-based flow)
+- ✅ Manual export trigger button (one-click export)
+- ✅ CSV download button in UI
+- ✅ Recent exports table viewer (paginated, last 100 entries)
+- ✅ Real-time export status updates
 
-**Pending Components (Vue.js/Admin UI):**
-- ⏳ Overview page with export statistics dashboard
-- ⏳ Google OAuth connection button (browser-based flow)
-- ⏳ Manual export trigger button (one-click export)
-- ⏳ CSV download button in UI
-- ⏳ Recent exports table viewer (last 100 entries)
-- ⏳ Real-time export status updates
+**Admin Routes:**
+- `/gotowebinar/sheets/dashboard` - Main dashboard with statistics and controls
+- Settings → Plugins → Webinar Export - Menu integration
 
-**Planned Admin Routes:**
-- `/gotowebinar/sheets` - Main dashboard (pending)
-- `/gotowebinar/sheets/config` - Configuration (redirect to system config)
-- `/gotowebinar/sheets/export` - Manual export trigger (pending)
+**Vue.js Components Implemented:**
+1. **gotowebinar-sheets-dashboard** - Main dashboard page
+2. **gotowebinar-stats-card** - Statistics display with total/pending/last export
+3. **gotowebinar-export-button** - Manual export trigger with modal confirmation
+4. **gotowebinar-oauth-button** - Google OAuth flow with popup window handling
+5. **gotowebinar-export-list** - Paginated export log table with CSV download
 
-**Estimated Implementation Effort:**
-- **Junior Developer (learning Vue.js + Shopware Admin):** 1-2 weeks
-- **Experienced Developer:** 3-5 days
-- **Components:** ~8-10 Vue.js components, routes, API integration
-- **Complexity:** Intermediate (requires Vue.js, Shopware Admin SDK knowledge)
+**Features:**
+- Multi-language support (German/English translations)
+- Modal confirmations for destructive actions
+- Loading states and error handling
+- Responsive design with Shopware admin components
 
 ### 7.2 AdminApiController
 
@@ -441,11 +445,11 @@ class ExportOrdersTask extends ScheduledTask
 - [ ] Implement batch processing
 
 ### Phase 5: Admin Interface (Day 7-8)
-- [ ] Create admin module structure
-- [ ] Implement OAuth connection UI
-- [ ] Manual export button
-- [ ] Recent exports table
-- [ ] Export statistics dashboard
+- [x] Create admin module structure
+- [x] Implement OAuth connection UI
+- [x] Manual export button
+- [x] Recent exports table
+- [x] Export statistics dashboard
 
 ### Phase 6: CSV Export & Polish (Day 9)
 - [ ] Implement CsvExportService
@@ -659,9 +663,23 @@ class ExportOrdersTask extends ScheduledTask
 - [ ] `src/Controller/AdminApiController.php`
 
 ### Administration (JavaScript/Vue)
-- [ ] `src/Resources/app/administration/src/main.js`
-- [ ] `src/Resources/app/administration/src/module/gotowebinar-sheets/index.js`
-- [ ] `src/Resources/app/administration/src/module/gotowebinar-sheets/page/gotowebinar-sheets-overview/index.js`
+- [x] `src/Resources/app/administration/src/main.js`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/index.js`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/snippet/de-DE.json`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/snippet/en-GB.json`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/page/gotowebinar-sheets-dashboard/index.js`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/page/gotowebinar-sheets-dashboard/gotowebinar-sheets-dashboard.html.twig`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/page/gotowebinar-sheets-dashboard/gotowebinar-sheets-dashboard.scss`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/component/gotowebinar-stats-card/index.js`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/component/gotowebinar-stats-card/gotowebinar-stats-card.html.twig`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/component/gotowebinar-stats-card/gotowebinar-stats-card.scss`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/component/gotowebinar-export-button/index.js`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/component/gotowebinar-export-button/gotowebinar-export-button.html.twig`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/component/gotowebinar-oauth-button/index.js`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/component/gotowebinar-oauth-button/gotowebinar-oauth-button.html.twig`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/component/gotowebinar-export-list/index.js`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/component/gotowebinar-export-list/gotowebinar-export-list.html.twig`
+- [x] `src/Resources/app/administration/src/module/gotowebinar-sheets/component/gotowebinar-export-list/gotowebinar-export-list.scss`
 
 ### Commands (Optional, for CLI access)
 - [ ] `src/Command/ExportOrdersCommand.php`

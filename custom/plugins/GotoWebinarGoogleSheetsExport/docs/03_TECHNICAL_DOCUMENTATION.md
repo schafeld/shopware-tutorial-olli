@@ -36,17 +36,17 @@
 │  └────────┬───────┘        │  - Configuration            │   │
 │           │                │  - OAuth Setup              │   │
 │           │ Place Order    │  - Manual Export            │   │
-│           ▼                └───────────┬───────────-─────┘   │
+│           ▼                └──────────┬────────────-─────┘   │
 │  ┌────────────────────────────────────┴──────────────-───┐   │
-│  │         GotoWebinarGoogleSheetsExport Plugin           │   │
+│  │         GotoWebinarGoogleSheetsExport Plugin          │   │
 │  │                                                       │   │
 │  │  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐  │   │
 │  │  │ OrderPlaced  │  │ Scheduled    │  │ Admin API   │  │   │
 │  │  │ Subscriber   │  │ Task Handler │  │ Controller  │  │   │
 │  │  └──────┬───────┘  └──────┬───────┘  └──────┬──────┘  │   │
-│  │         │                  │                  │       │   │
-│  │         │  Creates Pending Export Logs        │       │   │
-│  │         ▼                  ▼                  ▼       │   │
+│  │         │                 │                 │         │   │
+│  │         │  Creates Pending Export Logs      │         │   │
+│  │         ▼                  ▼                ▼         │   │
 │  │  ┌──────────────────────────────────────────────────┐ │   │
 │  │  │         OrderExportService                       │ │   │
 │  │  │  - Extract order data                            │ │   │

@@ -498,7 +498,7 @@ Customer orders 2 webinars in one order:
 
 **Symptoms:**
 - Plugin not visible in plugin list
-- No "Blauwasser Sheets Export" menu
+- No "Webinar Sheets Export" menu
 
 **Solutions:**
 
@@ -535,7 +535,7 @@ GotoWebinarGoogleSheetsExport  1.0.0  Yes        Installed  Active
    - Edit your OAuth client
    - Ensure redirect URI exactly matches:
      ```
-     https://your-domain.com/admin#/blauwasser/sheets/oauth/callback
+     https://your-domain.com/admin#/gotowebinar/sheets/oauth/callback
      ```
    - Check for typos, missing `https://`, wrong domain
 
@@ -576,7 +576,7 @@ GotoWebinarGoogleSheetsExport  1.0.0  Yes        Installed  Active
 4. **Check Logs:**
    ```bash
    # View Shopware logs
-   tail -f var/log/prod.log | grep -i blauwasser
+   tail -f var/log/prod.log | grep -i gotowebinar
    ```
 
 ### Problem 4: Export Scheduled Task Not Running
@@ -590,7 +590,7 @@ GotoWebinarGoogleSheetsExport  1.0.0  Yes        Installed  Active
 1. **Verify Scheduled Tasks are Running:**
    ```bash
    # Check if scheduled task exists
-   bin/console scheduled-task:list | grep blauwasser
+   bin/console scheduled-task:list | grep gotowebinar
    ```
 
 2. **Run Scheduled Tasks Manually:**
@@ -633,20 +633,20 @@ GotoWebinarGoogleSheetsExport  1.0.0  Yes        Installed  Active
 ### Problem 6: Database Errors
 
 **Symptoms:**
-- "Table 'blauwasser_order_export' doesn't exist"
+- "Table 'gotowebinar_order_export' doesn't exist"
 - Plugin installation errors
 
 **Solutions:**
 
 ```bash
 # 1. Uninstall plugin
-bin/console plugin:uninstall BlauwasserGoogleSheetsExport
+bin/console plugin:uninstall GotoWebinarGoogleSheetsExport
 
 # 2. Reinstall plugin (recreates tables)
-bin/console plugin:install BlauwasserGoogleSheetsExport
+bin/console plugin:install GotoWebinarGoogleSheetsExport
 
 # 3. Activate plugin
-bin/console plugin:activate BlauwasserGoogleSheetsExport
+bin/console plugin:activate GotoWebinarGoogleSheetsExport
 
 # 4. Clear cache
 bin/console cache:clear
@@ -720,7 +720,7 @@ Future versions may include custom field mapping.
 1. Deactivate the plugin temporarily
 2. Or manually delete the pending export from the database:
    ```sql
-   DELETE FROM blauwasser_order_export 
+   DELETE FROM gotowebinar_order_export 
    WHERE order_number = '10001' AND export_status = 'pending';
    ```
 

@@ -66,7 +66,7 @@
 │                        │                                     │
 │  ┌─────────────────────┴─────────────────────────────────┐   │
 │  │         Database (MySQL/MariaDB)                      │   │
-│  │  - blauwasser_order_export table                      │   │
+│  │  - gotowebinar_order_export table                     │   │
 │  │  - system_config (OAuth tokens)                       │   │
 │  └──────────────────────┬────────────────────────────────┘   │
 └─────────────────────────┼────────────────────────────────────┘
@@ -99,7 +99,7 @@ Shopware → OrderPlacedSubscriber: Trigger CheckoutOrderPlacedEvent
 OrderPlacedSubscriber → CategoryFilterService: Is product in monitored category?
 CategoryFilterService → OrderPlacedSubscriber: Yes
 OrderPlacedSubscriber → OrderExportService: Create pending export log
-OrderExportService → Database: INSERT into blauwasser_order_export (status='pending')
+OrderExportService → Database: INSERT into gotowebinar_order_export (status='pending')
 ```
 
 **Scenario: Scheduled Export**
@@ -163,7 +163,7 @@ For each lineItem in order.lineItems:
                        ▼
 ┌────────────────────────────────────────────────────────────┐
 │ Step 2: Fetch Pending Exports                              │
-│ Query: SELECT * FROM blauwasser_order_export               │
+│ Query: SELECT * FROM gotowebinar_order_export              │
 │        WHERE export_status = 'pending'                     │
 │        LIMIT [batchSize]                                   │
 └──────────────────────┬─────────────────────────────────────┘
@@ -197,13 +197,13 @@ For each lineItem in order.lineItems:
 ┌────────────────────────────────────────────────────────────┐
 │ Step 6: Update Export Status                               │
 │ On Success:                                                │
-│   UPDATE blauwasser_order_export                           │
+│   UPDATE gotowebinar_order_export                          │
 │   SET export_status='success',                             │
 │       exported_at=NOW()                                    │
 │   WHERE id IN (exported_ids)                               │
 │                                                            │
 │ On Error:                                                  │
-│   UPDATE blauwasser_order_export                           │
+│   UPDATE gotowebinar_order_export                          │
 │   SET export_status='failed',                              │
 │       error_message='[error details]'                      │
 │   WHERE id IN (failed_ids)                                 │
@@ -296,7 +296,7 @@ For each lineItem in order.lineItems:
 
 ### 3.4 Why Local Database Table Instead of Google Sheets as Source?
 
-**Decision:** Maintain local `blauwasser_order_export` table to track exports.
+**Decision:** Maintain local `gotowebinar_order_export` table to track exports.
 
 **Rationale:**
 1. **Performance:** Fast queries without external API calls
@@ -379,12 +379,12 @@ For each lineItem in order.lineItems:
 
 ## 4. Database Schema
 
-### 4.1 Table: `blauwasser_order_export`
+### 4.1 Table: `gotowebinar_order_export`
 
 **Purpose:** Track all order exports (pending, successful, failed)
 
 ```sql
-CREATE TABLE `blauwasser_order_export` (
+CREATE TABLE `gotowebinar_order_export` (
     -- Primary Key
     `id` BINARY(16) NOT NULL,
     
@@ -689,7 +689,7 @@ use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 
 /**
  * @RouteScope(scopes={"api"})
- * @Route("/api/_action/blauwasser-sheets/export/manual", ...)
+ * @Route("/api/_action/gotowebinar-sheets/export/manual", ...)
  */
 public function manualExport(Request $request, Context $context): JsonResponse
 {
@@ -697,7 +697,7 @@ public function manualExport(Request $request, Context $context): JsonResponse
     // Shopware automatically validates JWT token
     
     // Additional permission check (optional):
-    if (!$this->hasPermission($context, 'blauwasser_sheets:export')) {
+    if (!$this->hasPermission($context, 'gotowebinar_sheets:export')) {
         throw new PermissionDeniedException();
     }
     
@@ -868,7 +868,7 @@ public function productMatchesCategory(ProductEntity $product, string $targetCat
 // Additional safety check (optional):
 public function run(): void
 {
-    $lockKey = 'blauwasser_export_lock';
+    $lockKey = 'gotowebinar_export_lock';
     
     if (!$this->lock->acquire($lockKey)) {
         $this->logger->info('Export already running, skipping');
@@ -1082,10 +1082,10 @@ $export->incrementRetryCount();
 
 ```php
 // tests/Unit/Service/CategoryFilterServiceTest.php
-namespace Blauwasser\GoogleSheetsExport\Tests\Unit\Service;
+namespace GotoWebinar\GoogleSheetsExport\Tests\Unit\Service;
 
 use PHPUnit\Framework\TestCase;
-use Blauwasser\GoogleSheetsExport\Service\CategoryFilterService;
+use GotoWebinar\GoogleSheetsExport\Service\CategoryFilterService;
 
 class CategoryFilterServiceTest extends TestCase
 {
@@ -1140,7 +1140,7 @@ class CategoryFilterServiceTest extends TestCase
 
 ```php
 // tests/Integration/Subscriber/OrderPlacedSubscriberTest.php
-namespace Blauwasser\GoogleSheetsExport\Tests\Integration\Subscriber;
+namespace GotoWebinar\GoogleSheetsExport\Tests\Integration\Subscriber;
 
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use PHPUnit\Framework\TestCase;
@@ -1151,8 +1151,8 @@ class OrderPlacedSubscriberTest extends TestCase
     
     public function testOrderPlacedCreatesExportLog(): void
     {
-        // Create test category "Blauwasser Webinar"
-        $categoryId = $this->createTestCategory('Blauwasser Webinar');
+        // Create test category "GotoWebinar Webinar"
+        $categoryId = $this->createTestCategory('GotoWebinar Webinar');
         
         // Create test product in that category
         $productId = $this->createTestProduct($categoryId);
@@ -1243,7 +1243,7 @@ class OrderPlacedSubscriberTest extends TestCase
 **Deployment Steps:**
 ```bash
 # 1. Upload plugin files to server
-scp -r BlauwasserGoogleSheetsExport/ user@server:/path/to/shopware/custom/plugins/
+scp -r GotoWebinarGoogleSheetsExport/ user@server:/path/to/shopware/custom/plugins/
 
 # 2. SSH into server
 ssh user@server
@@ -1257,10 +1257,10 @@ composer dump-autoload
 bin/console plugin:refresh
 
 # 5. Install plugin
-bin/console plugin:install BlauwasserGoogleSheetsExport
+bin/console plugin:install GotoWebinarGoogleSheetsExport
 
 # 6. Activate plugin
-bin/console plugin:activate BlauwasserGoogleSheetsExport
+bin/console plugin:activate GotoWebinarGoogleSheetsExport
 
 # 7. Clear cache
 bin/console cache:clear
@@ -1269,7 +1269,7 @@ bin/console cache:clear
 bin/build-administration.sh
 
 # 9. Verify scheduled task registered
-bin/console scheduled-task:list | grep blauwasser
+bin/console scheduled-task:list | grep gotowebinar
 ```
 
 **Post-Deployment:**
@@ -1501,4 +1501,4 @@ class WebhookService
 
 **End of Technical Documentation**
 
-This documentation provides a comprehensive technical overview for developers working with or extending the BlauwasserGoogleSheetsExport plugin.
+This documentation provides a comprehensive technical overview for developers working with or extending the GotoWebinarGoogleSheetsExport plugin.

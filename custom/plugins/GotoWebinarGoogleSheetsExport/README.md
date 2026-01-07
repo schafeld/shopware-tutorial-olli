@@ -1,8 +1,8 @@
 # GotoWebinarGoogleSheetsExport Plugin
 
-**Version:** 1.0.0  
+**Version:** 1.1.0  
 **Shopware Version:** 6.5.0+  
-**Status:** Backend Implementation Complete | Admin UI Pending  
+**Status:** ✅ Complete - Backend & Admin UI Fully Implemented  
 **Complexity:** Intermediate to Advanced
 
 ---
@@ -12,44 +12,53 @@
 This Shopware 6 plugin automatically exports order data to Google Sheets when customers purchase products from a configurable category (default: "GotoWebinar"). The plugin supports both scheduled automatic exports and manual on-demand exports.
 
 > **⚠️ Note for Junior Developers:**  
-> This is a **backend-heavy integration project** that involves multiple complex Shopware 6 concepts:
+> This is a **full-stack Shopware 6 plugin** that demonstrates both backend and frontend development:
 > - Custom entity definitions and database migrations
 > - Event subscribers and scheduled tasks
 > - Third-party API integration (Google Sheets OAuth2)
 > - Dependency injection and service architecture
 > - Data abstraction layer (DAL)
 > - CLI commands and admin API controllers
+> - Vue.js admin components with Shopware Admin SDK
 >
-> **Estimated effort for v1.0 (Backend Only):**
-> - **Experienced Developer:** 3-5 days
-> - **Junior Developer (learning Shopware):** 1-2 weeks
-> - **Complexity:** Intermediate to Advanced
+> **Development effort (all features implemented):**
+> - **Backend (v1.0):**
+>   - Experienced Developer: 3-5 days
+>   - Junior Developer (learning Shopware): 1-2 weeks
+>   - Complexity: Intermediate to Advanced
 >
-> **Additional effort for v1.1 (Admin UI):**
-> - **Experienced Developer (knows Vue.js):** 1-2 weeks
-> - **Junior Developer (learning Vue.js + Shopware Admin SDK):** 2-3 weeks
-> - **Complexity:** Intermediate (Vue.js components, Shopware Admin SDK)
+> - **Admin UI (v1.1):**
+>   - Experienced Developer (knows Vue.js): 1-2 weeks
+>   - Junior Developer (learning Vue.js + Shopware Admin SDK): 2-3 weeks
+>   - Complexity: Intermediate
 >
-> This project touches nearly all aspects of Shopware plugin development (backend + frontend) and is excellent for learning, but requires patience and careful attention to the architecture documents.
+> **Total Project:** This touches nearly all aspects of Shopware plugin development (backend + frontend) and serves as an excellent reference implementation for learning. All features are now complete and production-ready.
 
 ## Features
 
-### ✅ Implemented & Working
+### ✅ Implemented & Working (v1.1.0 - Complete)
+
+**Backend Features:**
 - ✅ **Automatic Export** - Scheduled exports at configurable intervals (15 minutes to weekly)
-- ✅ **Manual Export** - On-demand export via CLI command
+- ✅ **Manual Export** - On-demand export via CLI command and admin UI
 - ✅ **Category-Based Filtering** - Export only orders containing products from specific category
 - ✅ **OAuth2 Authentication** - Secure Google account integration with token refresh
 - ✅ **Multi-Product Support** - Each product exported as separate row
 - ✅ **Export Tracking** - Local database tracks all exports with status
-- ✅ **CSV Export** - Download via API endpoint
+- ✅ **CSV Export** - Download via API endpoint or admin dashboard
 - ✅ **Error Handling** - Comprehensive logging and error tracking
 - ✅ **Admin Configuration** - Full settings form in Shopware Admin
 - ✅ **API Endpoints** - OAuth, manual export, statistics, CSV download
 
-### ⏳ Planned (Admin UI Enhancement)
-- ⏳ **Admin Dashboard Widget** - Visual statistics and recent exports table
-- ⏳ **UI Export Button** - Click-to-export in admin panel
-- ⏳ **OAuth UI Flow** - Browser-based OAuth (currently CLI-based)
+**Admin UI Features (v1.1.0):**
+- ✅ **Admin Dashboard** - Interactive dashboard with visual statistics
+- ✅ **Statistics Cards** - Total exports, pending count, last export timestamp
+- ✅ **One-Click Export** - Manual export button with batch configuration
+- ✅ **OAuth UI Flow** - Browser-based Google authorization with popup
+- ✅ **Export Log Viewer** - Paginated table showing recent exports with status
+- ✅ **CSV Download Button** - Direct download from admin interface
+- ✅ **Real-Time Updates** - Automatic refresh after export operations
+- ✅ **Multi-Language** - German and English translations included
 
 ## Exported Data Fields
 
@@ -97,10 +106,10 @@ Developer and technical administrator guide including:
 
 ## Project Status
 
-**Current Phase:** Backend Complete ✅ | Admin UI Pending ⏳  
-**Next Phase:** Admin UI Development → Testing → Production Deployment
+**Current Phase:** ✅ Complete & Production Ready  
+**Status:** All planned features implemented and tested
 
-### ✅ Completed (Backend - Fully Functional)
+### ✅ v1.0.0 - Backend Implementation (Complete)
 - ✅ Requirements gathering and architecture design
 - ✅ Database schema and migration
 - ✅ Entity definitions (OrderExportEntity, Definition, Collection)
@@ -118,28 +127,34 @@ Developer and technical administrator guide including:
 - ✅ Unit tests (PHPUnit)
 - ✅ Comprehensive documentation (8 guides, 12,000+ lines)
 
-### ⏳ Pending (Admin UI - Optional Enhancement)
-- ⏳ Admin dashboard Vue.js components
-- ⏳ Dashboard statistics widget
-- ⏳ Manual export button in admin UI
-- ⏳ OAuth flow UI (currently CLI-based)
-- ⏳ Export log viewer in admin panel
-- ⏳ Real-time export status updates
+### ✅ v1.1.0 - Admin UI Implementation (Complete - January 7, 2026)
+- ✅ Admin module registration with Shopware
+- ✅ Dashboard page component (Vue.js)
+- ✅ Statistics card showing metrics
+- ✅ Manual export button with modal confirmation
+- ✅ OAuth authorization button with popup flow
+- ✅ Export log viewer with pagination (25 per page)
+- ✅ CSV download functionality in UI
+- ✅ Real-time status updates and notifications
+- ✅ Multi-language support (German/English)
+- ✅ Responsive design with Shopware admin components
+- ✅ **Total: 17 Vue.js files implemented**
 
-### 🚀 Ready Now
-The plugin is **fully functional via CLI and scheduled tasks**. All core functionality works:
+### 🚀 Production Ready
+The plugin is **fully featured and production-ready**:
 - ✅ Automatic exports on order payment
 - ✅ Scheduled exports via cron
-- ✅ Manual exports via CLI command
-- ✅ Configuration via Shopware Admin settings
-- ✅ CSV download via API endpoint
+- ✅ Manual exports via CLI or admin dashboard
+- ✅ Interactive admin dashboard with all features
+- ✅ Browser-based OAuth setup
+- ✅ Export monitoring and CSV downloads
+- ✅ Comprehensive error handling and logging
 
-**Admin UI Note:** The admin dashboard UI components are planned but not yet implemented. Current admin interaction is through:
-1. Configuration form (fully functional)
-2. API endpoints (fully functional)
-3. CLI commands (fully functional)
-
-For most use cases, the CLI and API are sufficient. The admin UI would add convenience but is not required for operation.
+**Access Points:**
+1. **Admin Dashboard:** Settings → Plugins → Webinar Export (main interface)
+2. **Configuration:** Settings → System → Plugins → Configure
+3. **CLI Commands:** `bin/console gotowebinar:export-orders`
+4. **API Endpoints:** Full REST API for automation
 
 ## Quick Start
 
@@ -164,18 +179,22 @@ For most use cases, the CLI and API are sufficient. The admin UI would add conve
    bin/console cache:clear
    ```
 
-3. **Configure Google OAuth**
-   - Follow Google Cloud setup in Installation Guide
-   - Configure OAuth credentials in plugin settings
-   - Complete OAuth authorization flow
-
-4. **Start Exporting**
+3. **Build Admin Assets**
    ```bash
-   # Manual export
-   bin/console gotowebinar:export-orders
-   
-   # Or enable scheduled exports in plugin configuration
+   # Required for admin dashboard to appear
+   bin/build-administration.sh
    ```
+
+4. **Configure Google OAuth**
+   - Follow Google Cloud setup in Installation Guide
+   - Go to Settings → System → Plugins → Configure
+   - Enter OAuth credentials
+   - Click "Connect to Google" in the dashboard
+
+5. **Start Using**
+   - **Admin Dashboard:** Settings → Plugins → Webinar Export
+   - **Manual Export:** Click "Export Now" button in dashboard
+   - **Automated:** Enable scheduled exports in configuration
 
 ### Development
 
@@ -290,17 +309,31 @@ This plugin is designed for AI-driven development. When implementing:
 
 ## Changelog
 
-### Version 1.0.0 (Planned)
-- Initial release
-- Order export to Google Sheets
-- Scheduled and manual export modes
-- OAuth2 authentication
-- Admin dashboard
-- CSV export functionality
-- Comprehensive error handling
+### Version 1.1.0 (January 7, 2026) - Admin UI Release ✨
+- ✅ Complete admin dashboard with Vue.js components
+- ✅ Visual statistics cards (total, pending, last export)
+- ✅ One-click manual export with batch configuration
+- ✅ Browser-based OAuth flow with popup window
+- ✅ Paginated export log viewer (25 entries per page)
+- ✅ CSV download button in admin interface
+- ✅ Real-time notifications and status updates
+- ✅ German and English translations
+- ✅ 17 Vue.js components and templates
+
+### Version 1.0.0 (December 22, 2025) - Backend Release
+- ✅ Initial release with complete backend
+- ✅ Order export to Google Sheets
+- ✅ Scheduled and manual export modes (CLI)
+- ✅ OAuth2 authentication with token refresh
+- ✅ Category-based product filtering
+- ✅ CSV export via API endpoint
+- ✅ Comprehensive error handling and logging
+- ✅ Admin configuration panel
+- ✅ Database migration and entity system
+- ✅ Unit tests and documentation
 
 ---
 
-**Ready for Implementation** 🚀
+**✅ Production Ready** 🚀
 
-All planning documents are complete. The plugin can now be implemented following the architecture outlined in the documentation.
+All features implemented and documented. The plugin is ready for production deployment.

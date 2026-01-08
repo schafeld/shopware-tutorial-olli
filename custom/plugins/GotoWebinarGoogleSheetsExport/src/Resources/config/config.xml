@@ -75,7 +75,7 @@
         <title>Export Schedule</title>
         <title lang="de-DE">Export-Zeitplan</title>
 
-        <component name="sw-single-select">
+        <input-field type="single-select">
             <name>exportInterval</name>
             <label>Export Interval</label>
             <label lang="de-DE">Export-Intervall</label>
@@ -114,7 +114,7 @@
             <defaultValue>hourly</defaultValue>
             <helpText>How often should pending orders be exported automatically?</helpText>
             <helpText lang="de-DE">Wie oft sollen ausstehende Bestellungen automatisch exportiert werden?</helpText>
-        </component>
+        </input-field>
 
         <input-field type="datetime">
             <name>lastExportTimestamp</name>

@@ -2,7 +2,7 @@
 
 namespace Learning\Bundle\Core\Content\Wishlist\SalesChannel;
 
-use Learning\Bundle\Service\WishlistService;
+use Learning\Bundle\Service\WishListService;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,9 +11,9 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route(defaults: ['_routeScope' => ['store-api'], '_loginRequired' => true])]
 class WishlistRoute
 {
-    private WishlistService $wishlistService;
+    private WishListService $wishlistService;
 
-    public function __construct(WishlistService $wishlistService)
+    public function __construct(WishListService $wishlistService)
     {
         $this->wishlistService = $wishlistService;
     }

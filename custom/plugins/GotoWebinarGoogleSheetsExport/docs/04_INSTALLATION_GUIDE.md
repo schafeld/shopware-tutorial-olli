@@ -129,8 +129,8 @@ GotoWebinarGoogleSheetsExport    1.0.0    Yes    Yes
 ### 3.1 Access Configuration
 
 1. Log in to Shopware Administration
-2. Go to **Settings → System → Plugins**
-3. Find **GotoWebinarGoogleSheetsExport**
+2. Go to **Extensions → My Extensions**
+3. Find **GoTo Webinar Google Sheets Export**
 4. Click the **three dots** → **Configure**
 
 ### 3.2 Basic Configuration
@@ -170,8 +170,8 @@ GotoWebinarGoogleSheetsExport    1.0.0    Yes    Yes
 The easiest way to connect to Google Sheets is through the admin UI:
 
 1. **Access the Plugin Dashboard:**
-   - In Shopware Admin, go to **Settings → System → Plugins**
-   - Find **GotoWebinarGoogleSheetsExport**
+   - In Shopware Admin, go to **Extensions → My Extensions**
+   - Find **GoTo Webinar Google Sheets Export**
    - Click **Open** or navigate to the dashboard
 
 2. **Click "Connect to Google Sheets":**
@@ -404,7 +404,8 @@ tail -f var/log/prod.log | grep GotoWebinar
 ### 7.2 Export Statistics
 
 View stats in the admin dashboard:
-- Go to **Settings → System → Plugins → GotoWebinarGoogleSheetsExport**
+- Go to **Extensions → My Extensions**
+- Find **GoTo Webinar Google Sheets Export**
 - Click **Open** to view the dashboard
 - See total exports, pending exports, last export time
 

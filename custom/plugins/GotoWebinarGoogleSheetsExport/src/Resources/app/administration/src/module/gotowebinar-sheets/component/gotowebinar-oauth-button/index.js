@@ -1,11 +1,11 @@
 import template from './gotowebinar-oauth-button.html.twig';
 
-const { Component, Mixin } = Shopware;
+const { Mixin, Application } = Shopware;
 
 /**
  * OAuth authorization button component
  */
-Component.register('gotowebinar-oauth-button', {
+export default {
     template,
 
     mixins: [
@@ -28,6 +28,10 @@ Component.register('gotowebinar-oauth-button', {
     },
 
     computed: {
+        httpClient() {
+            return Application.getContainer('init').httpClient;
+        },
+        
         buttonLabel() {
             if (this.isConnecting) {
                 return this.$tc('gotowebinar-sheets.oauth.buttonLabelConnecting');
@@ -43,7 +47,7 @@ Component.register('gotowebinar-oauth-button', {
         },
 
         iconName() {
-            return this.isConfigured ? 'default-action-check' : 'default-action-share';
+            return this.isConfigured ? 'regular-check' : 'regular-external-link';
         }
     },
 
@@ -67,7 +71,7 @@ Component.register('gotowebinar-oauth-button', {
             const redirectUri = `${window.location.origin}/admin`;
 
             // Get authorization URL from API
-            this.$http.post('/_action/gotowebinar-sheets/oauth/authorize', {
+            this.httpClient.post('/_action/gotowebinar-sheets/oauth/authorize', {
                 redirectUri: redirectUri
             })
                 .then((response) => {
@@ -141,7 +145,7 @@ Component.register('gotowebinar-oauth-button', {
         handleAuthCode(code) {
             const redirectUri = `${window.location.origin}/admin`;
 
-            this.$http.post('/_action/gotowebinar-sheets/oauth/callback', {
+            this.httpClient.post('/_action/gotowebinar-sheets/oauth/callback', {
                 code: code,
                 redirectUri: redirectUri
             })
@@ -179,4 +183,4 @@ Component.register('gotowebinar-oauth-button', {
             this.authWindow = null;
         }
     }
-});
+};

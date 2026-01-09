@@ -1,11 +1,11 @@
 import template from './gotowebinar-export-button.html.twig';
 
-const { Component, Mixin } = Shopware;
+const { Mixin, Application } = Shopware;
 
 /**
  * Manual export trigger button component
  */
-Component.register('gotowebinar-export-button', {
+export default {
     template,
 
     mixins: [
@@ -28,6 +28,10 @@ Component.register('gotowebinar-export-button', {
     },
 
     computed: {
+        httpClient() {
+            return Application.getContainer('init').httpClient;
+        },
+        
         buttonLabel() {
             if (this.isExporting) {
                 return this.$tc('gotowebinar-sheets.export.buttonLabelLoading');
@@ -64,7 +68,7 @@ Component.register('gotowebinar-export-button', {
         triggerExport() {
             this.isExporting = true;
 
-            this.$http.post('/_action/gotowebinar-sheets/export/manual', {
+            this.httpClient.post('/_action/gotowebinar-sheets/export/manual', {
                 limit: this.limit
             })
                 .then((response) => {
@@ -97,4 +101,4 @@ Component.register('gotowebinar-export-button', {
                 });
         }
     }
-});
+};

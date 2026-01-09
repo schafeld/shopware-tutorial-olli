@@ -1,18 +1,17 @@
 {% block gotowebinar_export_list %}
     <sw-card 
         :title="$tc('gotowebinar-sheets.exportList.title')"
-        :isLoading="isLoading"
         class="gotowebinar-export-list">
 
         {% block gotowebinar_export_list_toolbar %}
             <template #toolbar>
                 <sw-button @click="onRefresh" size="small">
-                    <sw-icon name="default-action-refresh" small></sw-icon>
+                    <sw-icon name="regular-refresh" small></sw-icon>
                     {{ $tc('gotowebinar-sheets.exportList.refresh') }}
                 </sw-button>
 
                 <sw-button @click="onDownloadCsv" size="small">
-                    <sw-icon name="default-action-download" small></sw-icon>
+                    <sw-icon name="regular-download" small></sw-icon>
                     {{ $tc('gotowebinar-sheets.exportList.downloadCsv') }}
                 </sw-button>
             </template>

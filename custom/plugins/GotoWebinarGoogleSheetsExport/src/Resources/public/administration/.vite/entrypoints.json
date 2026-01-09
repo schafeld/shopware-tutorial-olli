@@ -1,0 +1,29 @@
+{
+  "base": "/bundles/gotowebinargooglesheetsexport/administration/",
+  "entryPoints": {
+    "goto-webinar-google-sheets-export": {
+      "css": [],
+      "dynamic": [
+        "/bundles/gotowebinargooglesheetsexport/administration/assets/index-DzewrGib.js",
+        "/bundles/gotowebinargooglesheetsexport/administration/assets/index-BZnKrwqf.js",
+        "/bundles/gotowebinargooglesheetsexport/administration/assets/index-BRPny39S.js",
+        "/bundles/gotowebinargooglesheetsexport/administration/assets/index-02JDLokK.js",
+        "/bundles/gotowebinargooglesheetsexport/administration/assets/index-B-uTAHsY.js"
+      ],
+      "js": [
+        "/bundles/gotowebinargooglesheetsexport/administration/assets/goto-webinar-google-sheets-export-Bp-uuxmn.js"
+      ],
+      "legacy": false,
+      "preload": []
+    }
+  },
+  "legacy": false,
+  "metadatas": {},
+  "version": [
+    "7.1.0",
+    7,
+    1,
+    0
+  ],
+  "viteServer": null
+}

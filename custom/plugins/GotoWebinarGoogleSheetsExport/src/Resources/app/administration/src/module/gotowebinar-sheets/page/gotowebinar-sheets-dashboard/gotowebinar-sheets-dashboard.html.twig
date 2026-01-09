@@ -9,13 +9,13 @@
 
         {% block gotowebinar_sheets_dashboard_actions %}
             <template #smart-bar-actions>
-                <sw-button @click="onRefresh" :disabled="isLoading">
-                    <sw-icon name="default-action-refresh" small></sw-icon>
+                <sw-button @click="onRefresh" :disabled="isLoadingStats">
+                    <sw-icon name="regular-refresh" small></sw-icon>
                     {{ $tc('gotowebinar-sheets.exportList.refresh') }}
                 </sw-button>
 
                 <sw-button variant="primary" @click="openConfiguration">
-                    <sw-icon name="default-action-settings" small></sw-icon>
+                    <sw-icon name="regular-cog" small></sw-icon>
                     {{ $tc('gotowebinar-sheets.dashboard.viewConfiguration') }}
                 </sw-button>
             </template>
@@ -28,13 +28,13 @@
                     {% block gotowebinar_sheets_dashboard_stats_card %}
                         <gotowebinar-stats-card
                             :stats="stats"
-                            :is-loading="isLoading"
+                            :is-loading="isLoadingStats"
                             :is-configured="isConfigured">
                         </gotowebinar-stats-card>
                     {% endblock %}
 
                     {% block gotowebinar_sheets_dashboard_actions_card %}
-                        <sw-card :title="$tc('gotowebinar-sheets.general.mainMenuItemGeneral')" :isLoading="isLoading">
+                        <sw-card :title="$tc('gotowebinar-sheets.general.mainMenuItemGeneral')">
                             <div class="gotowebinar-sheets-dashboard__actions">
                                 
                                 {% block gotowebinar_sheets_dashboard_oauth_button %}

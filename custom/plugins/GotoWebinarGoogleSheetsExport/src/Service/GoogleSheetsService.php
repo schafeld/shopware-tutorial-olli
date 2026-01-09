@@ -28,6 +28,21 @@ class GoogleSheetsService
     }
 
     /**
+     * Get a sanitized config value (trimmed of whitespace)
+     * This prevents issues with copy-paste errors adding trailing spaces
+     */
+    private function getSanitizedConfig(string $key): ?string
+    {
+        $value = $this->systemConfigService->get(self::CONFIG_PREFIX . $key);
+        
+        if ($value === null) {
+            return null;
+        }
+        
+        return trim((string) $value);
+    }
+
+    /**
      * Get Google Client instance with authentication
      */
     private function getClient(): GoogleClient
@@ -36,9 +51,9 @@ class GoogleSheetsService
             return $this->client;
         }
 
-        $clientId = $this->systemConfigService->get(self::CONFIG_PREFIX . 'googleClientId');
-        $clientSecret = $this->systemConfigService->get(self::CONFIG_PREFIX . 'googleClientSecret');
-        $refreshToken = $this->systemConfigService->get(self::CONFIG_PREFIX . 'googleRefreshToken');
+        $clientId = $this->getSanitizedConfig('googleClientId');
+        $clientSecret = $this->getSanitizedConfig('googleClientSecret');
+        $refreshToken = $this->getSanitizedConfig('googleRefreshToken');
 
         if (!$clientId || !$clientSecret) {
             throw new \RuntimeException('Google API credentials not configured');
@@ -82,8 +97,8 @@ class GoogleSheetsService
      */
     public function getAuthorizationUrl(string $redirectUri): string
     {
-        $clientId = $this->systemConfigService->get(self::CONFIG_PREFIX . 'googleClientId');
-        $clientSecret = $this->systemConfigService->get(self::CONFIG_PREFIX . 'googleClientSecret');
+        $clientId = $this->getSanitizedConfig('googleClientId');
+        $clientSecret = $this->getSanitizedConfig('googleClientSecret');
 
         if (!$clientId || !$clientSecret) {
             throw new \RuntimeException('Google API credentials not configured');
@@ -105,8 +120,8 @@ class GoogleSheetsService
      */
     public function authenticate(string $authCode, string $redirectUri): array
     {
-        $clientId = $this->systemConfigService->get(self::CONFIG_PREFIX . 'googleClientId');
-        $clientSecret = $this->systemConfigService->get(self::CONFIG_PREFIX . 'googleClientSecret');
+        $clientId = $this->getSanitizedConfig('googleClientId');
+        $clientSecret = $this->getSanitizedConfig('googleClientSecret');
 
         if (!$clientId || !$clientSecret) {
             throw new \RuntimeException('Google API credentials not configured');
@@ -226,7 +241,7 @@ class GoogleSheetsService
             return $token['access_token'];
         }
 
-        $refreshToken = $this->systemConfigService->get(self::CONFIG_PREFIX . 'googleRefreshToken');
+        $refreshToken = $this->getSanitizedConfig('googleRefreshToken');
         
         if (!$refreshToken) {
             throw new \RuntimeException('No refresh token available');
@@ -253,9 +268,9 @@ class GoogleSheetsService
      */
     public function isConfigured(): bool
     {
-        $clientId = $this->systemConfigService->get(self::CONFIG_PREFIX . 'googleClientId');
-        $clientSecret = $this->systemConfigService->get(self::CONFIG_PREFIX . 'googleClientSecret');
-        $refreshToken = $this->systemConfigService->get(self::CONFIG_PREFIX . 'googleRefreshToken');
+        $clientId = $this->getSanitizedConfig('googleClientId');
+        $clientSecret = $this->getSanitizedConfig('googleClientSecret');
+        $refreshToken = $this->getSanitizedConfig('googleRefreshToken');
 
         return !empty($clientId) && !empty($clientSecret) && !empty($refreshToken);
     }

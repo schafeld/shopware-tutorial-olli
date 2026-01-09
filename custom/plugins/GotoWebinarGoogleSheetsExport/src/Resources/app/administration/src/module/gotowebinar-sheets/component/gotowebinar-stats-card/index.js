@@ -1,12 +1,10 @@
 import template from './gotowebinar-stats-card.html.twig';
 import './gotowebinar-stats-card.scss';
 
-const { Component } = Shopware;
-
 /**
  * Statistics card component showing export metrics
  */
-Component.register('gotowebinar-stats-card', {
+export default {
     template,
 
     props: {
@@ -41,4 +39,4 @@ Component.register('gotowebinar-stats-card', {
             return this.stats.pendingExports > 0 ? 'info' : 'success';
         }
     }
-});
+};

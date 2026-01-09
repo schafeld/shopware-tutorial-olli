@@ -1,13 +1,13 @@
 import template from './gotowebinar-export-list.html.twig';
 import './gotowebinar-export-list.scss';
 
-const { Component, Mixin } = Shopware;
+const { Mixin } = Shopware;
 const { Criteria } = Shopware.Data;
 
 /**
  * Export log viewer component
  */
-Component.register('gotowebinar-export-list', {
+export default {
     template,
 
     inject: ['repositoryFactory'],
@@ -140,4 +140,4 @@ Component.register('gotowebinar-export-list', {
             return new Date(date).toLocaleString();
         }
     }
-});
+};

@@ -91,7 +91,12 @@ git clone <repository-url> GotoWebinarGoogleSheetsExport
 # Install Google API client dependency
 cd GotoWebinarGoogleSheetsExport
 composer install --no-dev
+
+# Remove vendor from version control (recommended)
+git rm -r --cached vendor/ 2>/dev/null || true
 ```
+
+> **📝 Note:** The plugin includes a `.gitignore` file that excludes the `vendor/` directory from version control. This is standard practice as dependencies should be installed via Composer.
 
 ### 2.3 Install the Plugin in Shopware
 
@@ -102,12 +107,20 @@ cd /path/to/shopware
 # Refresh plugin list
 bin/console plugin:refresh
 
-# Install the plugin
-bin/console plugin:install GotoWebinarGoogleSheetsExport --activate
+# Install the plugin (use increased memory limit if needed)
+php -d memory_limit=512M bin/console plugin:install GotoWebinarGoogleSheetsExport --activate
 
 # Clear cache
-bin/console cache:clear
+php -d memory_limit=512M bin/console cache:clear
+
+# Build administration assets (required for admin UI)
+./bin/build-administration.sh
 ```
+
+> **⚠️ Common Issues:**
+> - **Memory limit errors:** Use `php -d memory_limit=512M` before commands
+> - **Database connection refused:** Check your `.env.local` has correct database port (use `127.0.0.1` not `localhost` for IPv4)
+> - **Admin dashboard not visible:** Run `./bin/build-administration.sh` to compile JavaScript assets
 
 ### 2.4 Verify Installation
 
@@ -170,13 +183,19 @@ GotoWebinarGoogleSheetsExport    1.0.0    Yes    Yes
 The easiest way to connect to Google Sheets is through the admin UI:
 
 1. **Access the Plugin Dashboard:**
-   - In Shopware Admin, go to **Extensions → My Extensions**
+   - In Shopware Admin, go to **Settings** (in the left sidebar)
+   - Look for **Plugins** section
+   - Click on **Webinar Export**
+   - This will open the dashboard at `https://your-domain.com/admin#/gotowebinar-sheets/dashboard`
+   
+   **Alternative access:**
+   - Go to **Extensions → My Extensions**
    - Find **GoTo Webinar Google Sheets Export**
-   - Click **Open** or navigate to the dashboard
+   - Click **Open** button
 
-2. **Click "Connect to Google Sheets":**
+2. **Click "Connect to Google":**
    - On the dashboard, find the **Google OAuth** section
-   - Click the **"Connect to Google Sheets"** button
+   - Click the **"Connect to Google"** button
    - A popup window will open with Google's authorization page
 
 3. **Authorize the Application:**
@@ -450,7 +469,74 @@ bin/console dbal:run-sql "SELECT * FROM gotowebinar_order_export ORDER BY create
 **Solution:**
 ```bash
 bin/console plugin:refresh
-bin/console cache:clear
+php -d memory_limit=512M bin/console cache:clear
+```
+
+### Problem: "PHP version does not satisfy requirement"
+
+**Solution:**
+
+If you see errors about PHP 8.5 not being supported:
+
+1. **Option 1 (Recommended):** Use PHP 8.4
+   ```bash
+   # On macOS with Homebrew
+   brew unlink php
+   brew link php@8.4 --force
+   php -v  # Verify version
+   ```
+
+2. **Option 2:** The plugin includes a platform config workaround in its `composer.json`
+
+### Problem: "Required plugin/package does not match installed version"
+
+**Solution:**
+
+If you're running Shopware 6.7 or newer and see version mismatch:
+- The plugin's `composer.json` has been updated to support Shopware 6.5, 6.6, and 6.7
+- Run `bin/console plugin:refresh` after updating the plugin
+
+### Problem: "Database connection refused"
+
+**Solution:**
+
+Check your database configuration in `.env.local`:
+```bash
+# Test database connection
+mysql -h 127.0.0.1 -P YOUR_PORT -u root -proot shopware -e "SELECT 1"
+
+# If successful, update .env.local to use 127.0.0.1 instead of localhost
+DATABASE_URL=mysql://root:root@127.0.0.1:YOUR_PORT/shopware
+```
+
+> **Note:** On macOS, `localhost` may resolve to IPv6 (`::1`) while Docker only listens on IPv4. Use `127.0.0.1` explicitly.
+
+### Problem: "Case mismatch between loaded and declared class names"
+
+**Solution:**
+
+This indicates another plugin has case-sensitivity issues. Check your other plugins' service definitions match their actual class names exactly.
+
+### Problem: "Admin dashboard shows empty dropdowns"
+
+**Solution:**
+
+The Export Interval dropdown may appear empty due to config.xml compatibility:
+- This has been fixed to use `<input-field type="single-select">` instead of deprecated `<component name="sw-single-select">`
+- Clear cache: `php -d memory_limit=512M bin/console cache:clear`
+- Rebuild admin: `./bin/build-administration.sh`
+
+### Problem: "Connect to Google Sheets button not visible"
+
+**Solution:**
+
+The admin dashboard requires built JavaScript assets:
+```bash
+# Build administration assets
+./bin/build-administration.sh
+
+# Clear cache and hard-refresh browser (Cmd+Shift+R)
+php -d memory_limit=512M bin/console cache:clear
 ```
 
 ### Problem: "Google API credentials not configured"

@@ -1,12 +1,12 @@
 import template from './gotowebinar-sheets-dashboard.html.twig';
 import './gotowebinar-sheets-dashboard.scss';
 
-const { Component, Mixin } = Shopware;
+const { Mixin, Application } = Shopware;
 
 /**
  * Main dashboard page for GotoWebinar Sheets Export
  */
-Component.register('gotowebinar-sheets-dashboard', {
+export default {
     template,
 
     inject: ['systemConfigApiService'],
@@ -17,7 +17,7 @@ Component.register('gotowebinar-sheets-dashboard', {
 
     data() {
         return {
-            isLoading: false,
+            isLoadingStats: false,
             stats: {
                 totalExports: 0,
                 pendingExports: 0,
@@ -29,6 +29,10 @@ Component.register('gotowebinar-sheets-dashboard', {
     },
 
     computed: {
+        httpClient() {
+            return Application.getContainer('init').httpClient;
+        },
+
         lastExportFormatted() {
             if (!this.stats.lastExport) {
                 return this.$tc('gotowebinar-sheets.stats.never');
@@ -40,28 +44,27 @@ Component.register('gotowebinar-sheets-dashboard', {
     },
 
     created() {
-        this.loadData();
         this.loadConfiguration();
+        this.loadData();
     },
 
     methods: {
         loadData() {
-            this.isLoading = true;
+            this.isLoadingStats = true;
 
             // Load statistics from API
-            this.$http.get('/_action/gotowebinar-sheets/export/stats')
+            this.httpClient.get('/_action/gotowebinar-sheets/export/stats')
                 .then((response) => {
                     if (response.data.success) {
                         this.stats = response.data.stats;
                     }
                 })
-                .catch((error) => {
-                    this.createNotificationError({
-                        message: error.message
-                    });
+                .catch(() => {
+                    // Silently fail - stats are not critical for initial display
+                    // The warning about not being configured will show instead
                 })
                 .finally(() => {
-                    this.isLoading = false;
+                    this.isLoadingStats = false;
                 });
         },
 
@@ -94,11 +97,12 @@ Component.register('gotowebinar-sheets-dashboard', {
 
         openConfiguration() {
             this.$router.push({
-                name: 'sw.plugin.settings',
+                name: 'sw.extension.config',
                 params: {
                     namespace: 'GotoWebinarGoogleSheetsExport'
                 }
             });
         }
     }
-});
+};
+

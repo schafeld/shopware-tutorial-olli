@@ -1,0 +1,54 @@
+{
+  "main.js": {
+    "file": "assets/goto-webinar-google-sheets-export-Bp-uuxmn.js",
+    "name": "goto-webinar-google-sheets-export",
+    "src": "main.js",
+    "isEntry": true,
+    "dynamicImports": [
+      "module/gotowebinar-sheets/page/gotowebinar-sheets-dashboard/index.js",
+      "module/gotowebinar-sheets/component/gotowebinar-stats-card/index.js",
+      "module/gotowebinar-sheets/component/gotowebinar-export-button/index.js",
+      "module/gotowebinar-sheets/component/gotowebinar-oauth-button/index.js",
+      "module/gotowebinar-sheets/component/gotowebinar-export-list/index.js"
+    ]
+  },
+  "module/gotowebinar-sheets/component/gotowebinar-export-button/index.js": {
+    "file": "assets/index-BRPny39S.js",
+    "name": "index",
+    "src": "module/gotowebinar-sheets/component/gotowebinar-export-button/index.js",
+    "isDynamicEntry": true
+  },
+  "module/gotowebinar-sheets/component/gotowebinar-export-list/index.js": {
+    "file": "assets/index-B-uTAHsY.js",
+    "name": "index",
+    "src": "module/gotowebinar-sheets/component/gotowebinar-export-list/index.js",
+    "isDynamicEntry": true,
+    "css": [
+      "assets/index-CVp-DUgK.css"
+    ]
+  },
+  "module/gotowebinar-sheets/component/gotowebinar-oauth-button/index.js": {
+    "file": "assets/index-02JDLokK.js",
+    "name": "index",
+    "src": "module/gotowebinar-sheets/component/gotowebinar-oauth-button/index.js",
+    "isDynamicEntry": true
+  },
+  "module/gotowebinar-sheets/component/gotowebinar-stats-card/index.js": {
+    "file": "assets/index-BZnKrwqf.js",
+    "name": "index",
+    "src": "module/gotowebinar-sheets/component/gotowebinar-stats-card/index.js",
+    "isDynamicEntry": true,
+    "css": [
+      "assets/index-glN03Wdx.css"
+    ]
+  },
+  "module/gotowebinar-sheets/page/gotowebinar-sheets-dashboard/index.js": {
+    "file": "assets/index-DzewrGib.js",
+    "name": "index",
+    "src": "module/gotowebinar-sheets/page/gotowebinar-sheets-dashboard/index.js",
+    "isDynamicEntry": true,
+    "css": [
+      "assets/index-BEB0vDt_.css"
+    ]
+  }
+}

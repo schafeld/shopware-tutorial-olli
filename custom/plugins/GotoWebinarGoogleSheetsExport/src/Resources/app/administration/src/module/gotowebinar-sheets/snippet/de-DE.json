@@ -15,6 +15,11 @@
       "refreshing": "Aktualisiere...",
       "viewConfiguration": "Konfiguration öffnen"
     },
+    "config": {
+      "dashboardCardTitle": "Webinar Export Dashboard",
+      "dashboardCardDescription": "Export-Verlauf, Statistiken anzeigen und Exports manuell zu Google Sheets auslösen.",
+      "openDashboard": "Dashboard öffnen"
+    },
     "stats": {
       "total": "Gesamt",
       "pending": "Ausstehend",

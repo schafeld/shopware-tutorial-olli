@@ -184,14 +184,15 @@ The easiest way to connect to Google Sheets is through the admin UI:
 
 1. **Access the Plugin Dashboard:**
    - In Shopware Admin, go to **Settings** (in the left sidebar)
-   - Look for **Plugins** section
+   - Look for **Extensions** section
    - Click on **Webinar Export**
-   - This will open the dashboard at `https://your-domain.com/admin#/gotowebinar-sheets/dashboard`
+   - This will open the dashboard at `https://your-domain.com/admin#/gotowebinar/sheets/dashboard`
    
    **Alternative access:**
    - Go to **Extensions → My Extensions**
    - Find **GoTo Webinar Google Sheets Export**
-   - Click **Open** button
+   - Click **Configure** link
+   - **Open Bashboard** button
 
 2. **Click "Connect to Google":**
    - On the dashboard, find the **Google OAuth** section

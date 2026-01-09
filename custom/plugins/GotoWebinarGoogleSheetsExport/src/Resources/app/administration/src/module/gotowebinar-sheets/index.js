@@ -6,6 +6,9 @@
 import deDE from './snippet/de-DE.json';
 import enGB from './snippet/en-GB.json';
 
+// Import component extensions
+import './extension/sw-extension-config';
+
 // Register components using lazy loading (Shopware 6.7 pattern)
 Shopware.Component.register('gotowebinar-sheets-dashboard', () => import('./page/gotowebinar-sheets-dashboard'));
 Shopware.Component.register('gotowebinar-stats-card', () => import('./component/gotowebinar-stats-card'));

@@ -1,6 +1,6 @@
 {
   "main.js": {
-    "file": "assets/goto-webinar-google-sheets-export-Bp-uuxmn.js",
+    "file": "assets/goto-webinar-google-sheets-export-RegSQpHz.js",
     "name": "goto-webinar-google-sheets-export",
     "src": "main.js",
     "isEntry": true,
@@ -19,7 +19,7 @@
     "isDynamicEntry": true
   },
   "module/gotowebinar-sheets/component/gotowebinar-export-list/index.js": {
-    "file": "assets/index-B-uTAHsY.js",
+    "file": "assets/index-DzvXwx-s.js",
     "name": "index",
     "src": "module/gotowebinar-sheets/component/gotowebinar-export-list/index.js",
     "isDynamicEntry": true,

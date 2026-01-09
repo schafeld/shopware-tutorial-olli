@@ -1,7 +1,7 @@
 import template from './gotowebinar-export-list.html.twig';
 import './gotowebinar-export-list.scss';
 
-const { Mixin } = Shopware;
+const { Mixin, Application } = Shopware;
 const { Criteria } = Shopware.Data;
 
 /**
@@ -27,6 +27,10 @@ export default {
     },
 
     computed: {
+        httpClient() {
+            return Application.getContainer('init').httpClient;
+        },
+
         repository() {
             return this.repositoryFactory.create('gotowebinar_order_export');
         },
@@ -106,7 +110,26 @@ export default {
         },
 
         onDownloadCsv() {
-            window.open('/_action/gotowebinar-sheets/export/csv?limit=100', '_blank');
+            this.httpClient.get('/_action/gotowebinar-sheets/export/csv', {
+                params: { limit: 100 },
+                responseType: 'blob'
+            })
+                .then((response) => {
+                    const blob = new Blob([response.data], { type: 'text/csv' });
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', `webinar-exports-${new Date().toISOString().split('T')[0]}.csv`);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch((error) => {
+                    this.createNotificationError({
+                        message: error.message || 'Failed to download CSV'
+                    });
+                });
         },
 
         onPageChange({ page, limit }) {

@@ -22,7 +22,8 @@ class OrderPlacedSubscriber implements EventSubscriberInterface
     public function __construct(
         private readonly OrderExportService $orderExportService,
         private readonly SystemConfigService $systemConfigService,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly EntityRepository $orderRepository
     ) {
     }
 
@@ -41,20 +42,39 @@ class OrderPlacedSubscriber implements EventSubscriberInterface
         // Check if plugin is enabled
         $enabled = $this->systemConfigService->get(self::CONFIG_PREFIX . 'enabled');
         if (!$enabled) {
+            $this->logger->debug('GotoWebinar export: Plugin is disabled');
             return;
         }
 
         $context = $event->getContext();
-        $orderTransaction = $event->getOrderTransaction();
-        $order = $orderTransaction->getOrder();
+        $orderId = $event->getOrder()->getId();
+
+        $this->logger->info('GotoWebinar export: Processing paid order', [
+            'orderId' => $orderId,
+        ]);
+
+        // Fetch the order with all required associations
+        $criteria = new Criteria([$orderId]);
+        $criteria->addAssociation('lineItems.product.categories');
+        $criteria->addAssociation('orderCustomer');
+        $criteria->addAssociation('salesChannel');
+
+        $order = $this->orderRepository->search($criteria, $context)->first();
 
         if (!$order) {
+            $this->logger->warning('GotoWebinar export: Order not found', [
+                'orderId' => $orderId,
+            ]);
             return;
         }
 
         try {
             // Check if order should be exported
             if (!$this->orderExportService->shouldExportOrder($order, $context)) {
+                $this->logger->debug('GotoWebinar export: Order does not match category filter', [
+                    'orderId' => $orderId,
+                    'orderNumber' => $order->getOrderNumber(),
+                ]);
                 return;
             }
 

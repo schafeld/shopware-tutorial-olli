@@ -72,8 +72,9 @@ export default {
         },
 
         showingEntriesText() {
+            const count = this.exports && this.exports.length ? this.exports.length : 0;
             return this.$tc('gotowebinar-sheets.exportList.showingEntries', 0, {
-                count: this.exports.length,
+                count: count,
                 total: this.total
             });
         }

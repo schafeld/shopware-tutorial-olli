@@ -59,6 +59,14 @@
             <tag name="console.command"/>
         </service>
 
+        <service id="GotoWebinarGoogleSheetsExport\Command\ScanOrdersCommand">
+            <argument type="service" id="order.repository"/>
+            <argument type="service" id="GotoWebinarGoogleSheetsExport\Service\OrderExportService"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="logger"/>
+            <tag name="console.command"/>
+        </service>
+
         <!-- Admin API Controller -->
         <service id="GotoWebinarGoogleSheetsExport\Controller\AdminApiController" public="true">
             <argument type="service" id="GotoWebinarGoogleSheetsExport\Service\GoogleSheetsService"/>

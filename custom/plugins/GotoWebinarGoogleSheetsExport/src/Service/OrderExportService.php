@@ -199,4 +199,19 @@ class OrderExportService
 
         return false;
     }
+
+    /**
+     * Check if an export entry already exists for a given order/product combination
+     */
+    public function exportExists(string $orderId, string $productId, Context $context): bool
+    {
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('orderId', $orderId));
+        $criteria->addFilter(new EqualsFilter('productId', $productId));
+        $criteria->setLimit(1);
+
+        $result = $this->exportRepository->search($criteria, $context);
+
+        return $result->getTotal() > 0;
+    }
 }

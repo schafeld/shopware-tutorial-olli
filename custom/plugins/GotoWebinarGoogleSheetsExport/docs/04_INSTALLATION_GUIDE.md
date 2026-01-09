@@ -192,7 +192,7 @@ The easiest way to connect to Google Sheets is through the admin UI:
    - Go to **Extensions → My Extensions**
    - Find **GoTo Webinar Google Sheets Export**
    - Click **Configure** link
-   - **Open Bashboard** button
+   - Click **Open Dashboard** button
 
 2. **Click "Connect to Google":**
    - On the dashboard, find the **Google OAuth** section

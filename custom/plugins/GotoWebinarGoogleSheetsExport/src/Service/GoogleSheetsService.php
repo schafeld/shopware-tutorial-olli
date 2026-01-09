@@ -67,24 +67,21 @@ class GoogleSheetsService
         $client->setPrompt('consent');
 
         if ($refreshToken) {
-            $client->setAccessToken([
-                'refresh_token' => $refreshToken,
-            ]);
-
-            // Refresh the access token if needed
-            if ($client->isAccessTokenExpired()) {
-                try {
-                    $newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
-                    
-                    if (isset($newToken['error'])) {
-                        throw new \RuntimeException('Failed to refresh token: ' . $newToken['error']);
-                    }
-                } catch (\Exception $e) {
-                    $this->logger->error('Failed to refresh Google access token', [
-                        'error' => $e->getMessage(),
-                    ]);
-                    throw new \RuntimeException('Failed to refresh access token: ' . $e->getMessage());
+            // Fetch a new access token using the refresh token
+            try {
+                $newToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
+                
+                if (isset($newToken['error'])) {
+                    throw new \RuntimeException('Failed to refresh token: ' . ($newToken['error_description'] ?? $newToken['error']));
                 }
+                
+                // Set the complete token including the new access token
+                $client->setAccessToken($newToken);
+            } catch (\Exception $e) {
+                $this->logger->error('Failed to refresh Google access token', [
+                    'error' => $e->getMessage(),
+                ]);
+                throw new \RuntimeException('Failed to refresh access token: ' . $e->getMessage());
             }
         }
 

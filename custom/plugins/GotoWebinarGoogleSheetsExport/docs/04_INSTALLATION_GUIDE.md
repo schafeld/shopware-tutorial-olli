@@ -373,32 +373,45 @@ crontab -e
 
 1. In Shopware Admin, go to **Catalogues → Categories**
 2. Create a category called "Test Webinars"
-3. **Note the category ID:**
-   - After saving, look at the browser URL
-   - Example: `https://127.0.0.1:8000/admin#/sw/category/index/019b46136a14708696dc49681ba8f774/base`
-   - The ID is the long hash in the URL: `019b46136a14708696dc49681ba8f774`
-   - This is the category's UUID (without dashes)
-   - You'll need this ID for the plugin configuration (Step 3.2)
+3. Save the category
+4. Go to **Extensions → My Extensions → GoTo Webinar Google Sheets Export → Configure**
+5. In the **Webinar Category** dropdown, select your newly created "Test Webinars" category
+6. Save the configuration
+
+> **📝 Note:** The category selector is a searchable dropdown - just start typing the category name to find it quickly.
 
 ### 6.2 Create Test Product
 
-1. Create a product in the "Test Webinars" category
-2. Name: "Test Webinar Product"
-3. Price: 10.00 EUR
-4. Set as active
+1. Go to **Catalogues → Products**
+2. Create a new product:
+   - Name: "Test Webinar Product"
+   - Product number: "WEBINAR-TEST-001"
+   - Price: 10.00 EUR (gross)
+   - Stock: 100 (or enable "Available for order" without stock)
+3. In the **Categories** section, assign it to "Test Webinars"
+4. Set **Active** to enabled
+5. Save the product
 
 ### 6.3 Place Test Order
 
-1. Open your storefront
-2. Add the test product to cart
-3. Complete checkout
-4. Complete payment (use fake payment for testing)
+1. Open your storefront in a browser
+2. Navigate to or search for your test product
+3. Add the test product to cart
+4. Complete checkout with test customer data
+5. **Important:** Use a payment method that sets status to "paid"
 
 > **⚠️ Important: Payment Status Requirement**  
 > Orders are only captured for export when the **payment status changes to "paid"**. This means:
 > - Orders with status "open", "in progress", or "cancelled" will NOT be exported
 > - The order must have at least one line item from the configured webinar category
 > - For testing, use a payment method that immediately sets status to "paid" (e.g., "Cash on Delivery" or "Paid in Advance" with manual confirmation)
+
+**Manually Set Payment to Paid (if needed):**
+1. Go to **Orders → Overview**
+2. Click on your test order
+3. In the order detail, find the **Payment status** dropdown
+4. Change it to **"Paid"**
+5. Save
 
 ### 6.4 Verify Order Capture
 

@@ -159,10 +159,12 @@ class OrderExportService
         $successCriteria->setLimit(1);
         $lastSuccess = $this->exportRepository->search($successCriteria, $context);
 
+        $lastExportDate = $lastSuccess->first()?->getExportedAt();
+        
         return [
             'totalExports' => $allExports->getTotal(),
             'pendingExports' => $pendingExports->getTotal(),
-            'lastExport' => $lastSuccess->first() ? $lastSuccess->first()->getExportedAt() : null,
+            'lastExport' => $lastExportDate ? $lastExportDate->format('c') : null,
         ];
     }
 

@@ -10,12 +10,12 @@
         {% block gotowebinar_sheets_dashboard_actions %}
             <template #smart-bar-actions>
                 <sw-button @click="onRefresh" :disabled="isLoadingStats">
-                    <sw-icon name="regular-refresh" small></sw-icon>
+                    <sw-icon name="regular-redo" small></sw-icon>
                     {{ $tc('gotowebinar-sheets.exportList.refresh') }}
                 </sw-button>
 
                 <sw-button variant="primary" @click="openConfiguration">
-                    <sw-icon name="regular-cog" small></sw-icon>
+                    <sw-icon name="regular-cog-s" small></sw-icon>
                     {{ $tc('gotowebinar-sheets.dashboard.viewConfiguration') }}
                 </sw-button>
             </template>

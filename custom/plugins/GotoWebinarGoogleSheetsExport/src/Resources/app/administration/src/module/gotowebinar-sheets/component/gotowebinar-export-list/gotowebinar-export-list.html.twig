@@ -6,12 +6,12 @@
         {% block gotowebinar_export_list_toolbar %}
             <template #toolbar>
                 <sw-button @click="onRefresh" size="small">
-                    <sw-icon name="regular-refresh" small></sw-icon>
+                    <sw-icon name="regular-redo" small></sw-icon>
                     {{ $tc('gotowebinar-sheets.exportList.refresh') }}
                 </sw-button>
 
                 <sw-button @click="onDownloadCsv" size="small">
-                    <sw-icon name="regular-download" small></sw-icon>
+                    <sw-icon name="regular-cloud-download" small></sw-icon>
                     {{ $tc('gotowebinar-sheets.exportList.downloadCsv') }}
                 </sw-button>
             </template>
@@ -62,8 +62,8 @@
                     @page-change="onPageChange">
                 </sw-pagination>
 
-                <div v-if="total > 0" class="gotowebinar-export-list__footer">
-                    <span>{{ showingEntriesText }}</span>
+                <div v-if="exports && exports.length > 0" class="gotowebinar-export-list__footer">
+                    <span>Showing {{ exports.length }} of {{ total }} entries</span>
                 </div>
             </template>
         {% endblock %}

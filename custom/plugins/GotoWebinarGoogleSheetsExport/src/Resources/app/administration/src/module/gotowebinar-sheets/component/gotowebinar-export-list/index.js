@@ -72,10 +72,11 @@ export default {
         },
 
         showingEntriesText() {
-            const count = this.exports && this.exports.length ? this.exports.length : 0;
-            return this.$tc('gotowebinar-sheets.exportList.showingEntries', 0, {
+            const count = this.exports ? this.exports.length : 0;
+            const total = this.total || 0;
+            return this.$tc('gotowebinar-sheets.exportList.showingEntries', count, {
                 count: count,
-                total: this.total
+                total: total
             });
         }
     },
@@ -94,7 +95,7 @@ export default {
             this.repository.search(criteria, Shopware.Context.api)
                 .then((result) => {
                     this.exports = result;
-                    this.total = result.total;
+                    this.total = result.total ?? result.length ?? 0;
                 })
                 .catch((error) => {
                     this.createNotificationError({

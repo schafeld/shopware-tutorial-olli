@@ -4,14 +4,14 @@
     "goto-webinar-google-sheets-export": {
       "css": [],
       "dynamic": [
-        "/bundles/gotowebinargooglesheetsexport/administration/assets/index-DzewrGib.js",
-        "/bundles/gotowebinargooglesheetsexport/administration/assets/index-BZnKrwqf.js",
-        "/bundles/gotowebinargooglesheetsexport/administration/assets/index-BRPny39S.js",
-        "/bundles/gotowebinargooglesheetsexport/administration/assets/index-02JDLokK.js",
-        "/bundles/gotowebinargooglesheetsexport/administration/assets/index-BhJagK0q.js"
+        "/bundles/gotowebinargooglesheetsexport/administration/assets/index-B8xH3B-P.js",
+        "/bundles/gotowebinargooglesheetsexport/administration/assets/index-Bj1Q6b7X.js",
+        "/bundles/gotowebinargooglesheetsexport/administration/assets/index-RnaGWCsR.js",
+        "/bundles/gotowebinargooglesheetsexport/administration/assets/index-BKRSupF0.js",
+        "/bundles/gotowebinargooglesheetsexport/administration/assets/index-BoZUbwr1.js"
       ],
       "js": [
-        "/bundles/gotowebinargooglesheetsexport/administration/assets/goto-webinar-google-sheets-export-D8RzLgbu.js"
+        "/bundles/gotowebinargooglesheetsexport/administration/assets/goto-webinar-google-sheets-export-DLrSxyiM.js"
       ],
       "legacy": false,
       "preload": []

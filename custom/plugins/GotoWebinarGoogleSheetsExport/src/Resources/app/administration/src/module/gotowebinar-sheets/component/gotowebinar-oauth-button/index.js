@@ -47,7 +47,7 @@ export default {
         },
 
         iconName() {
-            return this.isConfigured ? 'regular-check' : 'regular-external-link';
+            return this.isConfigured ? 'regular-checkmark' : 'regular-external-link';
         }
     },
 

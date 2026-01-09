@@ -7,7 +7,7 @@
             
             {% block gotowebinar_stats_card_total %}
                 <div class="gotowebinar-stats-card__stat">
-                    <sw-icon name="default-basic-stack-line" size="32"></sw-icon>
+                    <sw-icon name="regular-layer-group" size="32"></sw-icon>
                     <div class="gotowebinar-stats-card__stat-value">
                         {{ stats.totalExports || 0 }}
                     </div>
@@ -19,7 +19,7 @@
 
             {% block gotowebinar_stats_card_pending %}
                 <div class="gotowebinar-stats-card__stat">
-                    <sw-icon name="default-time-clock" size="32"></sw-icon>
+                    <sw-icon name="regular-clock" size="32"></sw-icon>
                     <div class="gotowebinar-stats-card__stat-value">
                         <sw-label :variant="statusVariant">
                             {{ stats.pendingExports || 0 }}
@@ -33,7 +33,7 @@
 
             {% block gotowebinar_stats_card_last %}
                 <div class="gotowebinar-stats-card__stat">
-                    <sw-icon name="default-action-check" size="32"></sw-icon>
+                    <sw-icon name="regular-checkmark" size="32"></sw-icon>
                     <div class="gotowebinar-stats-card__stat-value">
                         {{ lastExportFormatted }}
                     </div>

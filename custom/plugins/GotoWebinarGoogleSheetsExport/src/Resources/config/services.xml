@@ -38,6 +38,12 @@
             <tag name="kernel.event_subscriber"/>
         </service>
 
+        <service id="GotoWebinarGoogleSheetsExport\Subscriber\ConfigChangeSubscriber">
+            <argument type="service" id="scheduled_task.repository"/>
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
         <!-- Scheduled Task -->
         <service id="GotoWebinarGoogleSheetsExport\ScheduledTask\ExportOrdersTask">
             <tag name="shopware.scheduled.task"/>

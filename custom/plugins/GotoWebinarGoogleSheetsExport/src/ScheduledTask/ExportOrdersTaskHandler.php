@@ -20,12 +20,13 @@ class ExportOrdersTaskHandler extends ScheduledTaskHandler
 
     public function __construct(
         EntityRepository $scheduledTaskRepository,
+        LoggerInterface $exceptionLogger,
         private readonly OrderExportService $orderExportService,
         private readonly GoogleSheetsService $googleSheetsService,
         private readonly SystemConfigService $systemConfigService,
         private readonly LoggerInterface $logger
     ) {
-        parent::__construct($scheduledTaskRepository);
+        parent::__construct($scheduledTaskRepository, $exceptionLogger);
     }
 
     public static function getHandledMessages(): iterable

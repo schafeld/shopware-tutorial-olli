@@ -331,24 +331,61 @@ In the plugin configuration:
 
 ### 5.2 Configure Scheduled Tasks
 
-Ensure Shopware's scheduled task runner is active:
+Shopware's scheduled task system requires **two components** to work:
+
+1. **Task Scheduler** (`scheduled-task:run`) - Checks which tasks are due and dispatches them to the message queue
+2. **Message Consumer** (`messenger:consume`) - Actually executes the queued tasks
+
+**For Development/Testing:**
 
 ```bash
-# Check if scheduled tasks are running
-bin/console scheduled-task:list
+# In one terminal: Start the message consumer (required!)
+bin/console messenger:consume async -vv
 
-# Run scheduled tasks manually (for testing)
+# In another terminal: Run the scheduler manually
 bin/console scheduled-task:run
 ```
 
-For production, set up a cron job:
+> **⚠️ Critical:** Without `messenger:consume` running, tasks will be queued but **never executed**. The `scheduled-task:run` command only adds tasks to the queue - it doesn't process them.
+
+**For Production:**
+
+Set up **both** as systemd services or use separate cron jobs:
 
 ```bash
-# Add to crontab
+# Option 1: Cron for scheduler + systemd for consumer (recommended)
+# Add to crontab for scheduler:
 crontab -e
-
-# Add this line (runs every minute)
 * * * * * cd /path/to/shopware && php bin/console scheduled-task:run >> var/log/scheduled_tasks.log 2>&1
+
+# Then create systemd service for messenger consumer (see below)
+```
+
+**Example systemd service for message consumer:**
+
+```ini
+# /etc/systemd/system/shopware-messenger.service
+[Unit]
+Description=Shopware Message Consumer
+After=mysql.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/path/to/shopware
+ExecStart=/usr/bin/php /path/to/shopware/bin/console messenger:consume async --time-limit=3600
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start:
+```bash
+sudo systemctl enable shopware-messenger
+sudo systemctl start shopware-messenger
+sudo systemctl status shopware-messenger
 ```
 
 ### 5.3 Advanced Options
@@ -419,7 +456,9 @@ After placing a test order, check that it was captured:
 
 ```bash
 # Check if the order was added to the export queue
-bin/console dbal:run-sql "SELECT id, order_number, export_status, created_at FROM gotowebinar_order_export ORDER BY created_at DESC LIMIT 5"
+mysql -h 127.0.0.1 -P YOUR_DB_PORT -u root -proot shopware -e "SELECT id, order_number, export_status, created_at FROM gotowebinar_order_export ORDER BY created_at DESC LIMIT 5"
+
+# Replace YOUR_DB_PORT with your actual database port (check .env.local)
 ```
 
 If no entries appear:
@@ -460,47 +499,81 @@ bin/console gotowebinar:export-orders
 
 ### 6.6 Test Scheduled Export Interval
 
-The plugin uses Shopware's scheduled task system. **Scheduled tasks do not run automatically** - they require an external trigger (cron job in production).
+The plugin uses Shopware's scheduled task system, which requires **two processes**:
+1. **Scheduler** (`scheduled-task:run`) - Dispatches due tasks to the queue
+2. **Consumer** (`messenger:consume`) - Executes the queued tasks
 
-**Check Current Task Configuration:**
+**Complete Testing Setup:**
+
 ```bash
-# View scheduled task status and interval
+# Terminal 1: Start message consumer (REQUIRED for tasks to execute!)
+bin/console messenger:consume async -vv
+
+# Terminal 2: Check task configuration
 bin/console scheduled-task:list | grep gotowebinar
 
 # Example output:
-# | gotowebinar.google_sheets_export | 2026-01-09T12:00:00+00:00 | - | 3600 | queued |
-#                                                                     ^^^^
-#                                                          Interval in seconds (3600 = 1 hour)
+# | gotowebinar.google_sheets_export | 2026-01-09T12:00:00+00:00 | - | 900 | queued |
+#                                                                    ^^^
+#                                         Interval in seconds (900 = 15 minutes)
 ```
 
 **Verify Interval Updates When Config Changes:**
 
 1. Change the export interval in plugin config (e.g., to "Every 15 minutes")
 2. Save the configuration
-3. Run the command again:
+3. Check the interval was updated:
    ```bash
    bin/console scheduled-task:list | grep gotowebinar
    ```
 4. The interval should now show `900` (15 minutes = 900 seconds)
 
-**Manually Trigger Scheduled Task (for testing):**
+**Force Task to Run Immediately (for testing):**
+
 ```bash
-# This checks all due scheduled tasks and runs them
+# Reset the next execution time to now
+mysql -h 127.0.0.1 -P YOUR_DB_PORT -u root -proot shopware -e "UPDATE scheduled_task SET next_execution_time = NOW() WHERE name = 'gotowebinar.google_sheets_export'"
+
+# Replace YOUR_DB_PORT with your actual database port (check .env.local)
+
+# Dispatch the task (Terminal 2)
 bin/console scheduled-task:run
 
-# To force run even if not due yet, reset the task first:
-bin/console dbal:run-sql "UPDATE scheduled_task SET next_execution_time = NOW() WHERE name = 'gotowebinar.google_sheets_export'"
-bin/console scheduled-task:run
+# Watch Terminal 1 (messenger:consume) - you should see:
+# [OK] Handling message GotoWebinarGoogleSheetsExport\ScheduledTask\ExportOrdersTask
+# ... export processing ...
+# [OK] Message handled
 ```
 
-**Understanding the Scheduled Task Flow:**
+**Understanding the Two-Process Flow:**
 
-1. `scheduled-task:run` checks which tasks are due (based on `next_execution_time`)
-2. Due tasks are dispatched to the message queue
-3. The message worker processes the queue
-4. After completion, `next_execution_time` is updated based on `run_interval`
+```
+scheduled-task:run (every minute)
+    ↓ Checks: Is task due?
+    ↓ Yes → Dispatch to queue
+    ↓ No → Do nothing
+    ↓
+Message Queue (in database)
+    ↓
+messenger:consume (always running)
+    ↓ Picks up queued message
+    ↓ Executes ExportOrdersTaskHandler
+    ↓ Exports to Google Sheets
+    ↓ Updates next_execution_time
+```
 
-> **📝 Note:** In development, you run `scheduled-task:run` manually. In production, a cron job runs it every minute. The actual export frequency is controlled by the plugin's "Export Interval" setting, not the cron frequency.
+> **⚠️ Common Mistake:** Running only `scheduled-task:run` without `messenger:consume` means tasks are queued but never executed! You'll see orders stay as "pending" indefinitely.
+
+**Check if Tasks are Being Queued:**
+
+```bash
+# See messages waiting in queue
+mysql -h 127.0.0.1 -P YOUR_DB_PORT -u root -proot shopware -e "SELECT * FROM messenger_messages ORDER BY created_at DESC LIMIT 5"
+
+# Replace YOUR_DB_PORT with your actual database port (check .env.local)
+```
+
+If you see messages piling up, it means `messenger:consume` is not running.
 
 ---
 
@@ -550,7 +623,9 @@ bin/console gotowebinar:export-orders
 
 **Via Database:**
 ```bash
-bin/console dbal:run-sql "SELECT * FROM gotowebinar_order_export ORDER BY created_at DESC LIMIT 20"
+mysql -h 127.0.0.1 -P YOUR_DB_PORT -u root -proot shopware -e "SELECT * FROM gotowebinar_order_export ORDER BY created_at DESC LIMIT 20"
+
+# Replace YOUR_DB_PORT with your actual database port (check .env.local)
 ```
 
 ---

@@ -394,21 +394,100 @@ crontab -e
 3. Complete checkout
 4. Complete payment (use fake payment for testing)
 
-### 6.4 Verify Export
+> **⚠️ Important: Payment Status Requirement**  
+> Orders are only captured for export when the **payment status changes to "paid"**. This means:
+> - Orders with status "open", "in progress", or "cancelled" will NOT be exported
+> - The order must have at least one line item from the configured webinar category
+> - For testing, use a payment method that immediately sets status to "paid" (e.g., "Cash on Delivery" or "Paid in Advance" with manual confirmation)
 
-**Option 1: Manual Export**
+### 6.4 Verify Order Capture
+
+After placing a test order, check that it was captured:
+
+```bash
+# Check if the order was added to the export queue
+bin/console dbal:run-sql "SELECT id, order_number, export_status, created_at FROM gotowebinar_order_export ORDER BY created_at DESC LIMIT 5"
+```
+
+If no entries appear:
+- Verify the product is in the configured category
+- Check the order's payment status is "paid"
+- Review logs: `tail -f var/log/dev.log | grep -i gotowebinar`
+
+**Manually Scan Existing Orders:**
+
+If you have existing paid orders that weren't captured (e.g., orders placed before plugin activation):
+
+```bash
+# Scan orders from the last 30 days
+bin/console gotowebinar:scan-orders --days=30
+
+# Scan a specific order
+bin/console gotowebinar:scan-orders --order-number=10001
+
+# Preview without creating export entries
+bin/console gotowebinar:scan-orders --days=7 --dry-run
+```
+
+### 6.5 Test Export to Google Sheets
+
+**Option 1: Manual Export via CLI**
 ```bash
 bin/console gotowebinar:export-orders
 ```
 
-**Option 2: Check Database**
-```bash
-bin/console dbal:run-sql "SELECT * FROM gotowebinar_order_export ORDER BY created_at DESC LIMIT 5"
-```
+**Option 2: Manual Export via Admin Dashboard**
+1. Go to the plugin dashboard
+2. Click **"Export Now"**
+3. Check the success notification
 
 **Option 3: Check Google Sheet**
 - Open your Google Sheet
 - Verify the new row appears with order data
+
+### 6.6 Test Scheduled Export Interval
+
+The plugin uses Shopware's scheduled task system. **Scheduled tasks do not run automatically** - they require an external trigger (cron job in production).
+
+**Check Current Task Configuration:**
+```bash
+# View scheduled task status and interval
+bin/console scheduled-task:list | grep gotowebinar
+
+# Example output:
+# | gotowebinar.google_sheets_export | 2026-01-09T12:00:00+00:00 | - | 3600 | queued |
+#                                                                     ^^^^
+#                                                          Interval in seconds (3600 = 1 hour)
+```
+
+**Verify Interval Updates When Config Changes:**
+
+1. Change the export interval in plugin config (e.g., to "Every 15 minutes")
+2. Save the configuration
+3. Run the command again:
+   ```bash
+   bin/console scheduled-task:list | grep gotowebinar
+   ```
+4. The interval should now show `900` (15 minutes = 900 seconds)
+
+**Manually Trigger Scheduled Task (for testing):**
+```bash
+# This checks all due scheduled tasks and runs them
+bin/console scheduled-task:run
+
+# To force run even if not due yet, reset the task first:
+bin/console dbal:run-sql "UPDATE scheduled_task SET next_execution_time = NOW() WHERE name = 'gotowebinar.google_sheets_export'"
+bin/console scheduled-task:run
+```
+
+**Understanding the Scheduled Task Flow:**
+
+1. `scheduled-task:run` checks which tasks are due (based on `next_execution_time`)
+2. Due tasks are dispatched to the message queue
+3. The message worker processes the queue
+4. After completion, `next_execution_time` is updated based on `run_interval`
+
+> **📝 Note:** In development, you run `scheduled-task:run` manually. In production, a cron job runs it every minute. The actual export frequency is controlled by the plugin's "Export Interval" setting, not the cron frequency.
 
 ---
 

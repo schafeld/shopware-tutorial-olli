@@ -43,6 +43,31 @@ Your project is configured for local development:
 
 **💡 Tip**: For development, consider changing `APP_ENV=dev` in your `.env` file for better debugging.
 
+### ⚠️ IMPORTANT: Environment Files (`.env` vs `.env.local`)
+
+**For local development, Symfony uses `.env.local` which OVERRIDES `.env`!**
+
+When running Shopware locally (via Docker Compose or PHP built-in server):
+- **`.env`** - Base configuration, committed to version control
+- **`.env.local`** - Local overrides, NOT committed (in `.gitignore`)
+
+**The `.env.local` file takes precedence!** If you update `DATABASE_URL` in `.env` but there's also a `DATABASE_URL` in `.env.local`, the `.env.local` value is used.
+
+Example `.env.local` for local Docker development:
+```bash
+APP_ENV=dev
+APP_URL=http://127.0.0.1:8000
+SHOPWARE_HTTP_CACHE_ENABLED=0
+DATABASE_URL=mysql://root:root@127.0.0.1:64760/shopware
+```
+
+**Common issue**: Database connection errors after Docker container restart. Docker may assign a different host port to the database container. Check the current port with:
+```bash
+docker ps | grep database
+# Look for the port mapping like "0.0.0.0:64760->3306/tcp"
+```
+Then update `DATABASE_URL` in **`.env.local`** (not `.env`).
+
 ### 2. Essential Commands
 ```bash
 # Start the development server

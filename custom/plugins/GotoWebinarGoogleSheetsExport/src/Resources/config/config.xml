@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/platform/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
+
+    <card>
+        <title>Basic Configuration</title>
+        <title lang="de-DE">Grundkonfiguration</title>
+
+        <input-field type="bool">
+            <name>enabled</name>
+            <label>Enable Plugin</label>
+            <label lang="de-DE">Plugin aktivieren</label>
+            <defaultValue>false</defaultValue>
+            <helpText>Enable or disable the automatic export functionality</helpText>
+            <helpText lang="de-DE">Aktiviert oder deaktiviert die automatische Export-Funktion</helpText>
+        </input-field>
+
+        <component name="sw-entity-single-select">
+            <name>categoryId</name>
+            <entity>category</entity>
+            <label>Webinar Category</label>
+            <label lang="de-DE">Webinar-Kategorie</label>
+            <helpText>Select the category containing webinar products to export</helpText>
+            <helpText lang="de-DE">Wählen Sie die Kategorie mit Webinar-Produkten zum Exportieren</helpText>
+        </component>
+    </card>
+
+    <card>
+        <title>Google Sheets Configuration</title>
+        <title lang="de-DE">Google Sheets Konfiguration</title>
+
+        <input-field type="text">
+            <name>googleSheetId</name>
+            <label>Google Sheet ID</label>
+            <label lang="de-DE">Google Sheet ID</label>
+            <helpText>The ID from your Google Sheet URL (e.g., 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms)</helpText>
+            <helpText lang="de-DE">Die ID aus Ihrer Google Sheet URL (z.B. 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms)</helpText>
+        </input-field>
+
+        <input-field type="text">
+            <name>worksheetName</name>
+            <label>Worksheet Name</label>
+            <label lang="de-DE">Tabellenblatt-Name</label>
+            <defaultValue>Bestellungen</defaultValue>
+            <helpText>Name of the worksheet/tab where data will be exported</helpText>
+            <helpText lang="de-DE">Name des Tabellenblatts, in das Daten exportiert werden</helpText>
+        </input-field>
+
+        <input-field type="text">
+            <name>googleClientId</name>
+            <label>Google OAuth Client ID</label>
+            <label lang="de-DE">Google OAuth Client ID</label>
+            <helpText>OAuth 2.0 Client ID from Google Cloud Console</helpText>
+            <helpText lang="de-DE">OAuth 2.0 Client ID aus der Google Cloud Console</helpText>
+        </input-field>
+
+        <input-field type="password">
+            <name>googleClientSecret</name>
+            <label>Google OAuth Client Secret</label>
+            <label lang="de-DE">Google OAuth Client Secret</label>
+            <helpText>OAuth 2.0 Client Secret from Google Cloud Console</helpText>
+            <helpText lang="de-DE">OAuth 2.0 Client Secret aus der Google Cloud Console</helpText>
+        </input-field>
+
+        <input-field type="password">
+            <name>googleRefreshToken</name>
+            <label>Google Refresh Token</label>
+            <label lang="de-DE">Google Refresh Token</label>
+            <helpText>Automatically filled after OAuth authorization</helpText>
+            <helpText lang="de-DE">Wird automatisch nach OAuth-Autorisierung ausgefüllt</helpText>
+        </input-field>
+    </card>
+
+    <card>
+        <title>Export Schedule</title>
+        <title lang="de-DE">Export-Zeitplan</title>
+
+        <input-field type="single-select">
+            <name>exportInterval</name>
+            <label>Export Interval</label>
+            <label lang="de-DE">Export-Intervall</label>
+            <options>
+                <option>
+                    <id>disabled</id>
+                    <name>Disabled (Manual only)</name>
+                    <name lang="de-DE">Deaktiviert (nur manuell)</name>
+                </option>
+                <option>
+                    <id>every_15_minutes</id>
+                    <name>Every 15 minutes</name>
+                    <name lang="de-DE">Alle 15 Minuten</name>
+                </option>
+                <option>
+                    <id>hourly</id>
+                    <name>Hourly</name>
+                    <name lang="de-DE">Stündlich</name>
+                </option>
+                <option>
+                    <id>every_4_hours</id>
+                    <name>Every 4 hours</name>
+                    <name lang="de-DE">Alle 4 Stunden</name>
+                </option>
+                <option>
+                    <id>daily</id>
+                    <name>Daily</name>
+                    <name lang="de-DE">Täglich</name>
+                </option>
+                <option>
+                    <id>weekly</id>
+                    <name>Weekly</name>
+                    <name lang="de-DE">Wöchentlich</name>
+                </option>
+            </options>
+            <defaultValue>hourly</defaultValue>
+            <helpText>How often should pending orders be exported automatically?</helpText>
+            <helpText lang="de-DE">Wie oft sollen ausstehende Bestellungen automatisch exportiert werden?</helpText>
+        </input-field>
+
+        <input-field type="datetime">
+            <name>lastExportTimestamp</name>
+            <label>Last Export</label>
+            <label lang="de-DE">Letzter Export</label>
+            <disabled>true</disabled>
+            <helpText>Timestamp of the last successful export</helpText>
+            <helpText lang="de-DE">Zeitstempel des letzten erfolgreichen Exports</helpText>
+        </input-field>
+    </card>
+
+    <card>
+        <title>Advanced Options</title>
+        <title lang="de-DE">Erweiterte Optionen</title>
+
+        <input-field type="bool">
+            <name>allowDuplicates</name>
+            <label>Allow Duplicate Exports</label>
+            <label lang="de-DE">Doppelte Exports erlauben</label>
+            <defaultValue>true</defaultValue>
+            <helpText>Allow exporting the same order/product combination multiple times</helpText>
+            <helpText lang="de-DE">Erlaubt das mehrfache Exportieren derselben Bestellung/Produkt-Kombination</helpText>
+        </input-field>
+
+        <input-field type="bool">
+            <name>logErrors</name>
+            <label>Log Errors</label>
+            <label lang="de-DE">Fehler protokollieren</label>
+            <defaultValue>true</defaultValue>
+            <helpText>Log export errors to Shopware logs</helpText>
+            <helpText lang="de-DE">Exportfehler in Shopware-Logs protokollieren</helpText>
+        </input-field>
+
+        <input-field type="int">
+            <name>batchSize</name>
+            <label>Batch Size</label>
+            <label lang="de-DE">Batch-Größe</label>
+            <defaultValue>50</defaultValue>
+            <helpText>Number of exports to process per batch (1-100)</helpText>
+            <helpText lang="de-DE">Anzahl der Exports pro Batch (1-100)</helpText>
+        </input-field>
+    </card>
+</config>

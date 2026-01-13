@@ -1,0 +1,168 @@
+import template from './gotowebinar-export-list.html.twig';
+import './gotowebinar-export-list.scss';
+
+const { Mixin, Application } = Shopware;
+const { Criteria } = Shopware.Data;
+
+/**
+ * Export log viewer component
+ */
+export default {
+    template,
+
+    inject: ['repositoryFactory'],
+
+    mixins: [
+        Mixin.getByName('notification')
+    ],
+
+    data() {
+        return {
+            exports: [],
+            isLoading: false,
+            total: 0,
+            page: 1,
+            limit: 25
+        };
+    },
+
+    computed: {
+        httpClient() {
+            return Application.getContainer('init').httpClient;
+        },
+
+        repository() {
+            return this.repositoryFactory.create('gotowebinar_order_export');
+        },
+
+        columns() {
+            return [
+                {
+                    property: 'exportedAt',
+                    label: this.$tc('gotowebinar-sheets.exportList.columnExportedAt'),
+                    allowResize: true,
+                    primary: true
+                },
+                {
+                    property: 'orderNumber',
+                    label: this.$tc('gotowebinar-sheets.exportList.columnOrderNumber'),
+                    allowResize: true
+                },
+                {
+                    property: 'productNumber',
+                    label: this.$tc('gotowebinar-sheets.exportList.columnProductNumber'),
+                    allowResize: true
+                },
+                {
+                    property: 'customerName',
+                    label: this.$tc('gotowebinar-sheets.exportList.columnCustomerName'),
+                    allowResize: true
+                },
+                {
+                    property: 'customerEmail',
+                    label: this.$tc('gotowebinar-sheets.exportList.columnEmail'),
+                    allowResize: true
+                },
+                {
+                    property: 'exportStatus',
+                    label: this.$tc('gotowebinar-sheets.exportList.columnStatus'),
+                    allowResize: true
+                }
+            ];
+        },
+
+        showingEntriesText() {
+            const count = this.exports ? this.exports.length : 0;
+            const total = this.total || 0;
+            return this.$tc('gotowebinar-sheets.exportList.showingEntries', count, {
+                count: count,
+                total: total
+            });
+        }
+    },
+
+    created() {
+        this.loadExports();
+    },
+
+    methods: {
+        loadExports() {
+            this.isLoading = true;
+
+            const criteria = new Criteria(this.page, this.limit);
+            criteria.addSorting(Criteria.sort('createdAt', 'DESC'));
+
+            this.repository.search(criteria, Shopware.Context.api)
+                .then((result) => {
+                    this.exports = result;
+                    this.total = result.total ?? result.length ?? 0;
+                })
+                .catch((error) => {
+                    this.createNotificationError({
+                        message: error.message
+                    });
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                });
+        },
+
+        onRefresh() {
+            this.loadExports();
+        },
+
+        onDownloadCsv() {
+            this.httpClient.get('/_action/gotowebinar-sheets/export/csv', {
+                params: { limit: 100 },
+                responseType: 'blob'
+            })
+                .then((response) => {
+                    const blob = new Blob([response.data], { type: 'text/csv' });
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', `webinar-exports-${new Date().toISOString().split('T')[0]}.csv`);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch((error) => {
+                    this.createNotificationError({
+                        message: error.message || 'Failed to download CSV'
+                    });
+                });
+        },
+
+        onPageChange({ page, limit }) {
+            this.page = page;
+            this.limit = limit;
+            this.loadExports();
+        },
+
+        getStatusVariant(status) {
+            const variants = {
+                pending: 'info',
+                success: 'success',
+                failed: 'danger'
+            };
+            return variants[status] || 'neutral';
+        },
+
+        getStatusLabel(status) {
+            const key = `gotowebinar-sheets.exportList.status${status.charAt(0).toUpperCase()}${status.slice(1)}`;
+            return this.$tc(key);
+        },
+
+        getCustomerName(item) {
+            return `${item.customerFirstName} ${item.customerLastName}`;
+        },
+
+        formatDate(date) {
+            if (!date) {
+                return '-';
+            }
+            return new Date(date).toLocaleString();
+        }
+    }
+};

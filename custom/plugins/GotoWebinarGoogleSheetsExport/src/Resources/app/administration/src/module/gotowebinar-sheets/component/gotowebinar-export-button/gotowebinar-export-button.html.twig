@@ -1,0 +1,46 @@
+{% block gotowebinar_export_button %}
+    <div class="gotowebinar-export-button">
+        <sw-button
+            variant="primary"
+            :disabled="isDisabled"
+            @click="onButtonClick">
+            <sw-icon name="regular-share" small></sw-icon>
+            {{ buttonLabel }}
+            <sw-label v-if="pendingCount > 0" variant="info">
+                {{ pendingCount }}
+            </sw-label>
+        </sw-button>
+
+        <sw-modal
+            v-if="showModal"
+            :title="$tc('gotowebinar-sheets.export.modalTitle')"
+            @modal-close="onCancelExport">
+            
+            <p>{{ $tc('gotowebinar-sheets.export.modalMessage') }}</p>
+
+            <sw-number-field
+                v-model="limit"
+                :label="$tc('gotowebinar-sheets.export.limitLabel')"
+                :helpText="$tc('gotowebinar-sheets.export.limitHelpText')"
+                :min="1"
+                :max="100"
+                numberType="int">
+            </sw-number-field>
+
+            <template #modal-footer>
+                <sw-button
+                    size="small"
+                    @click="onCancelExport">
+                    {{ $tc('global.default.cancel') }}
+                </sw-button>
+
+                <sw-button
+                    variant="primary"
+                    size="small"
+                    @click="onConfirmExport">
+                    {{ $tc('gotowebinar-sheets.export.buttonLabel') }}
+                </sw-button>
+            </template>
+        </sw-modal>
+    </div>
+{% endblock %}

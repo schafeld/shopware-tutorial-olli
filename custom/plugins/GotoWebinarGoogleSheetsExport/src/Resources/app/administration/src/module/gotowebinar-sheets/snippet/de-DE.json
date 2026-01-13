@@ -1,0 +1,75 @@
+{
+  "gotowebinar-sheets": {
+    "general": {
+      "mainMenuItemGeneral": "Webinar Export",
+      "descriptionTextModule": "Google Sheets Export für Webinar-Bestellungen"
+    },
+    "dashboard": {
+      "title": "Webinar Export Dashboard",
+      "cardStatistics": "Statistiken",
+      "cardRecentExports": "Letzte Exports",
+      "totalExports": "Gesamte Exports",
+      "pendingExports": "Ausstehend",
+      "lastExport": "Letzter Export",
+      "noExports": "Keine Exports vorhanden",
+      "refreshing": "Aktualisiere...",
+      "viewConfiguration": "Konfiguration öffnen"
+    },
+    "config": {
+      "dashboardCardTitle": "Webinar Export Dashboard",
+      "dashboardCardDescription": "Export-Verlauf, Statistiken anzeigen und Exports manuell zu Google Sheets auslösen.",
+      "openDashboard": "Dashboard öffnen"
+    },
+    "stats": {
+      "total": "Gesamt",
+      "pending": "Ausstehend",
+      "lastExport": "Letzter Export",
+      "never": "Noch nie"
+    },
+    "export": {
+      "buttonLabel": "Jetzt exportieren",
+      "buttonLabelLoading": "Exportiere...",
+      "modalTitle": "Exports zu Google Sheets",
+      "modalMessage": "Möchten Sie alle ausstehenden Exports jetzt zu Google Sheets senden?",
+      "limitLabel": "Maximale Anzahl",
+      "limitHelpText": "Anzahl der zu exportierenden Datensätze",
+      "successTitle": "Export erfolgreich",
+      "successMessage": "{count} Datensatz(e) erfolgreich exportiert",
+      "errorTitle": "Export fehlgeschlagen",
+      "errorMessage": "Fehler beim Exportieren: {message}",
+      "noPendingExports": "Keine ausstehenden Exports vorhanden"
+    },
+    "oauth": {
+      "buttonLabel": "Mit Google verbinden",
+      "buttonLabelConnected": "Mit Google verbunden",
+      "buttonLabelConnecting": "Verbinde...",
+      "statusConnected": "Verbunden",
+      "statusNotConnected": "Nicht verbunden",
+      "reconnect": "Erneut verbinden",
+      "modalTitle": "Google OAuth Autorisierung",
+      "modalMessage": "Bitte autorisieren Sie den Zugriff auf Ihre Google Sheets im Popup-Fenster.",
+      "successTitle": "Verbindung erfolgreich",
+      "successMessage": "Erfolgreich mit Google Sheets verbunden",
+      "errorTitle": "Verbindung fehlgeschlagen",
+      "errorMessage": "Fehler bei der OAuth-Autorisierung: {message}",
+      "popupBlocked": "Popup wurde blockiert. Bitte erlauben Sie Popups für diese Seite."
+    },
+    "exportList": {
+      "title": "Export-Verlauf",
+      "columnExportedAt": "Exportiert am",
+      "columnOrderNumber": "Bestellnummer",
+      "columnProductNumber": "Produktnummer",
+      "columnCustomerName": "Kunde",
+      "columnEmail": "E-Mail",
+      "columnStatus": "Status",
+      "statusPending": "Ausstehend",
+      "statusSuccess": "Erfolgreich",
+      "statusFailed": "Fehlgeschlagen",
+      "noEntries": "Keine Export-Einträge vorhanden",
+      "errorMessage": "Fehler",
+      "downloadCsv": "CSV herunterladen",
+      "refresh": "Aktualisieren",
+      "showingEntries": "Zeige {count} von {total} Einträgen"
+    }
+  }
+}

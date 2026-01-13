@@ -1,0 +1,67 @@
+{% block gotowebinar_sheets_dashboard %}
+    <sw-page class="gotowebinar-sheets-dashboard">
+
+        {% block gotowebinar_sheets_dashboard_header %}
+            <template #smart-bar-header>
+                <h2>{{ $tc('gotowebinar-sheets.dashboard.title') }}</h2>
+            </template>
+        {% endblock %}
+
+        {% block gotowebinar_sheets_dashboard_actions %}
+            <template #smart-bar-actions>
+                <sw-button @click="onRefresh" :disabled="isLoadingStats">
+                    <sw-icon name="regular-redo" small></sw-icon>
+                    {{ $tc('gotowebinar-sheets.exportList.refresh') }}
+                </sw-button>
+
+                <sw-button variant="primary" @click="openConfiguration">
+                    <sw-icon name="regular-cog-s" small></sw-icon>
+                    {{ $tc('gotowebinar-sheets.dashboard.viewConfiguration') }}
+                </sw-button>
+            </template>
+        {% endblock %}
+
+        {% block gotowebinar_sheets_dashboard_content %}
+            <template #content>
+                <sw-card-view>
+
+                    {% block gotowebinar_sheets_dashboard_stats_card %}
+                        <gotowebinar-stats-card
+                            :stats="stats"
+                            :is-loading="isLoadingStats"
+                            :is-configured="isConfigured">
+                        </gotowebinar-stats-card>
+                    {% endblock %}
+
+                    {% block gotowebinar_sheets_dashboard_actions_card %}
+                        <sw-card :title="$tc('gotowebinar-sheets.general.mainMenuItemGeneral')">
+                            <div class="gotowebinar-sheets-dashboard__actions">
+                                
+                                {% block gotowebinar_sheets_dashboard_oauth_button %}
+                                    <gotowebinar-oauth-button
+                                        :is-configured="isConfigured"
+                                        @success="onOAuthSuccess">
+                                    </gotowebinar-oauth-button>
+                                {% endblock %}
+
+                                {% block gotowebinar_sheets_dashboard_export_button %}
+                                    <gotowebinar-export-button
+                                        :pending-count="stats.pendingExports"
+                                        @success="onExportSuccess">
+                                    </gotowebinar-export-button>
+                                {% endblock %}
+
+                            </div>
+                        </sw-card>
+                    {% endblock %}
+
+                    {% block gotowebinar_sheets_dashboard_export_list %}
+                        <gotowebinar-export-list></gotowebinar-export-list>
+                    {% endblock %}
+
+                </sw-card-view>
+            </template>
+        {% endblock %}
+
+    </sw-page>
+{% endblock %}

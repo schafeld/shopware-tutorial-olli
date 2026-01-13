@@ -60,6 +60,13 @@ class MessageService
     public function generateWelcomeMessage(string $name, Context $context): string
     {
 
+        // Debug level – detailled information
+        $this->logger->debug('Starting welcome message generation', [
+            'name' => $name,
+            'context_token' => $context->getToken(),
+        ]);
+
+
         // Validate and sanitize the name input
         try {
             $name = $this -> validationService -> processName($name);

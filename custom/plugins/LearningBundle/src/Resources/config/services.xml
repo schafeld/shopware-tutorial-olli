@@ -283,5 +283,10 @@
             <argument>60</argument>  <!-- window in seconds -->
             <argument type="service" id="logger"/>
         </service>
+
+        <!-- Custom Logger -->
+        <service id="Learning\Bundle\Service\Logger\CustomLogger">
+            <argument type="service" id="logger"/>
+        </service>
     </services>
 </container>

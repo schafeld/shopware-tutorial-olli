@@ -228,7 +228,9 @@ The profiler is enabled by default in dev mode. Access it at the bottom toolbar 
 
 ### Step 2: Profile Your API Requests
 
-When developing APIs, you can access the profiler programmatically:
+When developing APIs, you can access the profiler programmatically.
+
+Create `custom/plugins/LearningBundle/src/Core/Api/ProfiledController.php`:
 
 ```php
 <?php declare(strict_types=1);
@@ -303,7 +305,9 @@ DATABASE_URL=mysql://user:pass@localhost:3306/shopware?serverVersion=8.0
 DATABASE_URL=mysql://user:pass@localhost:3306/shopware?serverVersion=8.0&logging=1
 ```
 
-Create a query analyzer:
+Create a query analyzer.
+
+Create `custom/plugins/LearningBundle/src/Service/Debug/QueryLogger.php`:
 
 ```php
 <?php declare(strict_types=1);
@@ -346,6 +350,20 @@ class QueryLogger implements SQLLogger
         $this->currentQuery = null;
     }
 }
+```
+
+Register the `ProfiledController` and `QueryLogger` in `custom/plugins/LearningBundle/src/Resources/config/services.xml`:
+
+```xml
+<!-- ProfiledController -->
+<service id="Learning\Bundle\Core\Api\ProfiledController" public="true">
+    <argument type="service" id="debug.stopwatch"/>
+</service>
+
+<!-- QueryLogger -->
+<service id="Learning\Bundle\Service\Debug\QueryLogger">
+    <argument type="service" id="logger"/>
+</service>
 ```
 
 ---

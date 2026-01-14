@@ -305,7 +305,7 @@ DATABASE_URL=mysql://user:pass@localhost:3306/shopware?serverVersion=8.0
 DATABASE_URL=mysql://user:pass@localhost:3306/shopware?serverVersion=8.0&logging=1
 ```
 
-Create a query analyzer.
+Create a query analyzer using the modern Doctrine DBAL middleware approach.
 
 Create `custom/plugins/LearningBundle/src/Service/Debug/QueryLogger.php`:
 
@@ -314,45 +314,159 @@ Create `custom/plugins/LearningBundle/src/Service/Debug/QueryLogger.php`:
 
 namespace Learning\Bundle\Service\Debug;
 
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Logging\SQLLogger;
+use Doctrine\DBAL\Driver;
+use Doctrine\DBAL\Driver\Connection as DriverConnection;
+use Doctrine\DBAL\Driver\Middleware;
+use Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware;
+use Doctrine\DBAL\Driver\Result;
+use Doctrine\DBAL\Driver\Statement;
 use Psr\Log\LoggerInterface;
 
-class QueryLogger implements SQLLogger
+class QueryLoggingMiddleware implements Middleware
 {
     private LoggerInterface $logger;
-    private ?float $start = null;
-    private ?string $currentQuery = null;
 
     public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
 
-    public function startQuery($sql, ?array $params = null, ?array $types = null): void
+    public function wrap(Driver $driver): Driver
     {
-        $this->start = microtime(true);
-        $this->currentQuery = $sql;
+        return new class($driver, $this->logger) extends AbstractDriverMiddleware {
+            private LoggerInterface $logger;
+
+            public function __construct(Driver $wrappedDriver, LoggerInterface $logger)
+            {
+                parent::__construct($wrappedDriver);
+                $this->logger = $logger;
+            }
+
+            public function connect(array $params): DriverConnection
+            {
+                return new QueryLoggingConnection(
+                    parent::connect($params),
+                    $this->logger
+                );
+            }
+        };
+    }
+}
+
+class QueryLoggingConnection implements DriverConnection
+{
+    private DriverConnection $connection;
+    private LoggerInterface $logger;
+
+    public function __construct(DriverConnection $connection, LoggerInterface $logger)
+    {
+        $this->connection = $connection;
+        $this->logger = $logger;
     }
 
-    public function stopQuery(): void
+    public function prepare(string $sql): Statement
     {
-        $duration = microtime(true) - $this->start;
+        return new QueryLoggingStatement(
+            $this->connection->prepare($sql),
+            $this->logger,
+            $sql
+        );
+    }
+
+    public function query(string $sql): Result
+    {
+        $start = microtime(true);
+        $result = $this->connection->query($sql);
+        $this->logQuery($sql, [], microtime(true) - $start);
         
-        if ($duration > 0.1) { // Log queries taking more than 100ms
+        return $result;
+    }
+
+    public function exec(string $sql): int
+    {
+        $start = microtime(true);
+        $result = $this->connection->exec($sql);
+        $this->logQuery($sql, [], microtime(true) - $start);
+        
+        return $result;
+    }
+
+    public function lastInsertId($name = null): string|int|false
+    {
+        return $this->connection->lastInsertId($name);
+    }
+
+    public function beginTransaction(): bool
+    {
+        return $this->connection->beginTransaction();
+    }
+
+    public function commit(): bool
+    {
+        return $this->connection->commit();
+    }
+
+    public function rollBack(): bool
+    {
+        return $this->connection->rollBack();
+    }
+
+    private function logQuery(string $sql, array $params, float $executionTime): void
+    {
+        if ($executionTime > 0.1) { // Log queries taking more than 100ms
             $this->logger->warning('Slow query detected', [
-                'query' => $this->currentQuery,
-                'duration_ms' => $duration * 1000,
+                'query' => $sql,
+                'params' => $params,
+                'duration_ms' => $executionTime * 1000,
             ]);
         }
+    }
+}
 
-        $this->start = null;
-        $this->currentQuery = null;
+class QueryLoggingStatement implements Statement
+{
+    private Statement $statement;
+    private LoggerInterface $logger;
+    private string $sql;
+
+    public function __construct(Statement $statement, LoggerInterface $logger, string $sql)
+    {
+        $this->statement = $statement;
+        $this->logger = $logger;
+        $this->sql = $sql;
+    }
+
+    public function bindValue($param, $value, $type = null): bool
+    {
+        return $this->statement->bindValue($param, $value, $type);
+    }
+
+    public function execute($params = null): Result
+    {
+        $start = microtime(true);
+        $result = $this->statement->execute($params);
+        
+        $this->logQuery($this->sql, $params ?? [], microtime(true) - $start);
+        
+        return $result;
+    }
+
+    private function logQuery(string $sql, array $params, float $executionTime): void
+    {
+        if ($executionTime > 0.1) { // Log queries taking more than 100ms
+            $this->logger->warning('Slow query detected', [
+                'query' => $sql,
+                'params' => $params,
+                'duration_ms' => $executionTime * 1000,
+            ]);
+        }
     }
 }
 ```
 
-Register the `ProfiledController` and `QueryLogger` in `custom/plugins/LearningBundle/src/Resources/config/services.xml`:
+**Note:** This implementation uses the modern Doctrine DBAL middleware approach instead of the deprecated `SQLLogger` interface. The middleware pattern provides better flexibility and performance.
+
+Register the `ProfiledController` and `QueryLoggingMiddleware` in `custom/plugins/LearningBundle/src/Resources/config/services.xml`:
 
 ```xml
 <!-- ProfiledController -->
@@ -360,11 +474,13 @@ Register the `ProfiledController` and `QueryLogger` in `custom/plugins/LearningB
     <argument type="service" id="debug.stopwatch"/>
 </service>
 
-<!-- QueryLogger -->
-<service id="Learning\Bundle\Service\Debug\QueryLogger">
+<!-- QueryLoggingMiddleware -->
+<service id="Learning\Bundle\Service\Debug\QueryLoggingMiddleware">
     <argument type="service" id="logger"/>
 </service>
 ```
+
+To register the middleware with Doctrine DBAL, you would typically add it to your database configuration. However, in Shopware, it's recommended to use the built-in profiling tools or register custom middlewares through bundle configuration.
 
 ---
 

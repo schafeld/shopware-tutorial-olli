@@ -630,7 +630,11 @@ Add to your launch configuration:
 
 ### Step 4: Set Breakpoints and Debug
 
-Create a test command for debugging:
+Create a test command for debugging.
+
+**Create the file:** `custom/plugins/LearningBundle/src/Command/DebugTestCommand.php`
+
+This command will be available to run as `bin/console learning:debug-test` once the plugin is installed and the cache is cleared.
 
 ```php
 <?php declare(strict_types=1);

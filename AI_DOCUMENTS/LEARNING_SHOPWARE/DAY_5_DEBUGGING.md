@@ -912,20 +912,9 @@ class ProductViewService
 
 ## Part 6: Testing Error Handling
 
-#### Test Commands Available
+### Step 1: Create Test Error Handling Command
 
-The tutorial mentions `learning:test-errors` but this command needs to be created. Here are the available commands:
-
-```bash
-# Available commands for testing:
-bin/console learning:test-product-view    # Test product view functionality
-bin/console learning:debug-test           # Test with breakpoints for Xdebug
-bin/console learning:debug-info           # Show debug information
-```
-
-To create the `learning:test-errors` command mentioned in the tutorial, follow the instructions in "Test 1: Test Custom Exceptions" section below.
-
-#### Test 1: Test Custom Exceptions
+Before testing, create the command that will help test error scenarios.
 
 Create `custom/plugins/LearningBundle/src/Command/TestErrorHandlingCommand.php`:
 
@@ -1051,7 +1040,47 @@ class TestErrorHandlingCommand extends Command
 }
 ```
 
-#### Test 2: Test Error Logging
+Register the command in `services.xml`:
+
+```xml
+<!-- Test Error Handling Command -->
+<service id="Learning\Bundle\Command\TestErrorHandlingCommand">
+    <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+    <tag name="console.command"/>
+</service>
+```
+
+Clear cache and verify:
+
+```bash
+bin/console cache:clear
+bin/console list | grep learning
+```
+
+### Step 2: Available Test Commands
+
+After setup, you'll have these commands available:
+
+```bash
+# Test error handling (dry run - doesn't throw)
+bin/console learning:test-errors
+
+# Test error handling (actually throws exceptions)
+bin/console learning:test-errors --throw
+
+# Test specific error types
+bin/console learning:test-errors product-not-found --throw
+bin/console learning:test-errors invalid-data --throw
+bin/console learning:test-errors database-error --throw
+
+# Test product view functionality
+bin/console learning:test-product-view
+
+# Test with Xdebug breakpoints
+bin/console learning:debug-test
+```
+
+### Step 3: Test Error Logging
 
 Create a web endpoint that triggers errors for testing:
 

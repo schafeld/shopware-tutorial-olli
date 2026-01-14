@@ -299,11 +299,11 @@ class ProfiledController extends AbstractController
 Enable query logging in `.env.local`:
 
 ```env
-# Show all database queries in profiler
-DATABASE_URL=mysql://user:pass@localhost:3306/shopware?serverVersion=8.0
-# Add logging parameter
-DATABASE_URL=mysql://user:pass@localhost:3306/shopware?serverVersion=8.0&logging=1
+# Database connection with logging enabled (use your actual port from docker ps)
+DATABASE_URL=mysql://root:root@127.0.0.1:54191/shopware?serverVersion=8.0&logging=1
 ```
+
+**💡 Tip:** Check your actual database port with `docker ps | grep database` and update accordingly.
 
 Create a query analyzer using the modern Doctrine DBAL middleware approach.
 
@@ -486,7 +486,7 @@ class QueryLoggingStatement implements Statement
 
 **Note:** This implementation uses the modern Doctrine DBAL middleware approach instead of the deprecated `SQLLogger` interface. The middleware pattern provides better flexibility and performance. This implementation fully complies with the Doctrine DBAL driver interfaces.
 
-Register the `ProfiledController` and `QueryLoggingMiddleware` in `custom/plugins/LearningBundle/src/Resources/config/services.xml`:
+Register the `ProfiledController`, `QueryLoggingMiddleware`, and `DebugTestCommand` in `custom/plugins/LearningBundle/src/Resources/config/services.xml`:
 
 ```xml
 <!-- ProfiledController -->
@@ -497,6 +497,12 @@ Register the `ProfiledController` and `QueryLoggingMiddleware` in `custom/plugin
 <!-- QueryLoggingMiddleware -->
 <service id="Learning\Bundle\Service\Debug\QueryLoggingMiddleware">
     <argument type="service" id="logger"/>
+</service>
+
+<!-- Debug Test Command -->
+<service id="Learning\Bundle\Command\DebugTestCommand">
+    <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+    <tag name="console.command"/>
 </service>
 ```
 
@@ -643,14 +649,13 @@ namespace Learning\Bundle\Command;
 
 use Learning\Bundle\Service\ProductViewService;
 use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class DebugTestCommand extends Command
 {
-    protected static $defaultName = 'learning:debug-test';
-
     private ProductViewService $productViewService;
 
     public function __construct(ProductViewService $productViewService)
@@ -659,28 +664,46 @@ class DebugTestCommand extends Command
         $this->productViewService = $productViewService;
     }
 
+    protected function configure(): void
+    {
+        $this
+            ->setName('learning:debug-test')
+            ->setDescription('Test command for debugging with Xdebug');
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $context = Context::createDefaultContext();
         
         // Set breakpoint here
-        $productId = 'test-product-id';
+        // Generate a valid UUID for testing
+        $productId = Uuid::randomHex();
         
         // Step through this code
         $viewCount = $this->productViewService->getProductViewCount($productId, $context);
         
-        $output->writeln("View count: {$viewCount}");
+        $output->writeln("View count for product {$productId}: {$viewCount}");
         
         // Check variables in debugger
         $data = [
+            'productId' => $productId,
             'count' => $viewCount,
             'timestamp' => new \DateTime(),
         ];
+        
+        $output->writeln("Data: " . json_encode($data, JSON_PRETTY_PRINT));
         
         return Command::SUCCESS;
     }
 }
 ```
+
+**Setup the command:**
+
+1. Make sure your command is registered in `services.xml`
+2. Clear cache: `bin/console cache:clear`
+3. Verify command is available: `bin/console list | grep learning`
+4. Test command first: `bin/console learning:debug-test`
 
 **Debug the command:**
 
@@ -699,6 +722,29 @@ php -dxdebug.mode=debug bin/console learning:debug-test
 # Or use the trigger
 XDEBUG_SESSION=1 bin/console learning:debug-test
 ```
+
+### 🔧 Common Setup Issues & Fixes
+
+**Database Connection Refused:**
+```bash
+# Check your database port
+docker ps | grep database
+
+# Update .env.local with correct port
+DATABASE_URL=mysql://root:root@127.0.0.1:[YOUR_PORT]/shopware?serverVersion=8.0&logging=1
+```
+
+**Command "Cannot have empty name":**
+- Use `configure()` method instead of `$defaultName` property
+- Make sure to call `parent::__construct()` before setting name
+
+**"learning" namespace not found:**
+- Register command in `services.xml` with `<tag name="console.command"/>`
+- Clear cache: `bin/console cache:clear`
+
+**Invalid UUID errors:**
+- Use `Uuid::randomHex()` instead of plain strings
+- Import: `use Shopware\Core\Framework\Uuid\Uuid;`
 
 **Debug web requests:**
 
@@ -1040,12 +1086,16 @@ When encountering issues:
 
 1. ✅ Check logs: `tail -f var/log/dev.log`
 2. ✅ Clear cache: `bin/console cache:clear`
-3. ✅ Check Symfony Profiler (web requests)
-4. ✅ Verify service registration: `bin/console debug:container`
-5. ✅ Check database: `bin/console dal:validate`
-6. ✅ Use Xdebug breakpoints for complex issues
-7. ✅ Review error messages carefully
-8. ✅ Check Recent changes in git: `git diff`
+3. ✅ Check database connection: `docker ps | grep database`
+4. ✅ Verify correct database port in `.env.local`
+5. ✅ Check Symfony Profiler (web requests)
+6. ✅ Verify service registration: `bin/console debug:container | grep Learning`
+7. ✅ Check database schema: `bin/console dal:validate`
+8. ✅ Verify command registration: `bin/console list | grep learning`
+9. ✅ Use Xdebug breakpoints for complex issues
+10. ✅ Review error messages carefully (especially UUID format errors)
+11. ✅ Check Recent changes in git: `git diff`
+12. ✅ Test without debugging first to isolate Xdebug issues
 
 ---
 

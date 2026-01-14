@@ -298,5 +298,11 @@
         <service id="Learning\Bundle\Service\Debug\QueryLoggingMiddleware">
             <argument type="service" id="logger"/>
         </service>
+
+        <!-- Debug Test Command -->
+        <service id="Learning\Bundle\Command\DebugTestCommand">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+            <tag name="console.command"/>
+        </service>
     </services>
 </container>

@@ -3,6 +3,7 @@
 namespace Learning\Bundle\Service;
 
 use Learning\Bundle\Core\Content\ProductView\ProductViewEntity;
+use Learning\Bundle\Exception\ProductViewException;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -64,18 +65,33 @@ class ProductViewService
      */
     public function getProductViewCount(string $productId, Context $context): int
     {
-        $criteria = new Criteria();
-        $criteria->addFilter(new EqualsFilter('productId', $productId));
+
+        try {
+            // Validate input
+            if (empty($productId)) {
+                throw ProductViewException::invalidViewData('Product ID cannot be empty');
+            }
         
-        $views = $this->productViewRepository->search($criteria, $context);
+            $criteria = new Criteria();
+            $criteria->addFilter(new EqualsFilter('productId', $productId));
+            
+            $views = $this->productViewRepository->search($criteria, $context);
 
-        $totalViews = 0;
-        /** @var ProductViewEntity $view */
-        foreach ($views as $view) {
-            $totalViews += $view->getViewCount();
+            $totalViews = 0;
+            /** @var ProductViewEntity $view */
+            foreach ($views as $view) {
+                $totalViews += $view->getViewCount();
+            }
+
+            return $totalViews;
+
+        } catch (ProductViewException $e) {
+            // Te-throw our custom exceptions
+            throw $e;
+        } catch (\Throwable $e) {
+            // Wrap unexpected exceptions
+            throw ProductViewException::databaseError($e);
         }
-
-        return $totalViews;
     }
 
     /**

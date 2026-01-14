@@ -851,203 +851,408 @@ class ProductViewException extends ShopwareHttpException
 }
 ```
 
+**Note:** Make sure to place this file in the `Exception` directory, not `Service`. The namespace should be `Learning\Bundle\Exception`.
+
 ### Step 2: Use Exceptions Properly
 
-Update `ProductViewService.php`:
-
-```php
-public function getProductViewCount(string $productId, Context $context): int
-{
-    try {
-        // Validate input
-        if (empty($productId)) {
-            throw ProductViewException::invalidViewData('Product ID cannot be empty');
-        }
-
-        $criteria = new Criteria();
-        $criteria->addFilter(new EqualsFilter('productId', $productId));
-
-        $views = $this->productViewRepository->search($criteria, $context);
-        
-        $totalViews = 0;
-        foreach ($views as $view) {
-            $totalViews += $view->getViewCount();
-        }
-
-        return $totalViews;
-
-    } catch (ProductViewException $e) {
-        // Re-throw our custom exceptions
-        throw $e;
-    } catch (\Throwable $e) {
-        // Wrap unexpected exceptions
-        throw ProductViewException::databaseError($e);
-    }
-}
-```
-
-### Step 3: Error Subscriber
-
-Create error logging subscriber:
+Update `custom/plugins/LearningBundle/src/Service/ProductViewService.php`:
 
 ```php
 <?php declare(strict_types=1);
 
-namespace Learning\Bundle\Subscriber;
+namespace Learning\Bundle\Service;
 
-use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\ExceptionEvent;
-use Symfony\Component\HttpKernel\KernelEvents;
+use Learning\Bundle\Core\Content\ProductView\ProductViewEntity;
+use Learning\Bundle\Exception\ProductViewException;  // Correct namespace
+use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 
-class ErrorLoggingSubscriber implements EventSubscriberInterface
+class ProductViewService
 {
-    private LoggerInterface $logger;
+    // ...existing code...
 
-    public function __construct(LoggerInterface $logger)
+    public function getProductViewCount(string $productId, Context $context): int
     {
-        $this->logger = $logger;
+        try {
+            // Validate input
+            if (empty($productId)) {
+                throw ProductViewException::invalidViewData('Product ID cannot be empty');
+            }
+
+            $criteria = new Criteria();
+            $criteria->addFilter(new EqualsFilter('productId', $productId));
+
+            $views = $this->productViewRepository->search($criteria, $context);
+            
+            $totalViews = 0;
+            /** @var ProductViewEntity $view */
+            foreach ($views as $view) {
+                $totalViews += $view->getViewCount();
+            }
+
+            return $totalViews;
+
+        } catch (ProductViewException $e) {
+            // Re-throw our custom exceptions
+            throw $e;
+        } catch (\Throwable $e) {
+            // Wrap unexpected exceptions
+            throw ProductViewException::databaseError($e);
+        }
     }
 
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            KernelEvents::EXCEPTION => ['onException', 100],
-        ];
-    }
-
-    public function onException(ExceptionEvent $event): void
-    {
-        $exception = $event->getThrowable();
-        
-        // Log with full context
-        $this->logger->error('Exception occurred', [
-            'exception_class' => get_class($exception),
-            'message' => $exception->getMessage(),
-            'code' => $exception->getCode(),
-            'file' => $exception->getFile(),
-            'line' => $exception->getLine(),
-            'trace' => $exception->getTraceAsString(),
-            'url' => $event->getRequest()->getUri(),
-            'method' => $event->getRequest()->getMethod(),
-        ]);
-    }
+    // ...existing code...
 }
 ```
 
+**Important:** Ensure the import statement uses the correct namespace: `use Learning\Bundle\Exception\ProductViewException;`
+
 ---
 
-## Part 6: Debugging Commands (30 minutes)
+## Part 6: Testing Error Handling
 
-### Useful Shopware Debugging Commands
+#### Test Commands Available
+
+The tutorial mentions `learning:test-errors` but this command needs to be created. Here are the available commands:
 
 ```bash
-# Check container services
-bin/console debug:container | grep Learning
-
-# Check event listeners
-bin/console debug:event-dispatcher
-
-# Check routes
-bin/console debug:router | grep learning
-
-# Check configuration
-bin/console debug:config
-
-# Dump database schema
-bin/console dbal:run-sql "SHOW CREATE TABLE learning_product_view"
-
-# Check entity definitions
-bin/console debug:container --tag=shopware.entity.definition
-
-# Clear specific cache
-bin/console cache:pool:clear cache.object
-
-# Validate database schema
-bin/console dal:validate
-
-# Check plugin status
-bin/console plugin:list
-
-# Check system requirements
-bin/console system:check
+# Available commands for testing:
+bin/console learning:test-product-view    # Test product view functionality
+bin/console learning:debug-test           # Test with breakpoints for Xdebug
+bin/console learning:debug-info           # Show debug information
 ```
 
-### Create Debug Command
+To create the `learning:test-errors` command mentioned in the tutorial, follow the instructions in "Test 1: Test Custom Exceptions" section below.
 
-Create `custom/plugins/LearningBundle/src/Command/DebugInfoCommand.php`:
+#### Test 1: Test Custom Exceptions
+
+Create `custom/plugins/LearningBundle/src/Command/TestErrorHandlingCommand.php`:
 
 ```php
 <?php declare(strict_types=1);
 
 namespace Learning\Bundle\Command;
 
+use Learning\Bundle\Exception\ProductViewException;
+use Learning\Bundle\Service\ProductViewService;
+use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class DebugInfoCommand extends Command
+class TestErrorHandlingCommand extends Command
 {
-    protected static $defaultName = 'learning:debug-info';
+    private ProductViewService $productViewService;
+
+    public function __construct(ProductViewService $productViewService)
+    {
+        parent::__construct();
+        $this->productViewService = $productViewService;
+    }
 
     protected function configure(): void
     {
-        $this->setDescription('Show debug information for Learning Bundle');
+        $this
+            ->setName('learning:test-errors')
+            ->setDescription('Test error handling and logging')
+            ->addArgument('error-type', InputArgument::OPTIONAL, 'Type of error to test', 'all')
+            ->addOption('throw', 't', InputOption::VALUE_NONE, 'Actually throw the exception');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        $errorType = $input->getArgument('error-type');
+        $shouldThrow = $input->getOption('throw');
 
-        $io->title('Learning Bundle Debug Information');
+        $io->title('Testing Error Handling');
 
-        // System info
-        $io->section('System');
-        $io->table(
-            ['Key', 'Value'],
-            [
-                ['PHP Version', PHP_VERSION],
-                ['Xdebug', extension_loaded('xdebug') ? '✓ Enabled' : '✗ Disabled'],
-                ['Environment', $_ENV['APP_ENV'] ?? 'unknown'],
-                ['Debug Mode', $_ENV['APP_DEBUG'] ?? 'unknown'],
-            ]
-        );
-
-        // Plugin info
-        $io->section('Plugin Configuration');
-        $io->listing([
-            'Tables: learning_product_view',
-            'Services: ProductViewService, ProductViewAnalyticsService',
-            'Events: CustomerSubscriber, ProductSubscriber, OrderSubscriber',
-        ]);
-
-        // Check log files
-        $io->section('Log Files');
-        $logDir = dirname(__DIR__, 5) . '/var/log';
-        $logFiles = glob($logDir . '/*.log');
-        
-        foreach ($logFiles as $logFile) {
-            $size = filesize($logFile);
-            $io->text(sprintf('%s (%s)', basename($logFile), $this->formatBytes($size)));
+        switch ($errorType) {
+            case 'product-not-found':
+                $this->testProductNotFound($io, $shouldThrow);
+                break;
+            case 'invalid-data':
+                $this->testInvalidData($io, $shouldThrow);
+                break;
+            case 'database-error':
+                $this->testDatabaseError($io, $shouldThrow);
+                break;
+            case 'all':
+                $this->testProductNotFound($io, $shouldThrow);
+                $this->testInvalidData($io, $shouldThrow);
+                $this->testDatabaseError($io, $shouldThrow);
+                break;
+            default:
+                $io->error("Unknown error type: {$errorType}");
+                return Command::FAILURE;
         }
 
-        $io->success('Debug information displayed');
+        $io->success('Error handling tests completed');
+        $io->note('Check var/log/dev.log for logged errors');
 
         return Command::SUCCESS;
     }
 
-    private function formatBytes(int $bytes): string
+    private function testProductNotFound(SymfonyStyle $io, bool $shouldThrow): void
     {
-        $units = ['B', 'KB', 'MB', 'GB'];
-        $i = 0;
-        while ($bytes >= 1024 && $i < count($units) - 1) {
-            $bytes /= 1024;
-            $i++;
+        $io->section('Testing: Product Not Found Exception');
+
+        try {
+            if ($shouldThrow) {
+                throw ProductViewException::productNotFound('non-existent-id');
+            } else {
+                $io->text('Would throw: ProductViewException::productNotFound()');
+            }
+        } catch (ProductViewException $e) {
+            $io->error("Caught exception: {$e->getMessage()}");
+            $io->text("Error Code: {$e->getErrorCode()}");
+            $io->text("HTTP Status: {$e->getStatusCode()}");
         }
-        return round($bytes, 2) . ' ' . $units[$i];
+    }
+
+    private function testInvalidData(SymfonyStyle $io, bool $shouldThrow): void
+    {
+        $io->section('Testing: Invalid Data Exception');
+
+        try {
+            if ($shouldThrow) {
+                throw ProductViewException::invalidViewData('Product ID cannot be empty');
+            } else {
+                $io->text('Would throw: ProductViewException::invalidViewData()');
+            }
+        } catch (ProductViewException $e) {
+            $io->error("Caught exception: {$e->getMessage()}");
+        }
+    }
+
+    private function testDatabaseError(SymfonyStyle $io, bool $shouldThrow): void
+    {
+        $io->section('Testing: Database Error Exception');
+
+        try {
+            if ($shouldThrow) {
+                $previous = new \PDOException('Connection failed');
+                throw ProductViewException::databaseError($previous);
+            } else {
+                $io->text('Would throw: ProductViewException::databaseError()');
+            }
+        } catch (ProductViewException $e) {
+            $io->error("Caught exception: {$e->getMessage()}");
+            if ($e->getPrevious()) {
+                $io->text("Previous: {$e->getPrevious()->getMessage()}");
+            }
+        }
     }
 }
+```
+
+#### Test 2: Test Error Logging
+
+Create a web endpoint that triggers errors for testing:
+
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Controller;
+
+use Learning\Bundle\Exception\ProductViewException;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Annotation\Route;
+
+/**
+ * @Route("/learning/test-errors")
+ */
+class TestErrorController extends AbstractController
+{
+    /**
+     * @Route("/product-not-found", name="learning.test.product_not_found", methods={"GET"})
+     */
+    public function testProductNotFound(): JsonResponse
+    {
+        throw ProductViewException::productNotFound('test-product-id');
+    }
+
+    /**
+     * @Route("/invalid-data", name="learning.test.invalid_data", methods={"GET"})
+     */
+    public function testInvalidData(): JsonResponse
+    {
+        throw ProductViewException::invalidViewData('Test invalid data error');
+    }
+
+    /**
+     * @Route("/database-error", name="learning.test.database_error", methods={"GET"})
+     */
+    public function testDatabaseError(): JsonResponse
+    {
+        $previous = new \PDOException('Test database connection failed');
+        throw ProductViewException::databaseError($previous);
+    }
+
+    /**
+     * @Route("/http-error", name="learning.test.http_error", methods={"GET"})
+     */
+    public function testHttpError(): JsonResponse
+    {
+        throw new NotFoundHttpException('Test 404 error');
+    }
+
+    /**
+     * @Route("/fatal-error", name="learning.test.fatal_error", methods={"GET"})
+     */
+    public function testFatalError(): JsonResponse
+    {
+        // This will cause a fatal error
+        $array = [];
+        $array['key']->nonExistentMethod();
+        
+        return new JsonResponse(['success' => true]);
+    }
+}
+```
+
+Register services in `services.xml`:
+
+```xml
+<!-- Test Error Handling Command -->
+<service id="Learning\Bundle\Command\TestErrorHandlingCommand">
+    <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+    <tag name="console.command"/>
+</service>
+
+<!-- Test Error Controller -->
+<service id="Learning\Bundle\Controller\TestErrorController" public="true"/>
+```
+
+#### Testing Instructions
+
+**1. Test via Command Line:**
+
+```bash
+# Test all error types (dry run)
+bin/console learning:test-errors
+
+# Test specific error type (dry run)
+bin/console learning:test-errors product-not-found
+
+# Actually throw exceptions to test logging
+bin/console learning:test-errors --throw
+
+# Test specific error with throwing
+bin/console learning:test-errors database-error --throw
+```
+
+**2. Test via Web Endpoints:**
+
+```bash
+# Test product not found error
+curl http://localhost:8000/learning/test-errors/product-not-found
+
+# Test invalid data error
+curl http://localhost:8000/learning/test-errors/invalid-data
+
+# Test database error
+curl http://localhost:8000/learning/test-errors/database-error
+
+# Test HTTP error
+curl http://localhost:8000/learning/test-errors/http-error
+
+# Test fatal error
+curl http://localhost:8000/learning/test-errors/fatal-error
+```
+
+**3. Monitor Logs:**
+
+```bash
+# Watch logs in real-time
+tail -f var/log/dev.log | grep -E "(Exception occurred|Learning)"
+
+# Check error count
+grep -c "Exception occurred" var/log/dev.log
+
+# View recent errors
+tail -n 50 var/log/dev.log | grep "Exception occurred"
+```
+
+**4. Test Error Reporting Service:**
+
+Add this method to your `DebugTestCommand`:
+
+```php
+public function testErrorReporting(ErrorReportingService $errorReportingService): void
+{
+    $report = $errorReportingService->generateErrorReport();
+    
+    echo "Error Report:\n";
+    echo "Total Errors: " . $report['summary']['total_errors'] . "\n";
+    echo "Critical Errors: " . $report['summary']['critical_errors'] . "\n";
+    echo "Warnings: " . $report['summary']['warnings'] . "\n";
+    echo "\nBy Exception Class:\n";
+    foreach ($report['summary']['by_class'] as $class => $count) {
+        echo "  {$class}: {$count}\n";
+    }
+}
+```
+
+**5. Verify Error Subscriber:**
+
+```bash
+# Check if subscriber is registered
+bin/console debug:event-dispatcher kernel.exception
+
+# Should show Learning\Bundle\Subscriber\ErrorLoggingSubscriber
+```
+
+### Expected Test Results
+
+After running tests, you should see in `var/log/dev.log`:
+
+```log
+[2026-01-14T10:30:00+00:00] app.WARNING: Exception occurred: Product with ID "test-product-id" not found {"exception_class":"Learning\\Bundle\\Exception\\ProductViewException","message":"Product with ID \"test-product-id\" not found","code":0,"file":"/path/to/TestErrorController.php","line":25,"url":"http://localhost:8000/learning/test-errors/product-not-found","method":"GET","user_agent":"curl/7.68.0","ip_address":"127.0.0.1","timestamp":"2026-01-14T10:30:00+00:00"} []
+
+[2026-01-14T10:30:05+00:00] app.ERROR: Exception occurred: Call to a member function nonExistentMethod() on null {"exception_class":"Error","message":"Call to a member function nonExistentMethod() on null","code":0,"file":"/path/to/TestErrorController.php","line":65,"url":"http://localhost:8000/learning/test-errors/fatal-error","method":"GET","user_agent":"curl/7.68.0","ip_address":"127.0.0.1","timestamp":"2026-01-14T10:30:05+00:00","trace":"#0 [internal function]: Learning\\Bundle\\Controller\\TestErrorController->testFatalError()\n..."} []
+```
+
+### Troubleshooting
+
+**Issue: Error subscriber not triggered**
+```bash
+# Check if subscriber is registered
+bin/console debug:container Learning\\Bundle\\Subscriber\\ErrorLoggingSubscriber
+
+# Clear cache and reinstall plugin
+bin/console cache:clear
+bin/console plugin:uninstall LearningBundle
+bin/console plugin:install --activate LearningBundle
+```
+
+**Issue: Logs not appearing**
+```bash
+# Check log permissions
+ls -la var/log/
+
+# Check if logger service is available
+bin/console debug:container logger
+
+# Test logging directly
+bin/console debug:log "Test message"
+```
+
+**Issue: Web endpoints not accessible**
+```bash
+# Check routes are registered
+bin/console debug:router | grep learning
+
+# Clear routing cache
+bin/console router:clear-cache
 ```
 
 ---

@@ -1081,8 +1081,7 @@ bin/console learning:debug-test
 ```
 
 ### Step 3: Test Error Logging
-
-Create a web endpoint that triggers errors for testing:
+Create a web endpoint that triggers errors for testing `custom/plugins/LearningBundle/src/Controller/TestErrorController.php`:
 
 ```php
 <?php declare(strict_types=1);
@@ -1181,22 +1180,39 @@ bin/console learning:test-errors database-error --throw
 
 **2. Test via Web Endpoints:**
 
+**⚠️ Important:** Web endpoint testing may require proper Shopware domain configuration. If you encounter "Domain Mapping Misconfiguration" errors, use one of these alternatives:
+
+**Option A: Use Command Line Testing (Recommended)**
 ```bash
-# Test product not found error
+# This bypasses domain configuration issues
+bin/console learning:test-errors --throw
+```
+
+**Option B: Access via Browser**
+```
+Open your browser and navigate to your Shopware installation URL:
+http://your-shopware-domain.local/learning/test-errors/product-not-found
+```
+
+**Option C: Fix Domain Configuration**
+1. Go to Administration → Settings → Sales Channels
+2. Select your Storefront sales channel
+3. Under "Domains", ensure your localhost URL is configured
+4. Add domain: `http://localhost:8000` with language and currency
+
+**Option D: Use curl (if domain is configured)**
+```bash
+# Test with your actual Shopware domain
+curl http://your-shopware-domain.local/learning/test-errors/product-not-found
+
+# Or if using localhost with proper configuration:
 curl http://localhost:8000/learning/test-errors/product-not-found
 
-# Test invalid data error
-curl http://localhost:8000/learning/test-errors/invalid-data
-
-# Test database error
-curl http://localhost:8000/learning/test-errors/database-error
-
-# Test HTTP error
-curl http://localhost:8000/learning/test-errors/http-error
-
-# Test fatal error
-curl http://localhost:8000/learning/test-errors/fatal-error
+# Get verbose output to diagnose issues
+curl -v http://localhost:8000/learning/test-errors/product-not-found
 ```
+
+**💡 Recommendation:** For testing error handling during development, the **command-line approach** (`bin/console learning:test-errors --throw`) is more reliable and doesn't require domain configuration.
 
 **3. Monitor Logs:**
 
@@ -1209,29 +1225,12 @@ grep -c "Exception occurred" var/log/dev.log
 
 # View recent errors
 tail -n 50 var/log/dev.log | grep "Exception occurred"
+
+# View exceptions with context
+tail -f var/log/dev.log | grep -A 5 "Exception occurred"
 ```
 
-**4. Test Error Reporting Service:**
-
-Add this method to your `DebugTestCommand`:
-
-```php
-public function testErrorReporting(ErrorReportingService $errorReportingService): void
-{
-    $report = $errorReportingService->generateErrorReport();
-    
-    echo "Error Report:\n";
-    echo "Total Errors: " . $report['summary']['total_errors'] . "\n";
-    echo "Critical Errors: " . $report['summary']['critical_errors'] . "\n";
-    echo "Warnings: " . $report['summary']['warnings'] . "\n";
-    echo "\nBy Exception Class:\n";
-    foreach ($report['summary']['by_class'] as $class => $count) {
-        echo "  {$class}: {$count}\n";
-    }
-}
-```
-
-**5. Verify Error Subscriber:**
+**4. Verify Error Subscriber:**
 
 ```bash
 # Check if subscriber is registered

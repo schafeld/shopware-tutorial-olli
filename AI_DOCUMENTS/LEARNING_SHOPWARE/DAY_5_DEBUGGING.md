@@ -509,11 +509,19 @@ To register the middleware with Doctrine DBAL, you would typically add it to you
 ### Step 1: Install Xdebug (macOS)
 
 ```bash
-# Install via PECL
+# Install via PECL (compile from source)
 pecl install xdebug
 
-# Or via Homebrew (if using Homebrew PHP)
-brew install php@8.2-xdebug  # Adjust version as needed
+# Or via Homebrew (RECOMMENDED - easier setup)
+# For your current PHP version, use:
+brew install shivammathur/extensions/xdebug@8.5  # For PHP 8.5
+# or for other versions:
+# brew install shivammathur/extensions/xdebug@8.4  # For PHP 8.4
+# brew install shivammathur/extensions/xdebug@8.3  # For PHP 8.3
+# etc.
+
+# Alternative: Install specific PHP version with Xdebug pre-compiled
+# brew install php@8.2-xdebug  # This installs a separate PHP 8.2 + Xdebug
 ```
 
 ### Step 2: Configure Xdebug

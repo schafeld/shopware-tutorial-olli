@@ -304,5 +304,11 @@
             <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
             <tag name="console.command"/>
         </service>
+
+        <!-- Test Error Handling Command -->
+        <service id="Learning\Bundle\Command\TestErrorHandlingCommand">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+            <tag name="console.command"/>
+        </service>
     </services>
 </container>

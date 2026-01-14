@@ -288,5 +288,15 @@
         <service id="Learning\Bundle\Service\Logger\CustomLogger">
             <argument type="service" id="logger"/>
         </service>
+
+        <!-- ProfiledController -->
+        <service id="Learning\Bundle\Core\Api\ProfiledController" public="true">
+            <argument type="service" id="debug.stopwatch"/>
+        </service>
+
+        <!-- QueryLoggingMiddleware -->
+        <service id="Learning\Bundle\Service\Debug\QueryLoggingMiddleware">
+            <argument type="service" id="logger"/>
+        </service>
     </services>
 </container>

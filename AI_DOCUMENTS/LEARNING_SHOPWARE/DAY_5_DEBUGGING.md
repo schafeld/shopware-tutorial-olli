@@ -391,24 +391,39 @@ class QueryLoggingConnection implements DriverConnection
         return $result;
     }
 
-    public function lastInsertId($name = null): string|int|false
+    public function lastInsertId($name = null): string
     {
         return $this->connection->lastInsertId($name);
     }
 
-    public function beginTransaction(): bool
+    public function beginTransaction(): void
     {
-        return $this->connection->beginTransaction();
+        $this->connection->beginTransaction();
     }
 
-    public function commit(): bool
+    public function commit(): void
     {
-        return $this->connection->commit();
+        $this->connection->commit();
     }
 
-    public function rollBack(): bool
+    public function rollBack(): void
     {
-        return $this->connection->rollBack();
+        $this->connection->rollBack();
+    }
+
+    public function quote($value, $type = 2): string
+    {
+        return $this->connection->quote($value, $type);
+    }
+
+    public function getServerVersion(): string
+    {
+        return $this->connection->getServerVersion();
+    }
+
+    public function getNativeConnection()
+    {
+        return $this->connection->getNativeConnection();
     }
 
     private function logQuery(string $sql, array $params, float $executionTime): void
@@ -436,9 +451,14 @@ class QueryLoggingStatement implements Statement
         $this->sql = $sql;
     }
 
-    public function bindValue($param, $value, $type = null): bool
+    public function bindValue($param, $value, $type = 2): void
     {
-        return $this->statement->bindValue($param, $value, $type);
+        $this->statement->bindValue($param, $value, $type);
+    }
+
+    public function bindParam($param, &$variable, $type = 2, $length = null): void
+    {
+        $this->statement->bindParam($param, $variable, $type, $length);
     }
 
     public function execute($params = null): Result
@@ -464,7 +484,7 @@ class QueryLoggingStatement implements Statement
 }
 ```
 
-**Note:** This implementation uses the modern Doctrine DBAL middleware approach instead of the deprecated `SQLLogger` interface. The middleware pattern provides better flexibility and performance.
+**Note:** This implementation uses the modern Doctrine DBAL middleware approach instead of the deprecated `SQLLogger` interface. The middleware pattern provides better flexibility and performance. This implementation fully complies with the Doctrine DBAL driver interfaces.
 
 Register the `ProfiledController` and `QueryLoggingMiddleware` in `custom/plugins/LearningBundle/src/Resources/config/services.xml`:
 

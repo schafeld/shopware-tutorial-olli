@@ -442,7 +442,13 @@ PHPUnit 9.5.x by Sebastian Bergmann and contributors.
 
 **Why these directories?**
 - `tests/unit/` - Fast tests that test individual classes in isolation (no database)
-- `tests/integration/` - Slower tests that test multiple components together (uses database)
+- `tests/Integration/` - Slower tests that test multiple components together (uses database)
+
+**⚠️ IMPORTANT: Directory Case Matters!**
+- Integration tests MUST be in `tests/Integration/` (capital I)
+- This is required for PSR-4 autoloading: `Learning\Bundle\Tests\Integration`
+- macOS/Windows have case-insensitive filesystems but PSR-4 is case-sensitive
+- Wrong case = "Trait not found" errors
 
 Create test directories in your plugin:
 
@@ -450,9 +456,9 @@ Create test directories in your plugin:
 # Make sure you're in the Shopware root
 cd /path/to/shopware-tutorial-olli
 
-# Create test directories
+# Create test directories (note capital I for Integration)
 mkdir -p custom/plugins/LearningBundle/tests/unit/Service
-mkdir -p custom/plugins/LearningBundle/tests/integration
+mkdir -p custom/plugins/LearningBundle/tests/Integration
 ```
 
 **What we're creating:**
@@ -462,7 +468,7 @@ LearningBundle/
 └── tests/                  # Your test code
     ├── unit/               # Unit tests (fast, isolated)
     │   └── Service/        # Tests for services
-    ├── integration/        # Integration tests (slower, realistic)
+    ├── Integration/        # Integration tests (capital I!)
     └── TestBootstrap.php   # Test setup file
 ```
 
@@ -916,6 +922,10 @@ cd /path/to/shopware-tutorial-olli/custom/plugins/LearningBundle
 
 # Run specific test method
 ../../../vendor/bin/phpunit -c phpunit.unit.xml --filter testGenerateWelcomeMessageWithSimpleFormat tests/unit/Service/MessageServiceTest.php
+
+# Generate coverage report (requires Xdebug)
+../../../vendor/bin/phpunit -c phpunit.unit.xml --coverage-html coverage/
+open coverage/index.html
 ```
 
 **Why `-c phpunit.unit.xml`?**
@@ -1354,48 +1364,94 @@ OK (20 tests, 45 assertions)
 
 ### Step 1: Create Integration Test Base
 
-Create `custom/plugins/LearningBundle/tests/integration/IntegrationTestBehaviour.php`:
+**Important:** Create this in `tests/Integration/` (capital I) to match PSR-4 autoloading requirements.
+
+Create `custom/plugins/LearningBundle/tests/Integration/IntegrationTestBehaviour.php`:
 
 ```php
 <?php declare(strict_types=1);
 
 namespace Learning\Bundle\Tests\Integration;
 
+use Shopware\Core\Content\Product\Aggregate\ProductVisibility\ProductVisibilityDefinition;
+use Shopware\Core\Defaults;
+use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\DatabaseTransactionBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
+use Shopware\Core\Framework\Uuid\Uuid;
 
 trait LearningIntegrationTestBehaviour
 {
     use IntegrationTestBehaviour;
-    use KernelTestBehaviour;
     use DatabaseTransactionBehaviour;
+    use KernelTestBehaviour;
 
     protected function getProductId(): string
     {
         // Get first product from database for testing
         $connection = $this->getContainer()->get('Doctrine\DBAL\Connection');
         $result = $connection->fetchOne('SELECT LOWER(HEX(id)) FROM product LIMIT 1');
-        
+
         return $result ?: $this->createTestProduct();
     }
 
     protected function createTestProduct(): string
     {
-        // Create a test product
-        $productId = '01234567890123456789012345678901';
+        $productId = Uuid::randomHex();
+        $context = Context::createDefaultContext();
         
-        // Implementation would create product via repository
-        // For simplicity, assume product exists
+        /** @var EntityRepository $productRepository */
+        $productRepository = $this->getContainer()->get('product.repository');
+        
+        // Get tax ID
+        $connection = $this->getContainer()->get('Doctrine\DBAL\Connection');
+        $taxId = $connection->fetchOne('SELECT LOWER(HEX(id)) FROM tax LIMIT 1');
+        
+        // Get sales channel ID  
+        $salesChannelId = $connection->fetchOne('SELECT LOWER(HEX(id)) FROM sales_channel LIMIT 1');
+        
+        $productRepository->create([
+            [
+                'id' => $productId,
+                'productNumber' => 'TEST-' . $productId,
+                'name' => 'Test Product',
+                'stock' => 10,
+                'price' => [
+                    [
+                        'currencyId' => Defaults::CURRENCY,
+                        'gross' => 99.99,
+                        'net' => 84.03,
+                        'linked' => false,
+                    ],
+                ],
+                'taxId' => $taxId,
+                'visibilities' => [
+                    [
+                        'salesChannelId' => $salesChannelId,
+                        'visibility' => ProductVisibilityDefinition::VISIBILITY_ALL,
+                    ],
+                ],
+            ],
+        ], $context);
         
         return $productId;
     }
 }
 ```
 
+**What this does:**
+- ✅ Actually creates a real product in the test database
+- ✅ Gets tax and sales channel IDs from existing data
+- ✅ Uses proper Shopware data structure
+- ✅ Returns a valid product ID for use in tests
+
 ### Step 2: Write Integration Test
 
-Create `custom/plugins/LearningBundle/tests/integration/Service/ProductViewServiceIntegrationTest.php`:
+**Important:** File path must be `tests/Integration/Service/` (capital I).
+
+Create `custom/plugins/LearningBundle/tests/Integration/Service/ProductViewServiceIntegrationTest.php`:
 
 ```php
 <?php declare(strict_types=1);
@@ -1475,10 +1531,49 @@ class ProductViewServiceIntegrationTest extends TestCase
 
 **Important:** Integration tests use `phpunit.xml` (with TestBootstrap.php) because they need database access.
 
+**⚠️ Prerequisites:**
+1. Your Docker containers must be running (`docker ps` should show database)
+2. Create `.env.test` file in Shopware root with database config:
+
 ```bash
-# Run integration tests (uses phpunit.xml by default)
+# Create .env.test in Shopware root
+cat > ../../../.env.test << 'EOF'
+# Test environment configuration
+KERNEL_CLASS='App\Kernel'
+APP_SECRET='$ecretf0rt3st'
+SYMFONY_DEPRECATIONS_HELPER=999999
+
+# Database configuration for integration tests
+# Update port to match your docker ps output
+DATABASE_URL=mysql://root:root@127.0.0.1:YOUR_PORT/shopware_test
+APP_URL=http://127.0.0.1:8000
+EOF
+```
+
+**Find your database port:**
+```bash
+docker ps | grep mariadb
+# Look for the port mapping like: 0.0.0.0:54191->3306/tcp
+# Use the first port (54191 in this example) in DATABASE_URL above
+```
+
+**Update TestBootstrap to explicitly load the trait:**
+
+Edit `custom/plugins/LearningBundle/tests/TestBootstrap.php` and add at the end:
+
+```php
+// Explicitly register the Integration test trait
+require_once __DIR__ . '/Integration/IntegrationTestBehaviour.php';
+```
+
+**Run the tests:**
+```bash
+# Run integration tests (note: capital I in Integration/)
 cd custom/plugins/LearningBundle
-../../../vendor/bin/phpunit -c phpunit.xml tests/integration/
+../../../vendor/bin/phpunit -c phpunit.xml tests/Integration/
+
+# Run specific integration test
+../../../vendor/bin/phpunit -c phpunit.xml tests/Integration/Service/ProductViewServiceIntegrationTest.php
 
 # Run all tests (both unit and integration)
 ../../../vendor/bin/phpunit -c phpunit.xml
@@ -1487,10 +1582,45 @@ cd custom/plugins/LearningBundle
 ../../../vendor/bin/phpunit -c phpunit.unit.xml tests/unit/
 ```
 
+**Expected output:**
+```
+Shopware Plugin Service
+=======================
+[OK] Plugin list refreshed
+
+... (plugin installation messages) ...
+
+PHPUnit 9.6.31 by Sebastian Bergmann and contributors.
+
+...                                                                 3 / 3 (100%)
+
+Time: 00:00.032, Memory: 151.50 MB
+
+OK (3 tests, 5 assertions)
+```
+
 **Configuration Summary:**
 - `phpunit.unit.xml` → Unit tests only (no database)
-- `phpunit.xml` → Integration tests (needs database)
+- `phpunit.xml` → Integration tests (needs database, runs plugin installation)
 - Default (no `-c` flag) → Uses `phpunit.xml` if found
+- Directory must be `tests/Integration/` (capital I) for PSR-4 autoloading
+
+**Common Integration Test Issues:**
+
+1. **"Trait not found"**
+   - Verify directory is `tests/Integration/` (capital I)
+   - Add explicit `require_once` in TestBootstrap.php
+   - Run `composer dump-autoload` from root
+
+2. **"Connection refused"**
+   - Check Docker containers: `docker ps`
+   - Verify `.env.test` has correct port
+   - Database port matches your `docker ps` output
+
+3. **"Foreign key constraint violation"**
+   - Product doesn't exist in test database
+   - Use the updated `createTestProduct()` method shown above
+   - Tests create their own test data
 
 ---
 

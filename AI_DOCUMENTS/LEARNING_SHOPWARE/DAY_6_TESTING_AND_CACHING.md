@@ -253,6 +253,129 @@ PHPUnit 9.5.x by Sebastian Bergmann and contributors.
    - During installation, it compiles assets and caches
    - Development environments especially need more memory for debugging tools
 
+6. **Security advisories blocking `composer update`**
+   
+   **Problem:** Composer warns about security vulnerabilities in your current Shopware version.
+   
+   ```
+   Problem 1
+   - Root composer.json requires shopware/core v6.7.3.1 (exact version match)
+   - These were not loaded, because they are affected by security advisories
+   ```
+   
+   **What are security advisories?**  
+   Security advisories are warnings about known vulnerabilities (security holes) in packages. Composer (as of v2.x) blocks installing packages with known security issues to protect you.
+   
+   **Solution 1: Update All Shopware Packages Together (RECOMMENDED for production)**
+   
+   This is the RIGHT way to fix security issues, but may require additional testing:
+   
+   ```bash
+   # Backup database first!
+   bin/console database:dump backup_before_update.sql
+   
+   # Update ALL Shopware packages together (including dependencies)
+   composer update shopware/* --with-all-dependencies
+   
+   # After update, run migrations
+   bin/console database:migrate --all
+   bin/console cache:clear
+   ```
+   
+   **⚠️ Important:**
+   - This updates multiple packages and may introduce breaking changes
+   - Test thoroughly after updating
+   - Read the changelog: https://github.com/shopware/shopware/releases
+   - **For beginners learning:** This might be overkill - see Solution 2
+   
+   **Solution 2: For Learning/Testing ONLY (NOT for production!)** ✅ **Recommended for Tutorial**
+   
+   If you're just learning with this tutorial and want to focus on testing (not security updates):
+   
+   **Step 1: Create or edit `composer.json`**
+   
+   Add this configuration to disable security checks (only for local development!):
+   
+   ```bash
+   cd /path/to/shopware-tutorial-olli
+   
+   # Open composer.json in editor
+   nano composer.json  # or use VS Code
+   ```
+   
+   **Step 2: Add this to your composer.json**
+   
+   Find the `"config"` section (or create it if it doesn't exist) and add:
+   
+   ```json
+   {
+       "require": {
+           ...existing requirements...
+       },
+       "config": {
+           "audit": {
+               "block-insecure": false
+           },
+           ...other config options...
+       }
+   }
+   ```
+   
+   **Complete example:**
+   ```json
+   {
+       "name": "shopware/production",
+       "require": {
+           "shopware/core": "v6.7.3.1",
+           "shopware/administration": "*",
+           "shopware/storefront": "*"
+       },
+       "config": {
+           "audit": {
+               "block-insecure": false
+           },
+           "optimize-autoloader": true,
+           "sort-packages": true
+       }
+   }
+   ```
+   
+   **Step 3: Run composer install**
+   ```bash
+   composer install
+   ```
+   
+   **This will now work** because you've told Composer: "I know about the security issues, let me proceed anyway for learning purposes."
+   
+   **⚠️ CRITICAL WARNINGS:**
+   - 🚫 **NEVER use this on a live/production website**
+   - 🚫 **NEVER store customer data with security vulnerabilities**
+   - 🚫 **NEVER accept real payments with an insecure version**
+   - ✅ **Only use for local learning/development**
+   - ✅ **Delete `"block-insecure": false` before going live**
+   
+   **Why this is okay for learning:**
+   - You're working on localhost only
+   - No real customer data involved
+   - No internet exposure
+   - Focus is on learning testing, not security
+   - You can update later when you deploy
+   
+   **Before deploying to production, you MUST:**
+   1. Remove the `"block-insecure": false` line
+   2. Update all Shopware packages to secure versions
+   3. Run security audit: `composer audit`
+   4. Keep Shopware updated with security patches
+   
+   **Checking for security issues:**
+   ```bash
+   # Check your current installation for vulnerabilities
+   composer audit
+   
+   # See advisory details
+   composer audit --format=json
+   ```
+
 **Understanding the Test Setup:**
 
 - `vendor/bin/phpunit` - The PHPUnit executable that runs your tests

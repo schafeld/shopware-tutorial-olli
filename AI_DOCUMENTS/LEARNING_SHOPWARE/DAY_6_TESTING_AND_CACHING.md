@@ -1024,7 +1024,14 @@ It shows what percentage of your code is executed during tests. Higher coverage 
 php -m | grep xdebug
 
 # If not installed (macOS):
-pecl install xdebug
+sudo pecl install xdebug
+
+# IMPORTANT: Configure Xdebug for coverage mode
+echo "xdebug.mode=coverage" | sudo tee -a $(php --ini | grep "Loaded Configuration File" | awk '{print $4}')
+
+# Verify Xdebug is loaded with coverage mode
+php -v  # Should show "with Xdebug v3.x.x"
+php -i | grep xdebug.mode  # Should show "xdebug.mode => coverage => coverage"
 
 # Generate HTML coverage report (for unit tests)
 cd custom/plugins/LearningBundle
@@ -1034,13 +1041,100 @@ cd custom/plugins/LearningBundle
 open coverage/index.html
 ```
 
+#### Xdebug Installation Troubleshooting
+
+**Problem 1: "pecl: command not found"**
+```bash
+# On macOS with Homebrew, PECL comes with PHP
+# Make sure PHP is properly installed
+brew install php
+
+# Or reinstall if needed
+brew reinstall php
+```
+
+**Problem 2: "Xdebug not showing in php -m"**
+
+This means Xdebug installed but isn't loaded. Check:
+
+```bash
+# Find where Xdebug was installed
+find /opt/homebrew -name "xdebug.so" 2>/dev/null
+find /usr/local -name "xdebug.so" 2>/dev/null
+
+# Check php.ini location
+php --ini
+
+# You should see a line like:
+# zend_extension="/path/to/xdebug.so"
+# If not, add it manually:
+echo 'zend_extension="xdebug.so"' | sudo tee -a /opt/homebrew/etc/php/8.3/php.ini
+```
+
+**Problem 3: "Wrong Xdebug version installed"**
+
+If you accidentally installed Xdebug for PHP 8.5 but are running PHP 8.3:
+
+```bash
+# Check your PHP version first
+php -v  # e.g., "PHP 8.3.29"
+
+# Remove wrong version (if installed via Homebrew)
+brew uninstall xdebug@8.5
+
+# Install correct version via PECL (automatically detects PHP version)
+sudo pecl install xdebug
+```
+
+**Problem 4: "Coverage report not generating (no error)"**
+
+If tests pass but no coverage/ directory is created:
+
+```bash
+# Check if Xdebug is in correct mode
+php -i | grep xdebug.mode
+
+# If it shows "develop" instead of "coverage", fix it:
+# Edit php.ini (find location with: php --ini)
+sudo nano /opt/homebrew/etc/php/8.3/php.ini
+
+# Change or add:
+# xdebug.mode=coverage
+
+# Verify change:
+php -i | grep xdebug.mode  # Should show "coverage"
+```
+
+**Problem 5: "Permission denied when installing"**
+
+If you see `ERROR: failed to mkdir`, use sudo:
+
+```bash
+# Install with sudo permissions
+sudo pecl install xdebug
+
+# Enter your macOS password when prompted
+```
+
+**Problem 6: "Installation takes forever or fails"**
+
+Sometimes Xdebug compilation can be slow or fail. Alternative method:
+
+```bash
+# On macOS with Homebrew, try installing via formula:
+brew install php-xdebug
+
+# Or for specific PHP version:
+brew install php@8.3-xdebug
+```
+
 **Interpreting coverage:**
 - 🟢 Green lines - Code was executed during tests
 - 🔴 Red lines - Code was NOT executed during tests
 - 80%+ coverage is considered good
 - 100% coverage doesn't mean bug-free!
 
-**Note:** For beginners, don't worry too much about coverage initially. Focus on writing meaningful tests first.
+**Note for beginners:** Don't worry too much about coverage initially. Focus on writing meaningful tests first. Code coverage is a nice metric to have later, but it's not essential when you're learning to write tests.
 
 ---
 

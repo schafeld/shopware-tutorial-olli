@@ -113,9 +113,65 @@ PHPUnit 9.5.x by Sebastian Bergmann and contributors.
    chmod +x vendor/bin/phpunit
    ```
 
-3. **PHPUnit still not found after composer install**
-   - Check that `phpunit/phpunit` is in your root `composer.json` under `require-dev`
-   - Shopware includes it by default, but if missing:
+3. **PHPUnit still not found after composer install/update**
+   
+   **Problem:** `vendor/bin/phpunit` doesn't exist even after running composer.
+   
+   **Step 1: Check if PHPUnit is installed**
+   ```bash
+   # See all installed packages
+   composer show | grep phpunit
+   
+   # Check specifically for phpunit/phpunit
+   composer show phpunit/phpunit
+   ```
+   
+   **If you see "Package phpunit/phpunit not found":**
+   
+   PHPUnit is NOT installed. Install it:
+   ```bash
+   # Install PHPUnit as a dev dependency
+   composer require --dev phpunit/phpunit:^9.5
+   
+   # Verify installation
+   ls -la vendor/bin/phpunit
+   vendor/bin/phpunit --version
+   ```
+   
+   **If you see phpunit/phpunit listed but vendor/bin/phpunit doesn't exist:**
+   
+   The binary links weren't created. Rebuild them:
+   ```bash
+   # Remove vendor directory
+   rm -rf vendor/
+   
+   # Reinstall everything
+   composer install
+   
+   # Check again
+   ls -la vendor/bin/
+   ```
+   
+   **Alternative: Use Composer's PHPUnit directly**
+   
+   If vendor/bin/phpunit still doesn't exist, you can run it via composer:
+   ```bash
+   # Run PHPUnit through composer
+   composer exec phpunit -- --version
+   
+   # Run your tests
+   composer exec phpunit -- tests/unit/Service/MessageServiceTest.php
+   ```
+   
+   **For Shopware specifically:**
+   
+   Shopware might not include PHPUnit by default in production installs. Check your `composer.json`:
+   ```bash
+   # View your composer.json
+   cat composer.json | grep -A 10 "require-dev"
+   ```
+   
+   If `"phpunit/phpunit"` is NOT listed under `"require-dev"`, add it:
    ```bash
    composer require --dev phpunit/phpunit:^9.5
    ```
@@ -410,12 +466,43 @@ LearningBundle/
     └── TestBootstrap.php   # Test setup file
 ```
 
-### Step 3: Create PHPUnit Configuration
+### Step 3: Create PHPUnit Configurations
 
 **What is phpunit.xml?**  
 This file tells PHPUnit where to find your tests, how to run them, and what code to check for coverage. Think of it as the "settings file" for your tests.
 
-Create `custom/plugins/LearningBundle/phpunit.xml`:
+**We'll create TWO configurations:**
+1. `phpunit.unit.xml` - For unit tests (fast, no database)
+2. `phpunit.xml` - For integration tests (slower, needs database)
+
+**First, create `custom/plugins/LearningBundle/phpunit.unit.xml` (for unit tests):**
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
+         bootstrap="tests/bootstrap-unit.php"
+         executionOrder="random"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTodoAnnotatedTests="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         colors="true">
+    <testsuites>
+        <testsuite name="Learning Bundle Unit Tests">
+            <directory>tests/unit</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+    </coverage>
+</phpunit>
+```
+
+**Next, create `custom/plugins/LearningBundle/phpunit.xml` (for integration tests):**
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -449,10 +536,41 @@ Create `custom/plugins/LearningBundle/phpunit.xml`:
 - `<testsuite>` - Defines where to find test files
 - `<coverage>` - What code to include in coverage reports
 
-### Step 4: Create Test Bootstrap
+### Step 4: Create Test Bootstrap Files
+
+**We need TWO bootstrap files:**
+
+**1. For Unit Tests (Minimal Bootstrap)**
+
+**What is bootstrap-unit.php?**  
+This file ONLY loads the Composer autoloader and registers your plugin namespace. It does NOT connect to the database or load Shopware services. This makes unit tests fast!
+
+Create `custom/plugins/LearningBundle/tests/bootstrap-unit.php`:
+
+```php
+<?php declare(strict_types=1);
+
+/**
+ * Bootstrap file for UNIT TESTS ONLY
+ * 
+ * This file only loads the Composer autoloader.
+ * It does NOT connect to database or bootstrap Shopware.
+ * 
+ * Unit tests should be fast and isolated - they don't need database.
+ */
+
+// Load Composer autoloader (4 levels up: tests → LearningBundle → plugins → custom → root)
+require_once __DIR__ . '/../../../../vendor/autoload.php';
+
+// Register plugin's PSR-4 namespace for autoloading
+$loader = require __DIR__ . '/../../../../vendor/autoload.php';
+$loader->addPsr4('Learning\\Bundle\\', __DIR__ . '/../src/');
+```
+
+**2. For Integration Tests (Full Shopware Bootstrap)**
 
 **What is TestBootstrap.php?**  
-This file sets up the Shopware environment so your tests can use Shopware classes and services. Without it, your tests wouldn't be able to access things like Context, Repositories, etc.
+This file sets up the FULL Shopware environment so your integration tests can use Shopware classes, services, and database. It's slower but more realistic.
 
 Create `custom/plugins/LearningBundle/tests/TestBootstrap.php`:
 
@@ -761,30 +879,35 @@ $this->assertStringContainsString('Olli', $message);
 
 ### Step 6: Run Your Tests
 
-**From your Shopware root directory:**
+**Important:** For unit tests, we use `phpunit.unit.xml` which has a minimal bootstrap (no database required). Integration tests use the regular `phpunit.xml` with full Shopware bootstrap.
+
+**From your plugin directory:**
 
 ```bash
-# Navigate to Shopware root
-cd /path/to/shopware-tutorial-olli
+# Navigate to plugin directory
+cd /path/to/shopware-tutorial-olli/custom/plugins/LearningBundle
 
-# Run tests from the plugin directory
-cd custom/plugins/LearningBundle
+# Run all unit tests with the unit configuration
+../../../vendor/bin/phpunit -c phpunit.unit.xml
 
-# Run all tests in the plugin
-../../../vendor/bin/phpunit
-
-# Run only unit tests
-../../../vendor/bin/phpunit tests/unit/
+# Run only unit tests directory
+../../../vendor/bin/phpunit -c phpunit.unit.xml tests/unit/
 
 # Run specific test file
-../../../vendor/bin/phpunit tests/unit/Service/MessageServiceTest.php
+../../../vendor/bin/phpunit -c phpunit.unit.xml tests/unit/Service/MessageServiceTest.php
 
 # Run with verbose output (shows test names)
-../../../vendor/bin/phpunit --verbose
+../../../vendor/bin/phpunit -c phpunit.unit.xml --verbose tests/unit/
 
 # Run specific test method
-../../../vendor/bin/phpunit --filter testGenerateWelcomeMessageWithSimpleFormat
+../../../vendor/bin/phpunit -c phpunit.unit.xml --filter testGenerateWelcomeMessageWithSimpleFormat tests/unit/Service/MessageServiceTest.php
 ```
+
+**Why `-c phpunit.unit.xml`?**
+- `phpunit.unit.xml` uses `bootstrap-unit.php` (only loads Composer autoloader)
+- `phpunit.xml` uses `TestBootstrap.php` (requires database connection)
+- Unit tests should be fast and isolated - no database needed!
+- Integration tests (later) will use `phpunit.xml`
 
 **Understanding Test Output:**
 
@@ -1053,20 +1176,20 @@ class ProductViewServiceTest extends TestCase
 # Navigate to plugin
 cd custom/plugins/LearningBundle
 
-# Run all tests
-../../../vendor/bin/phpunit
+# Run all unit tests
+../../../vendor/bin/phpunit -c phpunit.unit.xml
 
 # Run only MessageService tests
-../../../vendor/bin/phpunit tests/unit/Service/MessageServiceTest.php
+../../../vendor/bin/phpunit -c phpunit.unit.xml tests/unit/Service/MessageServiceTest.php
 
 # Run only ProductViewService tests  
-../../../vendor/bin/phpunit tests/unit/Service/ProductViewServiceTest.php
+../../../vendor/bin/phpunit -c phpunit.unit.xml tests/unit/Service/ProductViewServiceTest.php
 
 # Run with detailed output
-../../../vendor/bin/phpunit --verbose
+../../../vendor/bin/phpunit -c phpunit.unit.xml --verbose
 
 # Run and generate coverage report
-../../../vendor/bin/phpunit --coverage-html coverage/
+../../../vendor/bin/phpunit -c phpunit.unit.xml --coverage-html coverage/
 ```
 
 **Expected output:**
@@ -1207,14 +1330,24 @@ class ProductViewServiceIntegrationTest extends TestCase
 
 ### Step 3: Run Integration Tests
 
-```bash
-# Run integration tests
-cd custom/plugins/LearningBundle
-../../../vendor/bin/phpunit tests/integration/
+**Important:** Integration tests use `phpunit.xml` (with TestBootstrap.php) because they need database access.
 
-# Run all tests
-../../../vendor/bin/phpunit
+```bash
+# Run integration tests (uses phpunit.xml by default)
+cd custom/plugins/LearningBundle
+../../../vendor/bin/phpunit -c phpunit.xml tests/integration/
+
+# Run all tests (both unit and integration)
+../../../vendor/bin/phpunit -c phpunit.xml
+
+# Or run unit tests separately
+../../../vendor/bin/phpunit -c phpunit.unit.xml tests/unit/
 ```
+
+**Configuration Summary:**
+- `phpunit.unit.xml` → Unit tests only (no database)
+- `phpunit.xml` → Integration tests (needs database)
+- Default (no `-c` flag) → Uses `phpunit.xml` if found
 
 ---
 

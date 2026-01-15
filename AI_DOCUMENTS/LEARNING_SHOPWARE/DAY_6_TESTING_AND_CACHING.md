@@ -120,6 +120,139 @@ PHPUnit 9.5.x by Sebastian Bergmann and contributors.
    composer require --dev phpunit/phpunit:^9.5
    ```
 
+4. **"Your lock file does not contain a compatible set of packages" or PHP version errors**
+   
+   **Problem:** Your PHP version is too new (e.g., PHP 8.5) and Shopware doesn't support it yet.
+   
+   **Solution 1: Switch to Compatible PHP Version (Recommended)**
+   
+   Check your current PHP version:
+   ```bash
+   php -v
+   ```
+   
+   If you see PHP 8.5 or newer, you need to downgrade to PHP 8.3 or 8.4:
+   
+   **On macOS (using Homebrew):**
+   ```bash
+   # Install PHP 8.3
+   brew install php@8.3
+   
+   # Link it to make it the default
+   brew unlink php
+   brew link php@8.3 --force --overwrite
+   
+   # Verify the change
+   php -v
+   # Should show: PHP 8.3.x
+   
+   # Now try composer install again
+   composer install
+   ```
+   
+   **On Ubuntu/Debian:**
+   ```bash
+   # Add PHP repository
+   sudo add-apt-repository ppa:ondrej/php
+   sudo apt update
+   
+   # Install PHP 8.3
+   sudo apt install php8.3 php8.3-cli php8.3-common
+   
+   # Switch to PHP 8.3
+   sudo update-alternatives --set php /usr/bin/php8.3
+   
+   # Verify
+   php -v
+   ```
+   
+   **Solution 2: Update Composer Dependencies (Advanced - May Break Things)**
+   
+   ⚠️ **Warning:** Only do this if you know what you're doing!
+   
+   ```bash
+   # This updates all packages to latest compatible versions
+   composer update
+   
+   # If that doesn't work, try with --ignore-platform-reqs (risky!)
+   composer install --ignore-platform-reqs
+   ```
+   
+   **Why this happens:**
+   - Shopware 6.7 officially supports PHP 8.2, 8.3, and 8.4
+   - PHP 8.5 is very new and libraries haven't caught up yet
+   - Always check Shopware's system requirements before upgrading PHP
+
+5. **"Fatal error: Allowed memory size exhausted" during composer install**
+   
+   **Problem:** PHP doesn't have enough memory allocated (default is often 128MB, Shopware needs more).
+   
+   **Solution: Increase PHP Memory Limit**
+   
+   **Quick Fix (Temporary - for this command only):**
+   ```bash
+   # Run composer with unlimited memory
+   php -d memory_limit=-1 $(which composer) install
+   ```
+   
+   **Permanent Fix (Recommended):**
+   
+   Find your php.ini file:
+   ```bash
+   php --ini
+   # Look for "Loaded Configuration File"
+   ```
+   
+   Edit the php.ini file and change:
+   ```ini
+   ; Change this line:
+   memory_limit = 128M
+   
+   ; To this (512MB is recommended for Shopware):
+   memory_limit = 512M
+   
+   ; Or for development, you can use:
+   memory_limit = -1  ; (unlimited - use with caution!)
+   ```
+   
+   **On macOS with Homebrew:**
+   ```bash
+   # Edit php.ini
+   nano /opt/homebrew/etc/php/8.3/php.ini
+   
+   # Find memory_limit and change to 512M
+   # Save with Ctrl+X, then Y, then Enter
+   
+   # Restart PHP if using PHP-FPM
+   brew services restart php@8.3
+   
+   # Verify the change
+   php -i | grep memory_limit
+   # Should show: memory_limit => 512M => 512M
+   ```
+   
+   **On Ubuntu/Debian:**
+   ```bash
+   # Edit php.ini
+   sudo nano /etc/php/8.3/cli/php.ini
+   
+   # Find memory_limit and change to 512M
+   # Save with Ctrl+X, then Y, then Enter
+   
+   # Verify the change
+   php -i | grep memory_limit
+   ```
+   
+   After increasing the memory limit, try again:
+   ```bash
+   composer install
+   ```
+   
+   **Why Shopware needs more memory:**
+   - Shopware is a large application with many dependencies
+   - During installation, it compiles assets and caches
+   - Development environments especially need more memory for debugging tools
+
 **Understanding the Test Setup:**
 
 - `vendor/bin/phpunit` - The PHPUnit executable that runs your tests

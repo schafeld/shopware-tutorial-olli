@@ -879,7 +879,22 @@ $this->assertStringContainsString('Olli', $message);
 
 ### Step 6: Run Your Tests
 
-**Important:** For unit tests, we use `phpunit.unit.xml` which has a minimal bootstrap (no database required). Integration tests use the regular `phpunit.xml` with full Shopware bootstrap.
+**🚨 IMPORTANT: Always Use `-c phpunit.unit.xml` for Unit Tests! 🚨**
+
+Even if your database is running, unit tests should use `phpunit.unit.xml` because:
+- ✅ They're designed to run with mocks (no real database needed)
+- ✅ They're much faster (20ms vs 2+ seconds)
+- ✅ They don't pollute your database with test data
+- ✅ They test code in isolation
+
+**Running `../../../vendor/bin/phpunit` without `-c phpunit.unit.xml` will:**
+- ❌ Try to use `phpunit.xml` (which needs database setup)
+- ❌ Attempt to run TestBootstrap.php (which installs test database)
+- ❌ Be much slower and may fail even with database running
+
+**TL;DR:** Always include `-c phpunit.unit.xml` for unit tests!
+
+---
 
 **From your plugin directory:**
 
@@ -948,19 +963,52 @@ This shows:
 
 **Common Test Errors for Beginners:**
 
-1. **"Class not found"**
+1. **"PDOException: SQLSTATE[HY000] [2002] Connection refused"**
+   
+   **Problem:** You ran `../../../vendor/bin/phpunit` without the `-c phpunit.unit.xml` flag.
+   
+   **Why it happens:**
+   - Without `-c` flag, PHPUnit uses default `phpunit.xml`
+   - Default config uses `TestBootstrap.php` which needs database
+   - Your Docker database container isn't running
+   
+   **Solution:**
+   ```bash
+   # For UNIT tests (no database needed) - USE THIS:
+   ../../../vendor/bin/phpunit -c phpunit.unit.xml tests/unit/
+   
+   # For INTEGRATION tests (needs database):
+   # First, start your database
+   docker-compose up -d
+   # Then run integration tests
+   ../../../vendor/bin/phpunit -c phpunit.xml tests/integration/
+   ```
+   
+   **Remember:**
+   - ✅ Unit tests → Use `-c phpunit.unit.xml` → Fast, no database
+   - ✅ Integration tests → Use `-c phpunit.xml` (or no flag) → Needs database
+   
+   **Verify database is running:**
+   ```bash
+   # Check if database container is running (works for MySQL or MariaDB)
+   docker ps | grep -E "mysql|mariadb"
+   # If empty, start it:
+   docker-compose up -d
+   ```
+
+2. **"Class not found"**
    - Missing `use` statement at top of test file
    - Check that class name is spelled correctly
 
-2. **"Call to undefined method"**
+3. **"Call to undefined method"**
    - Typo in method name
    - Method doesn't exist in the class you're testing
 
-3. **"Too few arguments"**
+4. **"Too few arguments"**
    - Constructor needs more dependencies
    - Check the actual service's `__construct()` method
 
-4. **Mock setup doesn't work**
+5. **Mock setup doesn't work**
    - Make sure you set up the mock BEFORE calling the method
    - Check that method names match exactly (case-sensitive!)
 
@@ -978,8 +1026,9 @@ php -m | grep xdebug
 # If not installed (macOS):
 pecl install xdebug
 
-# Generate HTML coverage report
-vendor/bin/phpunit --coverage-html coverage/
+# Generate HTML coverage report (for unit tests)
+cd custom/plugins/LearningBundle
+../../../vendor/bin/phpunit -c phpunit.unit.xml --coverage-html coverage/
 
 # Open the report
 open coverage/index.html
@@ -1767,7 +1816,8 @@ class CacheBenchmarkCommand extends Command
 Achieve 80%+ test coverage for your services. Run:
 
 ```bash
-vendor/bin/phpunit --coverage-html coverage/
+cd custom/plugins/LearningBundle
+../../../vendor/bin/phpunit -c phpunit.unit.xml --coverage-html coverage/
 open coverage/index.html
 ```
 

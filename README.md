@@ -46,3 +46,15 @@ php phpstan.phar analyze custom/plugins/LearningBundle/src/Command/ApplyDiscount
 ```
 
 Added [SonarQube trial](https://sonarcloud.io/summary/overall?id=schafeld_shopware-tutorial-olli&branch=main) for this tutorial project.
+
+
+### Notes
+
+#### Shopware Tutorials
+
+If you're learning Shopware you'll find the [tutorial series](https://github.com/schafeld/shopware-tutorial-olli/tree/main/AI_DOCUMENTS/LEARNING_SHOPWARE) included in this repo helpful. Do not be fooled by the the concept of calling the lessons "Day 1" to "Day 7". Time estimates by AI are very unreliable and much too optimistic. If you are new to Shopware and its tech stack and you type the listings by hand in order to learn, the required time will be 2 to 3 times more than "a day". The AI time estimates for the exercises are ludicrous for a junior developer – just look at the included soultions. 😉
+
+#### Plugin Shopware Order Data Export to Google API
+
+There is a [prototype for a Shopware plugin "GotoWebinarGoogleSheetsExport"](https://github.com/schafeld/shopware-tutorial-olli/tree/main/custom/plugins/GotoWebinarGoogleSheetsExport) that allows eporting specified category order data to a Google Sheet (see [documentation](https://github.com/schafeld/shopware-tutorial-olli/tree/main/custom/plugins/GotoWebinarGoogleSheetsExport/docs) for details).
+Use with caution! It works (on my machine 🤓) but hasn't been tested for potential safety or performance issues or data privacy concerns.

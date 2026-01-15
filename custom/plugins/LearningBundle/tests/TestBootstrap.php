@@ -9,4 +9,4 @@ $loader = (new TestBootstrapper())
     ->bootstrap()
     ->getClassLoader();
 
-$loader->addPsr4('LearningBundle\\Tests\\', __DIR__);
+$loader->addPsr4('Learning\\Bundle\\Tests\\', __DIR__);

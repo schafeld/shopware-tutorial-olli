@@ -283,5 +283,11 @@
             <argument>60</argument>  <!-- window in seconds -->
             <argument type="service" id="logger"/>
         </service>
+
+        <service id="Learning\Bundle\Service\CachedProductViewService">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+            <argument type="service" id="cache.object"/>
+            <argument type="service" id="logger"/>
+        </service>
     </services>
 </container>

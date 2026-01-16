@@ -1825,22 +1825,29 @@ namespace Learning\Bundle\Core\Content\ProductView\SalesChannel;
 
 use Shopware\Core\Framework\Adapter\Cache\AbstractCacheTracer;
 use Shopware\Core\Framework\Adapter\Cache\CacheValueCompressor;
+use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Core\System\SalesChannel\StoreApiResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class CachedProductViewRoute extends AbstractProductViewRoute
 {
     private AbstractProductViewRoute $decorated;
     private AbstractCacheTracer $tracer;
+    private CacheInterface $cache;
     private array $states;
 
     public function __construct(
         AbstractProductViewRoute $decorated,
         AbstractCacheTracer $tracer,
+        CacheInterface $cache,
         array $states
     ) {
         $this->decorated = $decorated;
         $this->tracer = $tracer;
+        $this->cache = $cache;
         $this->states = $states;
     }
 

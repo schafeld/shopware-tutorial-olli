@@ -5,6 +5,7 @@
 ---
 
 ## Table of Contents
+- [Development Environment](#development-environment)
 - [General Principles](#general-principles)
 - [Shopware-Specific Rules](#shopware-specific-rules)
 - [PHP Standards](#php-standards)
@@ -14,6 +15,41 @@
 - [Database & Migrations](#database--migrations)
 - [Frontend/Twig](#fronendtwig)
 - [Testing](#testing)
+
+---
+
+## Development Environment
+
+### Docker Configuration
+
+This project uses Docker Compose for local development. **Critical:** The Docker container ports are **dynamically assigned** and change when containers are restarted.
+
+#### Database Connection
+
+- **Configuration file:** `.env.local` (not `.env`)
+- **Database port:** Check with `docker ps` - the MySQL container maps to a random host port
+- **Connection string format:** `mysql://root:root@127.0.0.1:PORT/shopware?serverVersion=8.0`
+
+#### When "Connection refused" errors occur:
+
+1. **Don't assume containers are stopped** - they are likely running with a different port
+2. **Check current port:** `docker ps --format "table {{.Names}}\t{{.Ports}}"`
+3. **Update `.env.local`** with the correct port from the `0.0.0.0:XXXXX->3306/tcp` mapping
+4. **Clear cache** after updating: `bin/console cache:clear`
+
+#### Example:
+```bash
+# Check running containers and ports
+docker ps --format "table {{.Names}}\t{{.Ports}}"
+
+# Output shows:
+# shopware-tutorial-olli-database-1   0.0.0.0:50170->3306/tcp
+#                                            ^^^^^
+#                                     This is the host port to use
+
+# Update .env.local:
+DATABASE_URL=mysql://root:root@127.0.0.1:50170/shopware?serverVersion=8.0
+```
 
 ---
 

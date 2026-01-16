@@ -2,6 +2,7 @@
 
 namespace GotoWebinarGoogleSheetsExport\Subscriber;
 
+use GotoWebinarGoogleSheetsExport\Service\CategoryFilterService;
 use GotoWebinarGoogleSheetsExport\Service\OrderExportService;
 use Psr\Log\LoggerInterface;
 use Shopware\Core\Checkout\Order\Event\OrderStateMachineStateChangeEvent;
@@ -21,6 +22,7 @@ class OrderPlacedSubscriber implements EventSubscriberInterface
 
     public function __construct(
         private readonly OrderExportService $orderExportService,
+        private readonly CategoryFilterService $categoryFilterService,
         private readonly SystemConfigService $systemConfigService,
         private readonly LoggerInterface $logger,
         private readonly EntityRepository $orderRepository
@@ -117,8 +119,15 @@ class OrderPlacedSubscriber implements EventSubscriberInterface
                 continue;
             }
 
-            // Check if product is in the configured category
-            // This check is already done in shouldExportOrder, but we need to filter individual line items
+            // Check if this specific product is in the configured category
+            if (!$this->categoryFilterService->productMatchesCategory($product, $categoryId, $context)) {
+                $this->logger->debug('GotoWebinar export: Skipping product not in configured category', [
+                    'orderId' => $order->getId(),
+                    'productNumber' => $product->getProductNumber(),
+                ]);
+                continue;
+            }
+
             $customerData = [
                 'first_name' => $customer ? $customer->getFirstName() : '',
                 'last_name' => $customer ? $customer->getLastName() : '',

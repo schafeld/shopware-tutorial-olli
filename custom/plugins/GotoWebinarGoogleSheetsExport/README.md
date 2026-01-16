@@ -153,7 +153,10 @@ The plugin is **fully featured and production-ready**:
 **Access Points:**
 1. **Admin Dashboard:** Settings → Plugins → Webinar Export (main interface)
 2. **Configuration:** Settings → System → Plugins → Configure
-3. **CLI Commands:** `bin/console gotowebinar:export-orders`
+3. **CLI Commands:** 
+   - `bin/console gotowebinar:export-orders` - Manual export
+   - `bin/console gotowebinar:scan-orders` - Scan existing orders
+   - `bin/console gotowebinar:reset-exports` - Reset export logs (dev/testing)
 4. **API Endpoints:** Full REST API for automation
 
 ## Quick Start
@@ -308,6 +311,14 @@ This plugin is designed for AI-driven development. When implementing:
 4. Update documentation as needed
 
 ## Changelog
+
+### Version 1.1.1 (January 16, 2026) - Bug Fix & Developer Tools
+- 🐛 Fixed category filtering bug: Only products from the configured category are now exported (previously all products in an order were exported if any matched)
+- 🐛 Fixed CategoryFilterService `in_array()` TypeError with category path handling
+- ✅ New CLI command `gotowebinar:reset-exports` for clearing export logs during development/testing
+  - Support for `--status` filter (pending, success, failed)
+  - Support for `--force` to skip confirmation
+  - Batched deletion for large datasets
 
 ### Version 1.1.0 (January 7, 2026) - Admin UI Release ✨
 - ✅ Complete admin dashboard with Vue.js components

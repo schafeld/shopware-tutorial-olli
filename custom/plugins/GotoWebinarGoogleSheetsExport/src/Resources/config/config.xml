@@ -18,10 +18,10 @@
         <component name="sw-entity-single-select">
             <name>categoryId</name>
             <entity>category</entity>
-            <label>Webinar Category</label>
-            <label lang="de-DE">Webinar-Kategorie</label>
-            <helpText>Select the category containing webinar products to export</helpText>
-            <helpText lang="de-DE">Wählen Sie die Kategorie mit Webinar-Produkten zum Exportieren</helpText>
+            <label>Export Category</label>
+            <label lang="de-DE">Export-Kategorie</label>
+            <helpText>Select the category of product orders to export (e.g. "Webinar")</helpText>
+            <helpText lang="de-DE">Wählen Sie die Kategorie von Produktbestellungen zum Exportieren (z.B. "Webinar")</helpText>
         </component>
     </card>
 

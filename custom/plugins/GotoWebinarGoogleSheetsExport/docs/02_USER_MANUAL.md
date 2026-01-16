@@ -490,6 +490,34 @@ Customer orders 2 webinars in one order:
 | Max | Mustermann | 10001 | BW-WEB-001 | Storefront | max@example.com |
 | Max | Mustermann | 10001 | BW-WEB-002 | Storefront | max@example.com |
 
+### 6.6 Reset Export Logs (Development/Testing)
+
+For development and testing purposes, you can reset the export log table to start fresh:
+
+**Reset all export entries:**
+```bash
+bin/console gotowebinar:reset-exports
+```
+
+**Reset only entries with a specific status:**
+```bash
+# Delete only pending exports
+bin/console gotowebinar:reset-exports --status=pending
+
+# Delete only failed exports
+bin/console gotowebinar:reset-exports --status=failed
+
+# Delete only successful exports
+bin/console gotowebinar:reset-exports --status=success
+```
+
+**Skip confirmation prompt (for scripts):**
+```bash
+bin/console gotowebinar:reset-exports --force
+```
+
+> ⚠️ **Warning:** This command permanently deletes export log entries from the database. Use with caution in production environments.
+
 ---
 
 ## 7. Troubleshooting

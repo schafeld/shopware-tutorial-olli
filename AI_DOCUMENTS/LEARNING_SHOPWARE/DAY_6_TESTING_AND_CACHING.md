@@ -1888,6 +1888,41 @@ class CachedProductViewRoute extends AbstractProductViewRoute
 }
 ```
 
+### Step 4: Test Your Cache Implementation
+
+After creating the cache services, verify they work correctly:
+
+**1. Clear the cache and rebuild:**
+```bash
+cd /path/to/shopware-tutorial-olli
+bin/console cache:clear
+```
+
+**2. Verify the service is registered:**
+```bash
+bin/console debug:container CachedProductViewService
+```
+
+**3. Test cache behavior via browser or API:**
+- Visit a product page twice
+- Check the logs (`var/log/dev.log`) for "Cache miss" on first visit
+- Second visit should be faster (cache hit, no log entry)
+
+**4. Manually test cache invalidation:**
+```bash
+# View cache statistics
+bin/console cache:pool:list
+
+# Clear object cache
+bin/console cache:pool:clear cache.object
+```
+
+✅ **Part 5 Complete!** You've implemented a full caching layer with:
+- Cached service wrapper with TTL
+- Cache tags for granular invalidation
+- Automatic cache invalidation on product updates
+- HTTP cache support for Store API routes
+
 ---
 
 ## Part 6: Cache Testing (45 minutes)
@@ -2035,6 +2070,64 @@ class CacheBenchmarkCommand extends Command
     }
 }
 ```
+
+### Step 3: Run Cache Tests
+
+**Run the cache unit tests:**
+```bash
+cd custom/plugins/LearningBundle
+
+# Run only the cache service test
+../../../vendor/bin/phpunit -c phpunit.unit.xml tests/unit/Service/CachedProductViewServiceTest.php
+
+# Run all unit tests including cache tests
+../../../vendor/bin/phpunit -c phpunit.unit.xml
+```
+
+**Expected output:**
+```
+PHPUnit 9.5.x by Sebastian Bergmann and contributors.
+
+..                                                                  2 / 2 (100%)
+
+Time: 00:00.089, Memory: 14.00 MB
+
+OK (2 tests, 4 assertions)
+```
+
+### Step 4: Run the Cache Benchmark
+
+**Register the command in `services.xml`** (add inside `<services>` tag):
+```xml
+<service id="Learning\Bundle\Command\CacheBenchmarkCommand">
+    <argument type="service" id="Learning\Bundle\Service\CachedProductViewService"/>
+    <tag name="console.command"/>
+</service>
+```
+
+**Run the benchmark:**
+```bash
+cd /path/to/shopware-tutorial-olli
+bin/console cache:clear
+bin/console learning:cache-benchmark
+```
+
+**Expected output:**
+```
++------------------+----------+-------------+
+| Call             | Time (ms)| Status      |
++------------------+----------+-------------+
+| First (miss)     | 45.23    | ❌          |
+| Second (hit)     | 0.12     | ✅          |
+| Improvement      | 45.11    | 376.9x faster|
++------------------+----------+-------------+
+```
+
+✅ **Part 6 Complete!** You've learned how to:
+- Write unit tests for cached services
+- Mock cache interfaces for isolated testing
+- Test cache hit and cache error scenarios
+- Benchmark cache performance improvements
 
 ---
 

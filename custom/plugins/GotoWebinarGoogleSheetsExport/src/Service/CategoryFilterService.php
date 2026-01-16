@@ -61,13 +61,13 @@ class CategoryFilterService
     private function isInCategoryTree(array $productCategoryIds, string $targetCategoryId, Context $context): bool
     {
         $criteria = new Criteria($productCategoryIds);
-        $criteria->addAssociation('path');
 
         $categories = $this->categoryRepository->search($criteria, $context);
 
         foreach ($categories as $category) {
-            $path = $category->getPath() ?? [];
-            if (in_array($targetCategoryId, $path, true)) {
+            // getPath() returns a string like "|uuid1|uuid2|" not an array
+            $path = $category->getPath();
+            if ($path !== null && str_contains($path, $targetCategoryId)) {
                 return true;
             }
         }

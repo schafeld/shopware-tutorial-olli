@@ -5,6 +5,18 @@ All notable changes to the GotoWebinarGoogleSheetsExport plugin will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-01-16
+
+### Fixed
+- **Category filtering bug:** Fixed issue where all products in an order were exported when only some products belonged to the configured category. Now only products from the configured category are exported.
+- **CategoryFilterService path handling:** Fixed `in_array()` TypeError - `category->getPath()` returns a pipe-delimited string, not an array.
+
+### Added
+- **Reset exports command:** New CLI command `gotowebinar:reset-exports` to clear the export log table for development/testing purposes.
+  - `--status` option to only delete entries with a specific status (pending, success, failed)
+  - `--force` option to skip confirmation prompt
+  - Batched deletion for large datasets
+
 ## [1.0.0] - 2025-01-07
 
 ### Added

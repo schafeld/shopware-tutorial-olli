@@ -1747,19 +1747,22 @@ class CachedProductViewService
     }
 
     /**
-     * Invalidate all product view caches
+     * Invalidate all product view related caches.
      */
     public function invalidateAllCaches(): void
     {
-        // This requires cache pool with tag awareness
-        // For simple implementation, we track keys
-        
-        $this->logger->info('Invalidated all product view caches');
+        // This requires a cache implementation that supports tag-based invalidation
+        if ($this->cache instanceof \Symfony\Contracts\Cache\TagAwareCacheInterface) {
+            $this->cache->invalidateTags(['learning-product-view']);
+            $this->logger->info('Invalidated all product view related caches by tag');
+        } else {
+            $this->logger->warning('Cache does not support tag-based invalidation');
+        }
     }
 }
 ```
 
-Register in `services.xml`:
+Register in `custom/plugins/LearningBundle/src/Resources/config/services.xml` (add this inside the `<services>` tag):
 
 ```xml
 <service id="Learning\Bundle\Service\CachedProductViewService">
@@ -1811,7 +1814,9 @@ class CacheInvalidationSubscriber implements EventSubscriberInterface
 
 ### Step 3: HTTP Cache Tags
 
-For Store API routes, add cache tags:
+For Store API routes, add cache tags.
+
+Create `custom/plugins/LearningBundle/src/Core/Content/ProductView/SalesChannel/CachedProductViewRoute.php`:
 
 ```php
 <?php declare(strict_types=1);
@@ -1975,7 +1980,7 @@ class CachedProductViewServiceTest extends TestCase
 
 ### Benchmark Cache Performance
 
-Create command to test cache performance:
+Create `custom/plugins/LearningBundle/src/Command/CacheBenchmarkCommand.php`:
 
 ```php
 <?php declare(strict_types=1);

@@ -16,7 +16,7 @@ docker compose up
 symfony serve
 
 # storefront
-open https://https://127.0.0.1:8000/
+open https://127.0.0.1:8000/
 
 # administration
 open https://127.0.0.1:8000/admin

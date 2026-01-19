@@ -2,12 +2,24 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
          bootstrap="tests/TestBootstrap.php"
-         executionOrder="random">
-    <coverage>
+         executionOrder="random"
+         beStrictAboutOutputDuringTests="true"
+         beStrictAboutTodoAnnotatedTests="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         colors="true">
+    <testsuites>
+        <testsuite name="Learning Bundle Test Suite">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage processUncoveredFiles="true">
         <include>
-            <directory>./src/</directory>
+            <directory suffix=".php">src</directory>
         </include>
     </coverage>
+
     <php>
         <ini name="error_reporting" value="-1"/>
         <server name="KERNEL_CLASS" value="Shopware\Core\Kernel"/>
@@ -15,9 +27,4 @@
         <env name="APP_DEBUG" value="1"/>
         <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak"/>
     </php>
-    <testsuites>
-        <testsuite name="LearningBundle Testsuite">
-            <directory>tests</directory>
-        </testsuite>
-    </testsuites>
 </phpunit>

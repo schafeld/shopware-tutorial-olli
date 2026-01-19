@@ -14,11 +14,21 @@ class Migration1700000002AddUserAgentToProductView extends MigrationStep
 
     public function update(Connection $connection): void
     {
-        $sql = <<<SQL
+        // Check if column already exists
+        $columnExists = $connection->fetchOne(
+            "SELECT COUNT(*) FROM information_schema.COLUMNS 
+             WHERE TABLE_SCHEMA = DATABASE() 
+             AND TABLE_NAME = 'learning_product_view' 
+             AND COLUMN_NAME = 'user_agent'"
+        );
+
+        if (!$columnExists) {
+            $sql = <<<SQL
 ALTER TABLE `learning_product_view`
 ADD COLUMN `user_agent` VARCHAR(255) NULL AFTER `view_count`;
 SQL;
-        $connection->executeStatement($sql);
+            $connection->executeStatement($sql);
+        }
     }
 
     public function updateDestructive(Connection $connection): void

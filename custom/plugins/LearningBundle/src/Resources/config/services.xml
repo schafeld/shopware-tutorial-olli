@@ -283,5 +283,18 @@
             <argument>60</argument>  <!-- window in seconds -->
             <argument type="service" id="logger"/>
         </service>
+
+        <service id="Learning\Bundle\Service\CachedProductViewService">
+            <argument type="service" id="Learning\Bundle\Service\ProductViewService"/>
+            <argument type="service" id="cache.object"/>
+            <argument type="service" id="logger"/>
+        </service>
+
+        <!-- Cache benchmark -->
+        <service id="Learning\Bundle\Command\CacheBenchmarkCommand">
+            <argument type="service" id="Learning\Bundle\Service\CachedProductViewService"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <tag name="console.command"/>
+        </service>
     </services>
 </container>

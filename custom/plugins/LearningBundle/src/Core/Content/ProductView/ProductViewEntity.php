@@ -12,9 +12,10 @@ class ProductViewEntity extends Entity
     use EntityIdTrait;
 
     protected string $productId;
+    protected string $productVersionId;
     protected ?string $customerId;
     protected int $viewCount;
-    protected ?string $puserAgent;
+    protected ?string $userAgent;
     protected \DateTimeInterface $lastViewedAt;
 
     // Associations
@@ -29,6 +30,16 @@ class ProductViewEntity extends Entity
     public function setProductId(string $productId): void
     {
         $this->productId = $productId;
+    }
+
+    public function getProductVersionId(): string
+    {
+        return $this->productVersionId;
+    }
+
+    public function setProductVersionId(string $productVersionId): void
+    {
+        $this->productVersionId = $productVersionId;
     }
 
     public function getCustomerId(): ?string

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for /Users/oliverschafeld/workspace/shopware-experiments/shopware-tutorial-olli/custom/plugins/LearningBundle/src/Core</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../_css/bootstrap.min.css?v=9.2.32" rel="stylesheet" type="text/css">
+  <link href="../_css/nv.d3.min.css?v=9.2.32" rel="stylesheet" type="text/css">
+  <link href="../_css/style.css?v=9.2.32" rel="stylesheet" type="text/css">
+  <link href="../_css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="../index.html">/Users/oliverschafeld/workspace/shopware-experiments/shopware-tutorial-olli/custom/plugins/LearningBundle/src</a></li>
+         <li class="breadcrumb-item"><a href="index.html">Core</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Api/Exception/InvalidAnalyticsRequestException.php.html#8">Learning\Bundle\Core\Api\Exception\InvalidAnalyticsRequestException</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Exception/ProductViewLimitExceededException.php.html#8">Learning\Bundle\Core\Api\Exception\ProductViewLimitExceededException</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Exception/ProductViewNotFoundException.php.html#8">Learning\Bundle\Core\Api\Exception\ProductViewNotFoundException</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Exception/RateLimitExceededException.php.html#8">Learning\Bundle\Core\Api\Exception\RateLimitExceededException</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/ProductComparisonController.php.html#13">Learning\Bundle\Core\Api\ProductComparisonController</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/ProductViewAnalyticsController.php.html#18">Learning\Bundle\Core\Api\ProductViewAnalyticsController</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/RateLimiter/SimpleRateLimiter.php.html#10">Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Response/ApiResponse.php.html#5">Learning\Bundle\Core\Api\Response\ApiResponse</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Validator/AnalyticsRequestValidator.php.html#9">Learning\Bundle\Core\Api\Validator\AnalyticsRequestValidator</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewCollection.php.html#16">Learning\Bundle\Core\Content\ProductView\ProductViewCollection</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewDefinition.php.html#19">Learning\Bundle\Core\Content\ProductView\ProductViewDefinition</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewEntity.php.html#10">Learning\Bundle\Core\Content\ProductView\ProductViewEntity</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/SalesChannel/ProductViewResult.php.html#7">Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewResult</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/SalesChannel/ProductViewRoute.php.html#16">Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/SalesChannel/ProductViewRouteResponse.php.html#7">Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRouteResponse</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/Wishlist/SalesChannel/WishlistRoute.php.html#11">Learning\Bundle\Core\Content\Wishlist\SalesChannel\WishlistRoute</a></td><td class="text-right">0%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Api/RateLimiter/SimpleRateLimiter.php.html#10">Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter</a></td><td class="text-right">156</td></tr>
+       <tr><td><a href="Content/Wishlist/SalesChannel/WishlistRoute.php.html#11">Learning\Bundle\Core\Content\Wishlist\SalesChannel\WishlistRoute</a></td><td class="text-right">110</td></tr>
+       <tr><td><a href="Api/ProductViewAnalyticsController.php.html#18">Learning\Bundle\Core\Api\ProductViewAnalyticsController</a></td><td class="text-right">90</td></tr>
+       <tr><td><a href="Content/ProductView/SalesChannel/ProductViewRoute.php.html#16">Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute</a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="Api/Validator/AnalyticsRequestValidator.php.html#9">Learning\Bundle\Core\Api\Validator\AnalyticsRequestValidator</a></td><td class="text-right">30</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Api/Exception/InvalidAnalyticsRequestException.php.html#10"><abbr title="Learning\Bundle\Core\Api\Exception\InvalidAnalyticsRequestException::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Exception/InvalidAnalyticsRequestException.php.html#17"><abbr title="Learning\Bundle\Core\Api\Exception\InvalidAnalyticsRequestException::getErrorCode">getErrorCode</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Exception/InvalidAnalyticsRequestException.php.html#21"><abbr title="Learning\Bundle\Core\Api\Exception\InvalidAnalyticsRequestException::getStatusCode">getStatusCode</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Exception/ProductViewLimitExceededException.php.html#10"><abbr title="Learning\Bundle\Core\Api\Exception\ProductViewLimitExceededException::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Exception/ProductViewLimitExceededException.php.html#18"><abbr title="Learning\Bundle\Core\Api\Exception\ProductViewLimitExceededException::getErrorCode">getErrorCode</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Exception/ProductViewLimitExceededException.php.html#23"><abbr title="Learning\Bundle\Core\Api\Exception\ProductViewLimitExceededException::getStatusCode">getStatusCode</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Exception/ProductViewNotFoundException.php.html#10"><abbr title="Learning\Bundle\Core\Api\Exception\ProductViewNotFoundException::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Exception/ProductViewNotFoundException.php.html#18"><abbr title="Learning\Bundle\Core\Api\Exception\ProductViewNotFoundException::getErrorCode">getErrorCode</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Exception/ProductViewNotFoundException.php.html#23"><abbr title="Learning\Bundle\Core\Api\Exception\ProductViewNotFoundException::getStatusCode">getStatusCode</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Exception/RateLimitExceededException.php.html#10"><abbr title="Learning\Bundle\Core\Api\Exception\RateLimitExceededException::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Exception/RateLimitExceededException.php.html#18"><abbr title="Learning\Bundle\Core\Api\Exception\RateLimitExceededException::getErrorCode">getErrorCode</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Exception/RateLimitExceededException.php.html#23"><abbr title="Learning\Bundle\Core\Api\Exception\RateLimitExceededException::getStatusCode">getStatusCode</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/ProductComparisonController.php.html#18"><abbr title="Learning\Bundle\Core\Api\ProductComparisonController::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/ProductComparisonController.php.html#23"><abbr title="Learning\Bundle\Core\Api\ProductComparisonController::getStats">getStats</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/ProductComparisonController.php.html#39"><abbr title="Learning\Bundle\Core\Api\ProductComparisonController::getPopularCombinations">getPopularCombinations</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/ProductViewAnalyticsController.php.html#25"><abbr title="Learning\Bundle\Core\Api\ProductViewAnalyticsController::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/ProductViewAnalyticsController.php.html#35"><abbr title="Learning\Bundle\Core\Api\ProductViewAnalyticsController::getOverview">getOverview</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/ProductViewAnalyticsController.php.html#73"><abbr title="Learning\Bundle\Core\Api\ProductViewAnalyticsController::getProductAnalytics">getProductAnalytics</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/ProductViewAnalyticsController.php.html#95"><abbr title="Learning\Bundle\Core\Api\ProductViewAnalyticsController::getPopularProducts">getPopularProducts</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/ProductViewAnalyticsController.php.html#122"><abbr title="Learning\Bundle\Core\Api\ProductViewAnalyticsController::resetProductViews">resetProductViews</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/RateLimiter/SimpleRateLimiter.php.html#17"><abbr title="Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/RateLimiter/SimpleRateLimiter.php.html#29"><abbr title="Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter::check">check</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/RateLimiter/SimpleRateLimiter.php.html#96"><abbr title="Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter::getRemainingRequests">getRemainingRequests</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/RateLimiter/SimpleRateLimiter.php.html#108"><abbr title="Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter::getKey">getKey</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Response/ApiResponse.php.html#7"><abbr title="Learning\Bundle\Core\Api\Response\ApiResponse::success">success</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Response/ApiResponse.php.html#18"><abbr title="Learning\Bundle\Core\Api\Response\ApiResponse::error">error</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Response/ApiResponse.php.html#33"><abbr title="Learning\Bundle\Core\Api\Response\ApiResponse::paginated">paginated</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Response/ApiResponse.php.html#50"><abbr title="Learning\Bundle\Core\Api\Response\ApiResponse::collection">collection</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Validator/AnalyticsRequestValidator.php.html#13"><abbr title="Learning\Bundle\Core\Api\Validator\AnalyticsRequestValidator::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Validator/AnalyticsRequestValidator.php.html#18"><abbr title="Learning\Bundle\Core\Api\Validator\AnalyticsRequestValidator::validateOverviewRequest">validateOverviewRequest</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Api/Validator/AnalyticsRequestValidator.php.html#49"><abbr title="Learning\Bundle\Core\Api\Validator\AnalyticsRequestValidator::validatePopularRequest">validatePopularRequest</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewCollection.php.html#18"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewCollection::getExpectedClass">getExpectedClass</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewDefinition.php.html#23"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewDefinition::getEntityName">getEntityName</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewDefinition.php.html#28"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewDefinition::getEntityClass">getEntityClass</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewDefinition.php.html#33"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewDefinition::getCollectionClass">getCollectionClass</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewDefinition.php.html#38"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewDefinition::defineFields">defineFields</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewEntity.php.html#24"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewEntity::getProductId">getProductId</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewEntity.php.html#29"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewEntity::setProductId">setProductId</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewEntity.php.html#34"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewEntity::getCustomerId">getCustomerId</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewEntity.php.html#39"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewEntity::setCustomerId">setCustomerId</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewEntity.php.html#44"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewEntity::getViewCount">getViewCount</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewEntity.php.html#49"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewEntity::setViewCount">setViewCount</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewEntity.php.html#54"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewEntity::getUserAgent">getUserAgent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewEntity.php.html#59"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewEntity::setUserAgent">setUserAgent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewEntity.php.html#64"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewEntity::getLastViewedAt">getLastViewedAt</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewEntity.php.html#69"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewEntity::setLastViewedAt">setLastViewedAt</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewEntity.php.html#74"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewEntity::getProduct">getProduct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewEntity.php.html#79"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewEntity::setProduct">setProduct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewEntity.php.html#84"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewEntity::getCustomer">getCustomer</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/ProductViewEntity.php.html#89"><abbr title="Learning\Bundle\Core\Content\ProductView\ProductViewEntity::setCustomer">setCustomer</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/SalesChannel/ProductViewResult.php.html#12"><abbr title="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewResult::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/SalesChannel/ProductViewResult.php.html#18"><abbr title="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewResult::getProductId">getProductId</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/SalesChannel/ProductViewResult.php.html#23"><abbr title="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewResult::getViewCount">getViewCount</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/SalesChannel/ProductViewRoute.php.html#22"><abbr title="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/SalesChannel/ProductViewRoute.php.html#30"><abbr title="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute::getDecorated">getDecorated</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/SalesChannel/ProductViewRoute.php.html#35"><abbr title="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute::popular">popular</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/SalesChannel/ProductViewRoute.php.html#50"><abbr title="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute::load">load</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/SalesChannel/ProductViewRoute.php.html#60"><abbr title="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute::record">record</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/SalesChannel/ProductViewRouteResponse.php.html#11"><abbr title="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRouteResponse::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/ProductView/SalesChannel/ProductViewRouteResponse.php.html#17"><abbr title="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRouteResponse::getResult">getResult</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/Wishlist/SalesChannel/WishlistRoute.php.html#16"><abbr title="Learning\Bundle\Core\Content\Wishlist\SalesChannel\WishlistRoute::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/Wishlist/SalesChannel/WishlistRoute.php.html#21"><abbr title="Learning\Bundle\Core\Content\Wishlist\SalesChannel\WishlistRoute::load">load</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/Wishlist/SalesChannel/WishlistRoute.php.html#48"><abbr title="Learning\Bundle\Core\Content\Wishlist\SalesChannel\WishlistRoute::add">add</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Content/Wishlist/SalesChannel/WishlistRoute.php.html#95"><abbr title="Learning\Bundle\Core\Content\Wishlist\SalesChannel\WishlistRoute::remove">remove</abbr></a></td><td class="text-right">0%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Api/RateLimiter/SimpleRateLimiter.php.html#29"><abbr title="Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter::check">check</abbr></a></td><td class="text-right">72</td></tr>
+       <tr><td><a href="Content/Wishlist/SalesChannel/WishlistRoute.php.html#48"><abbr title="Learning\Bundle\Core\Content\Wishlist\SalesChannel\WishlistRoute::add">add</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Api/ProductViewAnalyticsController.php.html#95"><abbr title="Learning\Bundle\Core\Api\ProductViewAnalyticsController::getPopularProducts">getPopularProducts</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="Content/Wishlist/SalesChannel/WishlistRoute.php.html#95"><abbr title="Learning\Bundle\Core\Content\Wishlist\SalesChannel\WishlistRoute::remove">remove</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="Api/ProductViewAnalyticsController.php.html#35"><abbr title="Learning\Bundle\Core\Api\ProductViewAnalyticsController::getOverview">getOverview</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Api/ProductViewAnalyticsController.php.html#73"><abbr title="Learning\Bundle\Core\Api\ProductViewAnalyticsController::getProductAnalytics">getProductAnalytics</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Api/RateLimiter/SimpleRateLimiter.php.html#96"><abbr title="Learning\Bundle\Core\Api\RateLimiter\SimpleRateLimiter::getRemainingRequests">getRemainingRequests</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Api/Validator/AnalyticsRequestValidator.php.html#18"><abbr title="Learning\Bundle\Core\Api\Validator\AnalyticsRequestValidator::validateOverviewRequest">validateOverviewRequest</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Api/Validator/AnalyticsRequestValidator.php.html#49"><abbr title="Learning\Bundle\Core\Api\Validator\AnalyticsRequestValidator::validatePopularRequest">validatePopularRequest</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Content/ProductView/SalesChannel/ProductViewRoute.php.html#60"><abbr title="Learning\Bundle\Core\Content\ProductView\SalesChannel\ProductViewRoute::record">record</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Content/Wishlist/SalesChannel/WishlistRoute.php.html#21"><abbr title="Learning\Bundle\Core\Content\Wishlist\SalesChannel\WishlistRoute::load">load</abbr></a></td><td class="text-right">6</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 9.2.32</a> using <a href="https://secure.php.net/" target="_top">PHP 8.3.29</a> and <a href="https://phpunit.de/">PHPUnit 9.6.31</a> at Thu Jan 15 13:31:38 UTC 2026.</small>
+    </p>
+   </footer>
+  </div>
+  <script src="../_js/jquery.min.js?v=9.2.32" type="text/javascript"></script>
+  <script src="../_js/d3.min.js?v=9.2.32" type="text/javascript"></script>
+  <script src="../_js/nv.d3.min.js?v=9.2.32" type="text/javascript"></script>
+  <script type="text/javascript">
+$(document).ready(function() {
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#classCoverageDistribution svg')
+      .datum(getCoverageDistributionData([16,0,0,0,0,0,0,0,0,0,0,1], "Class Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#methodCoverageDistribution svg')
+      .datum(getCoverageDistributionData([64,0,0,0,0,0,0,0,0,0,0,2], "Method Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getCoverageDistributionData(data, label) {
+    var labels = [
+      '0%',
+      '0-10%',
+      '10-20%',
+      '20-30%',
+      '30-40%',
+      '40-50%',
+      '50-60%',
+      '60-70%',
+      '70-80%',
+      '80-90%',
+      '90-100%',
+      '100%'
+    ];
+    var values = [];
+    $.each(labels, function(key) {
+      values.push({x: labels[key], y: data[key]});
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Cyclomatic Complexity');
+
+    d3.select('#classComplexity svg')
+      .datum(getComplexityData([[0,3,"<a href=\"Api\/Exception\/InvalidAnalyticsRequestException.php.html#8\">Learning\\Bundle\\Core\\Api\\Exception\\InvalidAnalyticsRequestException<\/a>"],[0,3,"<a href=\"Api\/Exception\/ProductViewLimitExceededException.php.html#8\">Learning\\Bundle\\Core\\Api\\Exception\\ProductViewLimitExceededException<\/a>"],[0,3,"<a href=\"Api\/Exception\/ProductViewNotFoundException.php.html#8\">Learning\\Bundle\\Core\\Api\\Exception\\ProductViewNotFoundException<\/a>"],[0,3,"<a href=\"Api\/Exception\/RateLimitExceededException.php.html#8\">Learning\\Bundle\\Core\\Api\\Exception\\RateLimitExceededException<\/a>"],[0,3,"<a href=\"Api\/ProductComparisonController.php.html#13\">Learning\\Bundle\\Core\\Api\\ProductComparisonController<\/a>"],[0,9,"<a href=\"Api\/ProductViewAnalyticsController.php.html#18\">Learning\\Bundle\\Core\\Api\\ProductViewAnalyticsController<\/a>"],[0,12,"<a href=\"Api\/RateLimiter\/SimpleRateLimiter.php.html#10\">Learning\\Bundle\\Core\\Api\\RateLimiter\\SimpleRateLimiter<\/a>"],[0,4,"<a href=\"Api\/Response\/ApiResponse.php.html#5\">Learning\\Bundle\\Core\\Api\\Response\\ApiResponse<\/a>"],[0,5,"<a href=\"Api\/Validator\/AnalyticsRequestValidator.php.html#9\">Learning\\Bundle\\Core\\Api\\Validator\\AnalyticsRequestValidator<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewCollection.php.html#16\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewCollection<\/a>"],[0,4,"<a href=\"Content\/ProductView\/ProductViewDefinition.php.html#19\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewDefinition<\/a>"],[0,14,"<a href=\"Content\/ProductView\/ProductViewEntity.php.html#10\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewEntity<\/a>"],[100,0,"<a href=\"Content\/ProductView\/SalesChannel\/AbstractProductViewRoute.php.html#8\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\AbstractProductViewRoute<\/a>"],[0,3,"<a href=\"Content\/ProductView\/SalesChannel\/ProductViewResult.php.html#7\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\ProductViewResult<\/a>"],[0,6,"<a href=\"Content\/ProductView\/SalesChannel\/ProductViewRoute.php.html#16\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\ProductViewRoute<\/a>"],[0,2,"<a href=\"Content\/ProductView\/SalesChannel\/ProductViewRouteResponse.php.html#7\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\ProductViewRouteResponse<\/a>"],[0,10,"<a href=\"Content\/Wishlist\/SalesChannel\/WishlistRoute.php.html#11\">Learning\\Bundle\\Core\\Content\\Wishlist\\SalesChannel\\WishlistRoute<\/a>"]], 'Class Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Method Complexity');
+
+    d3.select('#methodComplexity svg')
+      .datum(getComplexityData([[0,1,"<a href=\"Api\/Exception\/InvalidAnalyticsRequestException.php.html#10\">Learning\\Bundle\\Core\\Api\\Exception\\InvalidAnalyticsRequestException::__construct<\/a>"],[0,1,"<a href=\"Api\/Exception\/InvalidAnalyticsRequestException.php.html#17\">Learning\\Bundle\\Core\\Api\\Exception\\InvalidAnalyticsRequestException::getErrorCode<\/a>"],[0,1,"<a href=\"Api\/Exception\/InvalidAnalyticsRequestException.php.html#21\">Learning\\Bundle\\Core\\Api\\Exception\\InvalidAnalyticsRequestException::getStatusCode<\/a>"],[0,1,"<a href=\"Api\/Exception\/ProductViewLimitExceededException.php.html#10\">Learning\\Bundle\\Core\\Api\\Exception\\ProductViewLimitExceededException::__construct<\/a>"],[0,1,"<a href=\"Api\/Exception\/ProductViewLimitExceededException.php.html#18\">Learning\\Bundle\\Core\\Api\\Exception\\ProductViewLimitExceededException::getErrorCode<\/a>"],[0,1,"<a href=\"Api\/Exception\/ProductViewLimitExceededException.php.html#23\">Learning\\Bundle\\Core\\Api\\Exception\\ProductViewLimitExceededException::getStatusCode<\/a>"],[0,1,"<a href=\"Api\/Exception\/ProductViewNotFoundException.php.html#10\">Learning\\Bundle\\Core\\Api\\Exception\\ProductViewNotFoundException::__construct<\/a>"],[0,1,"<a href=\"Api\/Exception\/ProductViewNotFoundException.php.html#18\">Learning\\Bundle\\Core\\Api\\Exception\\ProductViewNotFoundException::getErrorCode<\/a>"],[0,1,"<a href=\"Api\/Exception\/ProductViewNotFoundException.php.html#23\">Learning\\Bundle\\Core\\Api\\Exception\\ProductViewNotFoundException::getStatusCode<\/a>"],[0,1,"<a href=\"Api\/Exception\/RateLimitExceededException.php.html#10\">Learning\\Bundle\\Core\\Api\\Exception\\RateLimitExceededException::__construct<\/a>"],[0,1,"<a href=\"Api\/Exception\/RateLimitExceededException.php.html#18\">Learning\\Bundle\\Core\\Api\\Exception\\RateLimitExceededException::getErrorCode<\/a>"],[0,1,"<a href=\"Api\/Exception\/RateLimitExceededException.php.html#23\">Learning\\Bundle\\Core\\Api\\Exception\\RateLimitExceededException::getStatusCode<\/a>"],[0,1,"<a href=\"Api\/ProductComparisonController.php.html#18\">Learning\\Bundle\\Core\\Api\\ProductComparisonController::__construct<\/a>"],[0,1,"<a href=\"Api\/ProductComparisonController.php.html#23\">Learning\\Bundle\\Core\\Api\\ProductComparisonController::getStats<\/a>"],[0,1,"<a href=\"Api\/ProductComparisonController.php.html#39\">Learning\\Bundle\\Core\\Api\\ProductComparisonController::getPopularCombinations<\/a>"],[0,1,"<a href=\"Api\/ProductViewAnalyticsController.php.html#25\">Learning\\Bundle\\Core\\Api\\ProductViewAnalyticsController::__construct<\/a>"],[0,2,"<a href=\"Api\/ProductViewAnalyticsController.php.html#35\">Learning\\Bundle\\Core\\Api\\ProductViewAnalyticsController::getOverview<\/a>"],[0,2,"<a href=\"Api\/ProductViewAnalyticsController.php.html#73\">Learning\\Bundle\\Core\\Api\\ProductViewAnalyticsController::getProductAnalytics<\/a>"],[0,3,"<a href=\"Api\/ProductViewAnalyticsController.php.html#95\">Learning\\Bundle\\Core\\Api\\ProductViewAnalyticsController::getPopularProducts<\/a>"],[0,1,"<a href=\"Api\/ProductViewAnalyticsController.php.html#122\">Learning\\Bundle\\Core\\Api\\ProductViewAnalyticsController::resetProductViews<\/a>"],[0,1,"<a href=\"Api\/RateLimiter\/SimpleRateLimiter.php.html#17\">Learning\\Bundle\\Core\\Api\\RateLimiter\\SimpleRateLimiter::__construct<\/a>"],[0,8,"<a href=\"Api\/RateLimiter\/SimpleRateLimiter.php.html#29\">Learning\\Bundle\\Core\\Api\\RateLimiter\\SimpleRateLimiter::check<\/a>"],[0,2,"<a href=\"Api\/RateLimiter\/SimpleRateLimiter.php.html#96\">Learning\\Bundle\\Core\\Api\\RateLimiter\\SimpleRateLimiter::getRemainingRequests<\/a>"],[0,1,"<a href=\"Api\/RateLimiter\/SimpleRateLimiter.php.html#108\">Learning\\Bundle\\Core\\Api\\RateLimiter\\SimpleRateLimiter::getKey<\/a>"],[0,1,"<a href=\"Api\/Response\/ApiResponse.php.html#7\">Learning\\Bundle\\Core\\Api\\Response\\ApiResponse::success<\/a>"],[0,1,"<a href=\"Api\/Response\/ApiResponse.php.html#18\">Learning\\Bundle\\Core\\Api\\Response\\ApiResponse::error<\/a>"],[0,1,"<a href=\"Api\/Response\/ApiResponse.php.html#33\">Learning\\Bundle\\Core\\Api\\Response\\ApiResponse::paginated<\/a>"],[0,1,"<a href=\"Api\/Response\/ApiResponse.php.html#50\">Learning\\Bundle\\Core\\Api\\Response\\ApiResponse::collection<\/a>"],[0,1,"<a href=\"Api\/Validator\/AnalyticsRequestValidator.php.html#13\">Learning\\Bundle\\Core\\Api\\Validator\\AnalyticsRequestValidator::__construct<\/a>"],[0,2,"<a href=\"Api\/Validator\/AnalyticsRequestValidator.php.html#18\">Learning\\Bundle\\Core\\Api\\Validator\\AnalyticsRequestValidator::validateOverviewRequest<\/a>"],[0,2,"<a href=\"Api\/Validator\/AnalyticsRequestValidator.php.html#49\">Learning\\Bundle\\Core\\Api\\Validator\\AnalyticsRequestValidator::validatePopularRequest<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewCollection.php.html#18\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewCollection::getExpectedClass<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewDefinition.php.html#23\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewDefinition::getEntityName<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewDefinition.php.html#28\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewDefinition::getEntityClass<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewDefinition.php.html#33\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewDefinition::getCollectionClass<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewDefinition.php.html#38\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewDefinition::defineFields<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewEntity.php.html#24\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewEntity::getProductId<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewEntity.php.html#29\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewEntity::setProductId<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewEntity.php.html#34\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewEntity::getCustomerId<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewEntity.php.html#39\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewEntity::setCustomerId<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewEntity.php.html#44\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewEntity::getViewCount<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewEntity.php.html#49\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewEntity::setViewCount<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewEntity.php.html#54\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewEntity::getUserAgent<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewEntity.php.html#59\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewEntity::setUserAgent<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewEntity.php.html#64\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewEntity::getLastViewedAt<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewEntity.php.html#69\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewEntity::setLastViewedAt<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewEntity.php.html#74\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewEntity::getProduct<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewEntity.php.html#79\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewEntity::setProduct<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewEntity.php.html#84\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewEntity::getCustomer<\/a>"],[0,1,"<a href=\"Content\/ProductView\/ProductViewEntity.php.html#89\">Learning\\Bundle\\Core\\Content\\ProductView\\ProductViewEntity::setCustomer<\/a>"],[100,0,"<a href=\"Content\/ProductView\/SalesChannel\/AbstractProductViewRoute.php.html#10\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\AbstractProductViewRoute::getDecorated<\/a>"],[100,0,"<a href=\"Content\/ProductView\/SalesChannel\/AbstractProductViewRoute.php.html#11\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\AbstractProductViewRoute::load<\/a>"],[0,1,"<a href=\"Content\/ProductView\/SalesChannel\/ProductViewResult.php.html#12\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\ProductViewResult::__construct<\/a>"],[0,1,"<a href=\"Content\/ProductView\/SalesChannel\/ProductViewResult.php.html#18\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\ProductViewResult::getProductId<\/a>"],[0,1,"<a href=\"Content\/ProductView\/SalesChannel\/ProductViewResult.php.html#23\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\ProductViewResult::getViewCount<\/a>"],[0,1,"<a href=\"Content\/ProductView\/SalesChannel\/ProductViewRoute.php.html#22\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\ProductViewRoute::__construct<\/a>"],[0,1,"<a href=\"Content\/ProductView\/SalesChannel\/ProductViewRoute.php.html#30\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\ProductViewRoute::getDecorated<\/a>"],[0,1,"<a href=\"Content\/ProductView\/SalesChannel\/ProductViewRoute.php.html#35\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\ProductViewRoute::popular<\/a>"],[0,1,"<a href=\"Content\/ProductView\/SalesChannel\/ProductViewRoute.php.html#50\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\ProductViewRoute::load<\/a>"],[0,2,"<a href=\"Content\/ProductView\/SalesChannel\/ProductViewRoute.php.html#60\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\ProductViewRoute::record<\/a>"],[0,1,"<a href=\"Content\/ProductView\/SalesChannel\/ProductViewRouteResponse.php.html#11\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\ProductViewRouteResponse::__construct<\/a>"],[0,1,"<a href=\"Content\/ProductView\/SalesChannel\/ProductViewRouteResponse.php.html#17\">Learning\\Bundle\\Core\\Content\\ProductView\\SalesChannel\\ProductViewRouteResponse::getResult<\/a>"],[0,1,"<a href=\"Content\/Wishlist\/SalesChannel\/WishlistRoute.php.html#16\">Learning\\Bundle\\Core\\Content\\Wishlist\\SalesChannel\\WishlistRoute::__construct<\/a>"],[0,2,"<a href=\"Content\/Wishlist\/SalesChannel\/WishlistRoute.php.html#21\">Learning\\Bundle\\Core\\Content\\Wishlist\\SalesChannel\\WishlistRoute::load<\/a>"],[0,4,"<a href=\"Content\/Wishlist\/SalesChannel\/WishlistRoute.php.html#48\">Learning\\Bundle\\Core\\Content\\Wishlist\\SalesChannel\\WishlistRoute::add<\/a>"],[0,3,"<a href=\"Content\/Wishlist\/SalesChannel\/WishlistRoute.php.html#95\">Learning\\Bundle\\Core\\Content\\Wishlist\\SalesChannel\\WishlistRoute::remove<\/a>"]], 'Method Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getComplexityData(data, label) {
+    var values = [];
+    $.each(data, function(key) {
+      var value = Math.round(data[key][0]*100) / 100;
+      values.push({
+        x: value,
+        y: data[key][1],
+        class: data[key][2],
+        size: 0.05,
+        shape: 'diamond'
+      });
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+});
+  </script>
+ </body>
+</html>

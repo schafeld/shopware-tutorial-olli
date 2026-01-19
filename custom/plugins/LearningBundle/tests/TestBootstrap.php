@@ -9,4 +9,7 @@ $loader = (new TestBootstrapper())
     ->bootstrap()
     ->getClassLoader();
 
-$loader->addPsr4('LearningBundle\\Tests\\', __DIR__);
+$loader->addPsr4('Learning\\Bundle\\Tests\\', __DIR__);
+
+// Explicitly register the Integration test trait
+require_once __DIR__ . '/Integration/IntegrationTestBehaviour.php';

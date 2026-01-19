@@ -14,12 +14,16 @@ You'll build a **Product Recommendation Engine** that:
 - **AJAX-powered "Quick Add" without page reload** ⭐
 - Provides personalized recommendations via API
 - **Responsive, animated UI with custom SCSS** ⭐
-- Includes admin interface for analytics
+- **Vue.js 3 Administration Dashboard with analytics** ⭐ (NEW!)
+- **PWA features: offline caching & installability** ⭐ (NEW!)
 - Has complete test coverage
 - Uses caching for performance
 - Follows Shopware best practices
 
-**Frontend Focus:** This project emphasizes building the **user-facing recommendation display** using Twig, JavaScript, and CSS while the backend provides the recommendation data.
+**Full-Stack Frontend Focus:** This project covers **ALL Shopware 6.7 frontend technologies**:
+- 🛒 **Storefront**: Twig + Vanilla JS plugins + SCSS (customer-facing)
+- 🎛️ **Administration**: Vue.js 3 + Meteor Components (backend dashboard)
+- 📱 **PWA**: Service Workers + App Manifest (progressive enhancement)
 
 ---
 
@@ -48,7 +52,7 @@ You'll build a **Product Recommendation Engine** that:
 - Proper error handling
 - Cache invalidation strategy
 
-**Frontend (60%):**
+**Storefront Frontend (40%):**
 - Custom Twig templates for recommendation display
 - JavaScript plugin for interactive carousel
 - AJAX "Quick Add to Cart" functionality
@@ -57,37 +61,71 @@ You'll build a **Product Recommendation Engine** that:
 - Cross-browser compatibility
 - Accessibility (keyboard navigation, ARIA labels)
 
+**Administration Frontend (15%) - Vue.js 3:**
+- Custom admin module with Vue.js 3
+- Interactive analytics dashboard
+- Shopware Meteor component library (sw-* components)
+- Data visualization with charts
+- Real-time data updates via Admin API
+
+**PWA Enhancement (5%):**
+- Service Worker for offline recommendation caching
+- Web App Manifest for installability
+- "Add to Home Screen" capability
+- Offline-first user experience
+
 ### Architecture Diagram
 
 ```
-┌─────────────────────────────────────────────────┐
-│  FRONTEND (User-Facing)                         │
-├─────────────────────────────────────────────────┤
-│  Product Detail Page                            │
-│       ↓                                         │
-│  📦 Recommendation Widget (Twig Template)       │
-│       ↓                                         │
-│  🎨 Interactive Carousel (JavaScript Plugin)    │
-│       ↓                                         │
-│  ⚡ AJAX Quick Add (No Page Reload)             │
-│       ↓                                         │
-│  💅 Responsive Styling (SCSS)                   │
-└─────────────────────────────────────────────────┘
-                     ↓ API Call
-┌─────────────────────────────────────────────────┐
-│  BACKEND (Data & Logic)                         │
-├─────────────────────────────────────────────────┤
-│  Store API Endpoint                             │
-│       ↓                                         │
-│  Cache Layer                                    │
-│       ↓                                         │
-│  Recommendation Engine Service                  │
-│       ↓                                         │
-│  Database (Tracking + Scores)                   │
-│       ↑                                         │
-│  Event Subscriber (Product Views)               │
-└─────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│  STOREFRONT (Customer-Facing) - Twig + Vanilla JS                       │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Product Detail Page                                                    │
+│       ↓                                                                 │
+│  📦 Recommendation Widget (Twig Template)                               │
+│       ↓                                                                 │
+│  🎨 Interactive Carousel (JavaScript Plugin)                            │
+│       ↓                                                                 │
+│  ⚡ AJAX Quick Add (No Page Reload)                                      │
+│       ↓                                                                 │
+│  💅 Responsive Styling (SCSS)                                           │
+│       ↓                                                                 │
+│  📱 PWA: Service Worker + Offline Cache (NEW!)                          │
+└─────────────────────────────────────────────────────────────────────────┘
+                     ↓ Store API Call
+┌─────────────────────────────────────────────────────────────────────────┐
+│  BACKEND (PHP Services)                                                 │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Store API ←──────────────────────────────→ Admin API                   │
+│       ↓                                          ↓                      │
+│  Cache Layer                               Analytics Service            │
+│       ↓                                          ↓                      │
+│  Recommendation Engine Service ←─────→ Database (Tracking + Scores)    │
+│       ↑                                                                 │
+│  Event Subscriber (Product Views)                                       │
+└─────────────────────────────────────────────────────────────────────────┘
+                     ↑ Admin API Call
+┌─────────────────────────────────────────────────────────────────────────┐
+│  ADMINISTRATION (Backend Dashboard) - Vue.js 3 (NEW!)                   │
+├─────────────────────────────────────────────────────────────────────────┤
+│  🎛️ Custom Admin Module (Vue.js 3 SPA)                                  │
+│       ↓                                                                 │
+│  📊 Analytics Dashboard (Meteor Components)                             │
+│       ↓                                                                 │
+│  📈 Interactive Charts (Data Visualization)                             │
+│       ↓                                                                 │
+│  ⚙️ Configuration Panel (Recommendation Settings)                       │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
+
+### Technology Stack Overview
+
+| Layer | Technology | Framework | Build Tool |
+|-------|------------|-----------|------------|
+| **Storefront** | Twig + Vanilla JS | Bootstrap 5 | Webpack |
+| **Administration** | Vue.js 3 + TypeScript | Meteor Components | Vite |
+| **PWA** | Service Workers | Web APIs | Native |
+| **Backend** | PHP 8.2+ | Symfony | Composer |
 
 ---
 
@@ -1681,7 +1719,1236 @@ bin/phpunit custom/plugins/LearningBundle
 
 ---
 
-## Part 10: Review and Polish (45 minutes)
+## Part 11: Administration Module with Vue.js 3 (120 minutes) 🎛️
+
+> **Learn Vue.js 3 within Shopware!** The Administration uses Vue.js 3 with Shopware's Meteor component library. This section teaches you to build professional admin interfaces.
+
+### Understanding Shopware Administration Architecture
+
+**Key Concepts:**
+- Vue.js 3 Single Page Application (SPA)
+- Component-based architecture with `sw-*` prefixed components
+- Hybrid Twig/Vue templates (unique to Shopware)
+- Service-based data fetching via Admin API
+- State management with Pinia (replacing Vuex)
+
+### Step 1: Create Admin Module Structure (15 minutes)
+
+Create the module directory structure:
+
+```
+src/Resources/app/administration/
+├── src/
+│   ├── main.js                          # Entry point
+│   └── module/
+│       └── learning-recommendations/
+│           ├── index.js                 # Module registration
+│           ├── page/
+│           │   └── learning-recommendations-dashboard/
+│           │       ├── index.js
+│           │       └── learning-recommendations-dashboard.html.twig
+│           ├── component/
+│           │   ├── learning-stats-card/
+│           │   │   ├── index.js
+│           │   │   └── learning-stats-card.html.twig
+│           │   └── learning-recommendation-chart/
+│           │       ├── index.js
+│           │       └── learning-recommendation-chart.html.twig
+│           └── snippet/
+│               ├── en-GB.json
+│               └── de-DE.json
+```
+
+### Step 2: Create Module Entry Point (15 minutes)
+
+Create `src/Resources/app/administration/src/main.js`:
+
+```javascript
+// Main entry point for the administration module
+import './module/learning-recommendations';
+```
+
+Create `src/Resources/app/administration/src/module/learning-recommendations/index.js`:
+
+```javascript
+import './page/learning-recommendations-dashboard';
+import './component/learning-stats-card';
+import './component/learning-recommendation-chart';
+
+import enGB from './snippet/en-GB.json';
+import deDE from './snippet/de-DE.json';
+
+// Get the Shopware object
+const { Module } = Shopware;
+
+// Register the module
+Module.register('learning-recommendations', {
+    type: 'plugin',
+    name: 'learning-recommendations',
+    title: 'learning-recommendations.general.mainMenuItemGeneral',
+    description: 'learning-recommendations.general.description',
+    color: '#ff68b4',
+    icon: 'regular-lightbulb',
+    
+    // Snippets for translations
+    snippets: {
+        'en-GB': enGB,
+        'de-DE': deDE
+    },
+
+    // Main menu entry
+    navigation: [{
+        id: 'learning-recommendations',
+        label: 'learning-recommendations.general.mainMenuItemGeneral',
+        color: '#ff68b4',
+        icon: 'regular-lightbulb',
+        path: 'learning.recommendations.dashboard',
+        position: 100,
+        parent: 'sw-marketing'
+    }],
+
+    // Routes
+    routes: {
+        dashboard: {
+            component: 'learning-recommendations-dashboard',
+            path: 'dashboard',
+            meta: {
+                parentPath: 'sw.marketing.index'
+            }
+        }
+    }
+});
+```
+
+### Step 3: Create Dashboard Page Component (30 minutes)
+
+Create `src/Resources/app/administration/src/module/learning-recommendations/page/learning-recommendations-dashboard/index.js`:
+
+```javascript
+const { Component, Mixin } = Shopware;
+const { Criteria } = Shopware.Data;
+
+Component.register('learning-recommendations-dashboard', {
+    template,
+
+    inject: ['repositoryFactory', 'acl'],
+
+    mixins: [
+        Mixin.getByName('notification')
+    ],
+
+    data() {
+        return {
+            isLoading: true,
+            statistics: {
+                totalRecommendations: 0,
+                totalTrackedViews: 0,
+                averageAffinityScore: 0,
+                topPairs: []
+            },
+            dateRange: {
+                from: null,
+                to: null
+            },
+            chartData: null
+        };
+    },
+
+    computed: {
+        recommendationRepository() {
+            return this.repositoryFactory.create('learning_product_recommendation');
+        },
+
+        sessionRepository() {
+            return this.repositoryFactory.create('learning_product_session');
+        },
+
+        columns() {
+            return [
+                {
+                    property: 'sourceProduct.name',
+                    label: this.$tc('learning-recommendations.dashboard.columnSource'),
+                    allowResize: true
+                },
+                {
+                    property: 'recommendedProduct.name', 
+                    label: this.$tc('learning-recommendations.dashboard.columnRecommended'),
+                    allowResize: true
+                },
+                {
+                    property: 'affinityScore',
+                    label: this.$tc('learning-recommendations.dashboard.columnScore'),
+                    allowResize: true
+                },
+                {
+                    property: 'viewCount',
+                    label: this.$tc('learning-recommendations.dashboard.columnViews'),
+                    allowResize: true
+                }
+            ];
+        }
+    },
+
+    created() {
+        this.loadStatistics();
+    },
+
+    methods: {
+        async loadStatistics() {
+            this.isLoading = true;
+
+            try {
+                // Load recommendation count
+                const recommendationCriteria = new Criteria(1, 1);
+                const recommendations = await this.recommendationRepository.search(
+                    recommendationCriteria,
+                    Shopware.Context.api
+                );
+                this.statistics.totalRecommendations = recommendations.total;
+
+                // Load session view count
+                const sessionCriteria = new Criteria(1, 1);
+                const sessions = await this.sessionRepository.search(
+                    sessionCriteria,
+                    Shopware.Context.api
+                );
+                this.statistics.totalTrackedViews = sessions.total;
+
+                // Load top recommendation pairs
+                await this.loadTopPairs();
+
+                // Build chart data
+                this.buildChartData();
+
+            } catch (error) {
+                this.createNotificationError({
+                    title: this.$tc('learning-recommendations.dashboard.errorTitle'),
+                    message: error.message
+                });
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        async loadTopPairs() {
+            const criteria = new Criteria(1, 10);
+            criteria.addAssociation('sourceProduct');
+            criteria.addAssociation('recommendedProduct');
+            criteria.addSorting(Criteria.sort('affinityScore', 'DESC'));
+
+            const result = await this.recommendationRepository.search(
+                criteria,
+                Shopware.Context.api
+            );
+
+            this.statistics.topPairs = result;
+
+            // Calculate average score
+            if (result.length > 0) {
+                const totalScore = result.reduce((sum, item) => sum + item.affinityScore, 0);
+                this.statistics.averageAffinityScore = (totalScore / result.length).toFixed(1);
+            }
+        },
+
+        buildChartData() {
+            // Prepare data for the chart component
+            this.chartData = {
+                labels: this.statistics.topPairs.slice(0, 5).map(
+                    pair => pair.sourceProduct?.translated?.name?.substring(0, 15) + '...' || 'Unknown'
+                ),
+                datasets: [{
+                    label: this.$tc('learning-recommendations.dashboard.chartLabel'),
+                    data: this.statistics.topPairs.slice(0, 5).map(pair => pair.affinityScore),
+                    backgroundColor: [
+                        '#ff68b4',
+                        '#57d9a3',
+                        '#189eff',
+                        '#ffc107',
+                        '#dc3545'
+                    ]
+                }]
+            };
+        },
+
+        onRefresh() {
+            this.loadStatistics();
+        }
+    }
+});
+```
+
+Create `learning-recommendations-dashboard.html.twig`:
+
+```twig
+{% block learning_recommendations_dashboard %}
+<sw-page class="learning-recommendations-dashboard">
+    
+    {% block learning_recommendations_dashboard_header %}
+    <template #smart-bar-header>
+        <h2>{{ $tc('learning-recommendations.dashboard.title') }}</h2>
+    </template>
+    {% endblock %}
+
+    {% block learning_recommendations_dashboard_actions %}
+    <template #smart-bar-actions>
+        <sw-button 
+            variant="ghost"
+            :isLoading="isLoading"
+            @click="onRefresh">
+            <sw-icon name="regular-redo" small></sw-icon>
+            {{ $tc('learning-recommendations.dashboard.refresh') }}
+        </sw-button>
+    </template>
+    {% endblock %}
+
+    {% block learning_recommendations_dashboard_content %}
+    <template #content>
+        <sw-card-view>
+            
+            {# Statistics Cards Row #}
+            {% block learning_recommendations_stats_row %}
+            <div class="learning-stats-row">
+                <learning-stats-card
+                    :value="statistics.totalRecommendations"
+                    :label="$tc('learning-recommendations.dashboard.totalRecommendations')"
+                    icon="regular-link"
+                    color="#ff68b4">
+                </learning-stats-card>
+
+                <learning-stats-card
+                    :value="statistics.totalTrackedViews"
+                    :label="$tc('learning-recommendations.dashboard.totalViews')"
+                    icon="regular-eye"
+                    color="#57d9a3">
+                </learning-stats-card>
+
+                <learning-stats-card
+                    :value="statistics.averageAffinityScore"
+                    :label="$tc('learning-recommendations.dashboard.averageScore')"
+                    icon="regular-chart-line"
+                    color="#189eff"
+                    suffix="%">
+                </learning-stats-card>
+            </div>
+            {% endblock %}
+
+            {# Chart Section #}
+            {% block learning_recommendations_chart %}
+            <sw-card 
+                :title="$tc('learning-recommendations.dashboard.chartTitle')"
+                :isLoading="isLoading">
+                <learning-recommendation-chart
+                    v-if="chartData"
+                    :chart-data="chartData">
+                </learning-recommendation-chart>
+            </sw-card>
+            {% endblock %}
+
+            {# Top Pairs Table #}
+            {% block learning_recommendations_table %}
+            <sw-card 
+                :title="$tc('learning-recommendations.dashboard.topPairsTitle')"
+                :isLoading="isLoading">
+                <sw-data-grid
+                    :dataSource="statistics.topPairs"
+                    :columns="columns"
+                    :showSelection="false"
+                    :showActions="false">
+                    
+                    <template #column-affinityScore="{ item }">
+                        <sw-label 
+                            variant="success"
+                            size="small">
+                            {{ item.affinityScore.toFixed(1) }}%
+                        </sw-label>
+                    </template>
+
+                    <template #column-viewCount="{ item }">
+                        <sw-label 
+                            variant="info"
+                            size="small">
+                            {{ item.viewCount }} views
+                        </sw-label>
+                    </template>
+                    
+                </sw-data-grid>
+            </sw-card>
+            {% endblock %}
+
+        </sw-card-view>
+    </template>
+    {% endblock %}
+
+</sw-page>
+{% endblock %}
+```
+
+### Step 4: Create Stats Card Component (20 minutes)
+
+Create `src/Resources/app/administration/src/module/learning-recommendations/component/learning-stats-card/index.js`:
+
+```javascript
+const { Component } = Shopware;
+
+Component.register('learning-stats-card', {
+    template,
+
+    props: {
+        value: {
+            type: [Number, String],
+            required: true
+        },
+        label: {
+            type: String,
+            required: true
+        },
+        icon: {
+            type: String,
+            default: 'regular-chart-bar'
+        },
+        color: {
+            type: String,
+            default: '#189eff'
+        },
+        suffix: {
+            type: String,
+            default: ''
+        }
+    },
+
+    computed: {
+        cardStyles() {
+            return {
+                '--stats-card-color': this.color
+            };
+        },
+
+        displayValue() {
+            if (typeof this.value === 'number') {
+                return this.value.toLocaleString() + this.suffix;
+            }
+            return this.value + this.suffix;
+        }
+    }
+});
+```
+
+Create `learning-stats-card.html.twig`:
+
+```twig
+{% block learning_stats_card %}
+<div class="learning-stats-card" :style="cardStyles">
+    <div class="learning-stats-card__icon">
+        <sw-icon :name="icon" size="32px"></sw-icon>
+    </div>
+    <div class="learning-stats-card__content">
+        <span class="learning-stats-card__value">{{ displayValue }}</span>
+        <span class="learning-stats-card__label">{{ label }}</span>
+    </div>
+</div>
+{% endblock %}
+```
+
+### Step 5: Create Chart Component (20 minutes)
+
+Create `src/Resources/app/administration/src/module/learning-recommendations/component/learning-recommendation-chart/index.js`:
+
+```javascript
+const { Component } = Shopware;
+
+Component.register('learning-recommendation-chart', {
+    template,
+
+    props: {
+        chartData: {
+            type: Object,
+            required: true
+        }
+    },
+
+    data() {
+        return {
+            chartOptions: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                return `Score: ${context.raw.toFixed(1)}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Affinity Score (%)'
+                        }
+                    }
+                }
+            }
+        };
+    }
+});
+```
+
+Create `learning-recommendation-chart.html.twig`:
+
+```twig
+{% block learning_recommendation_chart %}
+<div class="learning-recommendation-chart">
+    <sw-chart
+        type="bar"
+        :data="chartData"
+        :options="chartOptions"
+        style="height: 300px;">
+    </sw-chart>
+</div>
+{% endblock %}
+```
+
+### Step 6: Add Translations (10 minutes)
+
+Create `src/Resources/app/administration/src/module/learning-recommendations/snippet/en-GB.json`:
+
+```json
+{
+    "learning-recommendations": {
+        "general": {
+            "mainMenuItemGeneral": "Recommendations",
+            "description": "Product Recommendation Engine Analytics"
+        },
+        "dashboard": {
+            "title": "Recommendation Analytics",
+            "refresh": "Refresh",
+            "totalRecommendations": "Total Recommendations",
+            "totalViews": "Tracked Views",
+            "averageScore": "Average Score",
+            "chartTitle": "Top Product Affinities",
+            "chartLabel": "Affinity Score",
+            "topPairsTitle": "Top Recommended Pairs",
+            "columnSource": "Source Product",
+            "columnRecommended": "Recommended Product",
+            "columnScore": "Affinity Score",
+            "columnViews": "View Count",
+            "errorTitle": "Error loading data"
+        }
+    }
+}
+```
+
+Create `de-DE.json` with German translations.
+
+### Step 7: Add SCSS Styling (10 minutes)
+
+Create `src/Resources/app/administration/src/module/learning-recommendations/page/learning-recommendations-dashboard/learning-recommendations-dashboard.scss`:
+
+```scss
+.learning-recommendations-dashboard {
+    .learning-stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+}
+
+.learning-stats-card {
+    background: white;
+    border-radius: 8px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    &__icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 12px;
+        background: var(--stats-card-color, #189eff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    &__content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a1a;
+        line-height: 1.2;
+    }
+
+    &__label {
+        font-size: 14px;
+        color: #666;
+        margin-top: 4px;
+    }
+}
+
+.learning-recommendation-chart {
+    min-height: 300px;
+    padding: 16px;
+}
+```
+
+### Step 8: Build and Test Administration (10 minutes)
+
+```bash
+# Build administration assets
+./bin/build-administration.sh
+
+# Or use watch mode for development
+./bin/watch-administration.sh
+
+# Clear cache
+bin/console cache:clear
+
+# Test in browser
+# 1. Log into Administration (/admin)
+# 2. Navigate to Marketing → Recommendations
+# 3. Verify dashboard loads with statistics
+# 4. Test refresh button
+# 5. Verify chart displays correctly
+```
+
+### Vue.js Administration Checklist
+
+✅ **Module Structure:**
+- [ ] Module registered in Shopware Module system
+- [ ] Navigation entry appears in sidebar
+- [ ] Routes configured correctly
+- [ ] Snippets load for translations
+
+✅ **Components:**
+- [ ] Dashboard page loads without errors
+- [ ] Stats cards display values correctly
+- [ ] Chart renders with data
+- [ ] Data grid shows top pairs
+
+✅ **Data Loading:**
+- [ ] Repository factory injects correctly
+- [ ] Criteria queries work
+- [ ] Error handling shows notifications
+- [ ] Loading states display
+
+✅ **Styling:**
+- [ ] SCSS compiles correctly
+- [ ] Cards have hover effects
+- [ ] Responsive grid layout works
+- [ ] Matches Shopware admin design
+
+---
+
+## Part 12: PWA Enhancement (60 minutes) 📱
+
+> **Add Progressive Web App features!** Make the storefront installable and work offline with Service Workers.
+
+### Understanding PWA in Shopware Context
+
+**What we're adding:**
+- Service Worker for caching recommendations
+- Web App Manifest for "Add to Home Screen"
+- Offline-first experience for recommendations
+- Background sync for tracking
+
+### Step 1: Create Web App Manifest (10 minutes)
+
+Create `src/Resources/app/storefront/src/manifest.json`:
+
+```json
+{
+    "name": "My Shop - Smart Recommendations",
+    "short_name": "My Shop",
+    "description": "Shop with personalized product recommendations",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#007bff",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/bundles/learningbundle/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/bundles/learningbundle/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["shopping"],
+    "screenshots": [
+        {
+            "src": "/bundles/learningbundle/screenshots/recommendations.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "label": "Product Recommendations"
+        }
+    ]
+}
+```
+
+### Step 2: Create Service Worker (30 minutes)
+
+Create `src/Resources/app/storefront/src/service-worker/recommendation-sw.js`:
+
+```javascript
+/**
+ * Recommendation Engine Service Worker
+ * 
+ * Caches recommendation API responses for offline access
+ * and provides background sync for tracking.
+ */
+
+const CACHE_NAME = 'learning-recommendations-v1';
+const RECOMMENDATION_API_PATTERN = /\/store-api\/learning\/recommendations\//;
+
+// Resources to cache on install
+const STATIC_CACHE = [
+    '/bundles/learningbundle/recommendation-offline.html'
+];
+
+// Install event - cache static resources
+self.addEventListener('install', (event) => {
+    console.log('[SW] Installing Recommendation Service Worker');
+    
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then((cache) => {
+                console.log('[SW] Caching static resources');
+                return cache.addAll(STATIC_CACHE);
+            })
+            .then(() => self.skipWaiting())
+    );
+});
+
+// Activate event - clean old caches
+self.addEventListener('activate', (event) => {
+    console.log('[SW] Activating Service Worker');
+    
+    event.waitUntil(
+        caches.keys()
+            .then((cacheNames) => {
+                return Promise.all(
+                    cacheNames
+                        .filter((name) => name !== CACHE_NAME)
+                        .map((name) => caches.delete(name))
+                );
+            })
+            .then(() => self.clients.claim())
+    );
+});
+
+// Fetch event - network first, cache fallback for recommendations
+self.addEventListener('fetch', (event) => {
+    const { request } = event;
+    
+    // Handle recommendation API requests
+    if (RECOMMENDATION_API_PATTERN.test(request.url)) {
+        event.respondWith(handleRecommendationRequest(request));
+        return;
+    }
+});
+
+/**
+ * Handle recommendation API requests with caching strategy
+ * Strategy: Network First with Cache Fallback
+ */
+async function handleRecommendationRequest(request) {
+    const cache = await caches.open(CACHE_NAME);
+    
+    try {
+        // Try network first
+        const networkResponse = await fetch(request);
+        
+        if (networkResponse.ok) {
+            // Clone and cache the response
+            const responseToCache = networkResponse.clone();
+            
+            // Cache with product ID as key for efficient lookup
+            const cacheKey = createCacheKey(request.url);
+            await cache.put(cacheKey, responseToCache);
+            
+            console.log('[SW] Cached recommendation:', cacheKey);
+        }
+        
+        return networkResponse;
+        
+    } catch (error) {
+        // Network failed, try cache
+        console.log('[SW] Network failed, trying cache:', request.url);
+        
+        const cacheKey = createCacheKey(request.url);
+        const cachedResponse = await cache.match(cacheKey);
+        
+        if (cachedResponse) {
+            console.log('[SW] Serving from cache:', cacheKey);
+            return cachedResponse;
+        }
+        
+        // Return offline JSON response
+        return new Response(
+            JSON.stringify({
+                success: false,
+                offline: true,
+                message: 'Recommendations unavailable offline',
+                data: []
+            }),
+            {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            }
+        );
+    }
+}
+
+/**
+ * Create a normalized cache key from URL
+ */
+function createCacheKey(url) {
+    const urlObj = new URL(url);
+    // Include product ID but normalize query params
+    return `recommendations:${urlObj.pathname}`;
+}
+
+// Background Sync for tracking (when online again)
+self.addEventListener('sync', (event) => {
+    if (event.tag === 'recommendation-tracking-sync') {
+        event.waitUntil(syncTrackingData());
+    }
+});
+
+/**
+ * Sync queued tracking data when back online
+ */
+async function syncTrackingData() {
+    const db = await openTrackingDB();
+    const pendingTracks = await db.getAll('pending-tracks');
+    
+    for (const track of pendingTracks) {
+        try {
+            await fetch('/store-api/learning/track', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(track)
+            });
+            
+            await db.delete('pending-tracks', track.id);
+            console.log('[SW] Synced tracking data:', track.id);
+            
+        } catch (error) {
+            console.error('[SW] Failed to sync tracking:', error);
+        }
+    }
+}
+
+/**
+ * Simple IndexedDB wrapper for tracking queue
+ */
+function openTrackingDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('LearningRecommendations', 1);
+        
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+            const db = request.result;
+            resolve({
+                getAll: (store) => {
+                    return new Promise((res, rej) => {
+                        const tx = db.transaction(store, 'readonly');
+                        const req = tx.objectStore(store).getAll();
+                        req.onsuccess = () => res(req.result);
+                        req.onerror = () => rej(req.error);
+                    });
+                },
+                delete: (store, key) => {
+                    return new Promise((res, rej) => {
+                        const tx = db.transaction(store, 'readwrite');
+                        const req = tx.objectStore(store).delete(key);
+                        req.onsuccess = () => res();
+                        req.onerror = () => rej(req.error);
+                    });
+                }
+            });
+        };
+        
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains('pending-tracks')) {
+                db.createObjectStore('pending-tracks', { keyPath: 'id', autoIncrement: true });
+            }
+        };
+    });
+}
+
+console.log('[SW] Recommendation Service Worker loaded');
+```
+
+### Step 3: Register Service Worker in Storefront (10 minutes)
+
+Create `src/Resources/app/storefront/src/plugin/pwa/pwa-installer.plugin.js`:
+
+```javascript
+import Plugin from 'src/plugin-system/plugin.class';
+
+/**
+ * PWA Installer Plugin
+ * 
+ * Registers the service worker and handles PWA install prompts
+ */
+export default class PwaInstallerPlugin extends Plugin {
+    
+    static options = {
+        swPath: '/bundles/learningbundle/recommendation-sw.js',
+        installBannerSelector: '.learning-pwa-install-banner'
+    };
+
+    init() {
+        this.deferredPrompt = null;
+        this.installBanner = document.querySelector(this.options.installBannerSelector);
+        
+        this.registerServiceWorker();
+        this.handleInstallPrompt();
+    }
+
+    /**
+     * Register the service worker
+     */
+    async registerServiceWorker() {
+        if (!('serviceWorker' in navigator)) {
+            console.log('[PWA] Service Workers not supported');
+            return;
+        }
+
+        try {
+            const registration = await navigator.serviceWorker.register(
+                this.options.swPath,
+                { scope: '/' }
+            );
+
+            console.log('[PWA] Service Worker registered:', registration.scope);
+
+            // Handle updates
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                console.log('[PWA] New Service Worker installing...');
+                
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        this.showUpdateNotification();
+                    }
+                });
+            });
+
+        } catch (error) {
+            console.error('[PWA] Service Worker registration failed:', error);
+        }
+    }
+
+    /**
+     * Handle the beforeinstallprompt event
+     */
+    handleInstallPrompt() {
+        window.addEventListener('beforeinstallprompt', (event) => {
+            // Prevent Chrome's default prompt
+            event.preventDefault();
+            
+            // Store the event for later use
+            this.deferredPrompt = event;
+            
+            // Show custom install banner
+            this.showInstallBanner();
+            
+            console.log('[PWA] Install prompt captured');
+        });
+
+        // Track when app is installed
+        window.addEventListener('appinstalled', () => {
+            console.log('[PWA] App installed successfully');
+            this.hideInstallBanner();
+            this.deferredPrompt = null;
+        });
+    }
+
+    /**
+     * Show custom install banner
+     */
+    showInstallBanner() {
+        if (!this.installBanner) return;
+        
+        this.installBanner.style.display = 'flex';
+        
+        // Handle install button click
+        const installBtn = this.installBanner.querySelector('[data-pwa-install]');
+        if (installBtn) {
+            installBtn.addEventListener('click', () => this.promptInstall());
+        }
+        
+        // Handle dismiss button
+        const dismissBtn = this.installBanner.querySelector('[data-pwa-dismiss]');
+        if (dismissBtn) {
+            dismissBtn.addEventListener('click', () => this.hideInstallBanner());
+        }
+    }
+
+    /**
+     * Trigger the install prompt
+     */
+    async promptInstall() {
+        if (!this.deferredPrompt) return;
+        
+        this.deferredPrompt.prompt();
+        
+        const { outcome } = await this.deferredPrompt.userChoice;
+        console.log('[PWA] User choice:', outcome);
+        
+        this.deferredPrompt = null;
+    }
+
+    /**
+     * Hide install banner
+     */
+    hideInstallBanner() {
+        if (this.installBanner) {
+            this.installBanner.style.display = 'none';
+        }
+    }
+
+    /**
+     * Show update available notification
+     */
+    showUpdateNotification() {
+        // You can use Shopware's notification system or custom UI
+        if (confirm('A new version is available. Reload to update?')) {
+            window.location.reload();
+        }
+    }
+}
+```
+
+Register in `main.js`:
+
+```javascript
+import PwaInstallerPlugin from './plugin/pwa/pwa-installer.plugin';
+
+const PluginManager = window.PluginManager;
+PluginManager.register('PwaInstaller', PwaInstallerPlugin, 'body');
+```
+
+### Step 4: Add PWA Install Banner Template (5 minutes)
+
+Create `storefront/layout/header/pwa-install-banner.html.twig`:
+
+```twig
+{% block learning_pwa_install_banner %}
+<div class="learning-pwa-install-banner" style="display: none;">
+    <div class="pwa-install-content">
+        <div class="pwa-install-icon">
+            📱
+        </div>
+        <div class="pwa-install-text">
+            <strong>{{ "learning.pwa.installTitle"|trans }}</strong>
+            <p>{{ "learning.pwa.installDescription"|trans }}</p>
+        </div>
+    </div>
+    <div class="pwa-install-actions">
+        <button class="btn btn-primary btn-sm" data-pwa-install>
+            {{ "learning.pwa.installButton"|trans }}
+        </button>
+        <button class="btn btn-link btn-sm" data-pwa-dismiss>
+            {{ "learning.pwa.dismissButton"|trans }}
+        </button>
+    </div>
+</div>
+{% endblock %}
+```
+
+### Step 5: Add PWA SCSS Styling (5 minutes)
+
+Create `src/Resources/app/storefront/src/scss/component/_pwa-install-banner.scss`:
+
+```scss
+.learning-pwa-install-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    animation: slideUp 0.3s ease-out;
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+        }
+        to {
+            transform: translateY(0);
+        }
+    }
+
+    .pwa-install-content {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .pwa-install-icon {
+        font-size: 32px;
+    }
+
+    .pwa-install-text {
+        strong {
+            font-size: 16px;
+            display: block;
+        }
+        p {
+            margin: 4px 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+    }
+
+    .pwa-install-actions {
+        display: flex;
+        gap: 8px;
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+            border: none;
+            font-weight: 600;
+
+            &:hover {
+                background: #f0f0f0;
+            }
+        }
+
+        .btn-link {
+            color: white;
+            opacity: 0.8;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+
+        .pwa-install-content {
+            flex-direction: column;
+        }
+    }
+}
+```
+
+### Step 6: Update Recommendation Plugin for Offline Support (5 minutes)
+
+Update `recommendation-carousel.plugin.js` to handle offline state:
+
+```javascript
+// Add to loadRecommendations() method:
+async loadRecommendations() {
+    try {
+        this.showLoading();
+        
+        const url = `${this.options.recommendationsUrl}/${this.productId}?limit=${this.options.limit}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+
+        // Check if we're showing cached/offline data
+        if (data.offline) {
+            this.showOfflineNotice();
+        }
+
+        if (data.success && data.data && data.data.length > 0) {
+            this.recommendations = data.data;
+            this.renderRecommendations();
+            this.initializeCarousel();
+            this.registerQuickAddHandlers();
+        } else {
+            this.showEmpty();
+        }
+        
+    } catch (error) {
+        console.error('Failed to load recommendations:', error);
+        this.showError();
+    }
+}
+
+showOfflineNotice() {
+    const notice = document.createElement('div');
+    notice.className = 'recommendations-offline-notice';
+    notice.innerHTML = `
+        <span class="offline-icon">📡</span>
+        <span>Showing cached recommendations</span>
+    `;
+    this.el.querySelector('.recommendations-header').appendChild(notice);
+}
+```
+
+### PWA Checklist
+
+✅ **Service Worker:**
+- [ ] Registered successfully (check DevTools → Application)
+- [ ] Caches recommendation API responses
+- [ ] Returns cached data when offline
+- [ ] Cleans up old caches on activation
+
+✅ **Web App Manifest:**
+- [ ] Linked in HTML head
+- [ ] Icons display correctly
+- [ ] App name and colors defined
+- [ ] "Add to Home Screen" prompt works
+
+✅ **Offline Experience:**
+- [ ] Recommendations show cached data offline
+- [ ] Offline indicator displays
+- [ ] No JavaScript errors when offline
+- [ ] Graceful degradation
+
+✅ **Install Banner:**
+- [ ] Appears on supported browsers
+- [ ] Install button triggers prompt
+- [ ] Dismiss button hides banner
+- [ ] Banner slides up smoothly
+
+---
+
+## Part 13: Review and Polish (45 minutes)
 
 ### Checklist
 
@@ -1759,9 +3026,9 @@ Add ability to export recommendation data as CSV via Admin API.
 
 ### What You've Built
 
-A complete, production-ready Shopware plugin with:
+A complete, production-ready Shopware plugin demonstrating **ALL Shopware 6.7 frontend technologies**:
 
-**Backend (40%):**
+**Backend (30%):**
 
 - ✅ Custom database schema with migrations
 - ✅ Entity definitions and repositories
@@ -1773,41 +3040,86 @@ A complete, production-ready Shopware plugin with:
 - ✅ Unit and integration tests
 - ✅ Error handling and logging
 
-**Frontend (60%):**
+**Storefront Frontend (40%) - Twig + Vanilla JS:**
 
 - ✅ Beautiful recommendation carousel UI
-- ✅ Interactive JavaScript plugin
+- ✅ Interactive JavaScript plugin (Shopware plugin pattern)
 - ✅ AJAX add to cart (no page reload)
 - ✅ Smooth animations and transitions
 - ✅ Responsive mobile design
 - ✅ Loading, error, and empty states
 - ✅ Accessibility features
 - ✅ Professional SCSS styling
-- ✅ Twig template integration
+- ✅ Twig template extension and blocks
 - ✅ Cross-browser compatibility
+
+**Administration Frontend (20%) - Vue.js 3:** 🆕
+
+- ✅ Custom admin module with Vue.js 3
+- ✅ Interactive analytics dashboard
+- ✅ Shopware Meteor component library (sw-* components)
+- ✅ Data grid with sorting and filtering
+- ✅ Chart visualization
+- ✅ Custom Vue components
+- ✅ Repository Factory data fetching
+- ✅ Notification mixins
+- ✅ Proper TypeScript integration
+- ✅ Hybrid Twig/Vue templates
+
+**PWA Enhancement (10%):** 🆕
+
+- ✅ Service Worker for offline caching
+- ✅ Web App Manifest for installability
+- ✅ "Add to Home Screen" functionality
+- ✅ Offline-first recommendation display
+- ✅ Background sync for tracking
+- ✅ Cache management strategy
+- ✅ Update notifications
 
 ### What You've Learned This Week
 
 **Day 1:** Plugin structure, services, configuration  
 **Day 2:** Events, subscribers, dependency injection  
-**Day 2.5:** 🎨 **Twig templates, JavaScript plugins, SCSS styling** (Frontend Focus!)  
+**Day 2.5:** 🎨 **Twig templates, JavaScript plugins, SCSS styling** (Storefront Focus!)  
 **Day 3:** Database, migrations, entities, repositories  
 **Day 4:** API architecture, Store API, Admin API  
 **Day 5:** Debugging, logging, error handling  
 **Day 6:** Testing, caching, performance  
-**Day 7:** 🎨 **Complete feature with beautiful frontend UI**  
+**Day 7-10:** 🎨 **Complete feature with ALL frontend technologies**  
 
-**Frontend Skills Demonstrated:**
+**Storefront Skills (Twig + Vanilla JS):**
 
 - ✅ Twig template extension and blocks
-- ✅ JavaScript plugin development
+- ✅ JavaScript plugin development (Shopware plugin pattern)
 - ✅ AJAX requests with HttpClient
 - ✅ Event-driven JavaScript architecture
 - ✅ Component-based SCSS styling
 - ✅ Responsive design patterns
 - ✅ User feedback and loading states
 - ✅ Cross-browser compatibility
-- ✅ Accessibility best practices  
+- ✅ Accessibility best practices
+
+**Administration Skills (Vue.js 3):** 🆕
+
+- ✅ Vue.js 3 component development
+- ✅ Shopware Module system
+- ✅ Meteor component library (sw-* components)
+- ✅ Repository Factory pattern
+- ✅ Criteria-based data queries
+- ✅ Hybrid Twig/Vue templates
+- ✅ Admin API integration
+- ✅ Notification mixins
+- ✅ Custom component styling
+
+**PWA Skills:** 🆕
+
+- ✅ Service Worker lifecycle
+- ✅ Cache strategies (Network First)
+- ✅ Web App Manifest
+- ✅ Install prompt handling
+- ✅ Offline-first patterns
+- ✅ Background sync
+- ✅ IndexedDB for queuing  
 
 ---
 
@@ -1822,10 +3134,11 @@ Before considering the project complete:
 - [ ] All migrations run successfully
 - [ ] Backend tests pass
 - [ ] Store API returns recommendations
+- [ ] Admin API returns analytics
 - [ ] Cache is working
 - [ ] Error handling works
 
-**Frontend:**
+**Storefront (Twig + JS):**
 
 - [ ] Storefront built successfully (`./bin/build-storefront.sh`)
 - [ ] Recommendations display on product pages
@@ -1837,6 +3150,27 @@ Before considering the project complete:
 - [ ] Works in Chrome, Firefox, Safari
 - [ ] No console errors
 - [ ] Animations are smooth
+
+**Administration (Vue.js 3):** 🆕
+
+- [ ] Administration built successfully (`./bin/build-administration.sh`)
+- [ ] Module appears in Marketing menu
+- [ ] Dashboard loads without errors
+- [ ] Stats cards display correct values
+- [ ] Chart renders with data
+- [ ] Data grid shows top pairs
+- [ ] Refresh button works
+- [ ] Translations display correctly
+- [ ] No Vue.js console warnings
+
+**PWA:** 🆕
+
+- [ ] Service Worker registered (check DevTools → Application)
+- [ ] Manifest linked and valid
+- [ ] App installable ("Add to Home Screen" works)
+- [ ] Recommendations cached for offline
+- [ ] Offline indicator shows when disconnected
+- [ ] No errors when network is unavailable
 
 **General:**
 
@@ -1865,11 +3199,13 @@ Before considering the project complete:
 
 **Estimated Completion Time Breakdown:**
 
-- Backend Development: 6-8 hours (40%)
-- **Frontend Development: 3-4 hours (180+ minutes, 60%)**
+- Backend Development: 5-6 hours (30%)
+- **Storefront Development: 3-4 hours (Twig + JS, 40%)**
+- **Administration Development: 2-3 hours (Vue.js 3, 20%)**
+- **PWA Enhancement: 1 hour (10%)**
 - Testing & Polish: 2-3 hours
 
-**Total:** 20-28 hours (3-4 days)
+**Total:** 25-35 hours (4-5 days)
 
 **Difficulty:** Advanced
 
@@ -1877,16 +3213,27 @@ Before considering the project complete:
 
 🎉 **CONGRATULATIONS!** 🎉
 
-You've completed the intensive **frontend-focused** Shopware 6 plugin development course. You now have the skills to build professional Shopware plugins with beautiful, interactive user interfaces!
+You've completed the **comprehensive full-stack** Shopware 6.7 plugin development course covering **ALL frontend technologies**!
 
 **Your Portfolio Now Includes:**
 
-- ✅ A working recommendation engine with **visual carousel**
-- ✅ **Interactive JavaScript** features
+- ✅ A working recommendation engine with **visual carousel** (Twig + Vanilla JS)
+- ✅ **Interactive JavaScript plugin** following Shopware patterns
 - ✅ **AJAX functionality** without page reloads
 - ✅ **Responsive, animated UI** that looks professional
-- ✅ Full-stack integration (backend API + frontend display)
+- ✅ **Vue.js 3 Admin Dashboard** with analytics and charts 🆕
+- ✅ **PWA features** with offline support and installability 🆕
+- ✅ Full-stack integration (Backend + Storefront + Administration)
+
+**Technologies Mastered:**
+
+| Area | Technology | You Can Now... |
+|------|------------|----------------|
+| **Storefront** | Twig + Vanilla JS | Build interactive customer-facing features |
+| **Administration** | Vue.js 3 | Create professional admin dashboards |
+| **PWA** | Service Workers | Enable offline and installable experiences |
+| **Backend** | PHP + Symfony | Build robust APIs and services |
 
 **Keep coding, keep learning, and welcome to the Shopware developer community!** 🚀
 
-*Ready to show this to potential employers or clients? Your recommendation carousel is a real-world feature that demonstrates both technical skill and UX design!*
+*This project demonstrates expertise in ALL Shopware 6.7 frontend technologies—a powerful portfolio piece for employers and clients!*

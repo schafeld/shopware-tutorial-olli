@@ -2,7 +2,7 @@
 
 namespace Learning\Bundle\Service;
 
-use Psr\Log\Logger\LoggerInterface;
+use Psr\Log\LoggerInterface;
 use Shopware\Core\Framework\Adapter\Cache\CacheValueCompressor;
 use Shopware\Core\Framework\Context;
 use Symfony\Contracts\Cache\CacheInterface;

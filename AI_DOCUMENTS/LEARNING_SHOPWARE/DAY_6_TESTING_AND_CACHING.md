@@ -2029,6 +2029,7 @@ Create `custom/plugins/LearningBundle/src/Command/CacheBenchmarkCommand.php`:
 
 namespace Learning\Bundle\Command;
 
+use Doctrine\DBAL\Connection;
 use Learning\Bundle\Service\CachedProductViewService;
 use Shopware\Core\Framework\Context;
 use Symfony\Component\Console\Command\Command;
@@ -2038,21 +2039,41 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class CacheBenchmarkCommand extends Command
 {
-    protected static $defaultName = 'learning:cache-benchmark';
+    protected static $defaultName = 'learning:cache:benchmark';
 
     private CachedProductViewService $cachedService;
+    private Connection $connection;
 
-    public function __construct(CachedProductViewService $cachedService)
-    {
+    public function __construct(
+        CachedProductViewService $cachedService,
+        Connection $connection
+    ) {
         parent::__construct();
         $this->cachedService = $cachedService;
+        $this->connection = $connection;
+    }
+
+    protected function configure(): void
+    {
+        $this
+            ->setName('learning:cache:benchmark')
+            ->setDescription('Benchmark cache performance for product view counts');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $context = Context::createDefaultContext();
-        $productId = 'test-product-id';
+        
+        // Get a real product ID from the database
+        $productId = $this->connection->fetchOne('SELECT LOWER(HEX(id)) FROM product LIMIT 1');
+        
+        if (!$productId) {
+            $io->error('No products found in database. Please create a product first.');
+            return Command::FAILURE;
+        }
+        
+        $io->info(sprintf('Testing cache with product ID: %s', $productId));
 
         // First call (cache miss)
         $start = microtime(true);
@@ -2067,8 +2088,8 @@ class CacheBenchmarkCommand extends Command
         $io->table(
             ['Call', 'Time (ms)', 'Status'],
             [
-                ['First (miss)', number_format($firstCallTime, 2), '❌'],
-                ['Second (hit)', number_format($secondCallTime, 2), '✅'],
+                ['First (miss)', number_format($firstCallTime, 2), '❌ Cache Miss'],
+                ['Second (hit)', number_format($secondCallTime, 2), '✅ Cache Hit'],
                 ['Improvement', number_format($firstCallTime - $secondCallTime, 2), sprintf('%.1fx faster', $firstCallTime / $secondCallTime)],
             ]
         );
@@ -2108,6 +2129,7 @@ OK (2 tests, 4 assertions)
 ```xml
 <service id="Learning\Bundle\Command\CacheBenchmarkCommand">
     <argument type="service" id="Learning\Bundle\Service\CachedProductViewService"/>
+    <argument type="service" id="Doctrine\DBAL\Connection"/>
     <tag name="console.command"/>
 </service>
 ```
@@ -2116,7 +2138,7 @@ OK (2 tests, 4 assertions)
 ```bash
 cd /path/to/shopware-tutorial-olli
 bin/console cache:clear
-bin/console learning:cache-benchmark
+bin/console learning:cache:benchmark
 ```
 
 **Expected output:**

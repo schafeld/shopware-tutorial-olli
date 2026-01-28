@@ -296,5 +296,14 @@
             <argument type="service" id="Doctrine\DBAL\Connection"/>
             <tag name="console.command"/>
         </service>
+
+        <!-- Product Recommendation Engine -->
+        <service id="Learning\Bundle\Core\Content\Recommendation\ProductSessionDefinition">
+            <tag name="shopware.entity.definition" entity="learning_product_session"/>
+        </service>
+
+        <service id="Learning\Bundle\Core\Content\Recommendation\ProductRecommendationDefinition">
+            <tag name="shopware.entity.definition" entity="learning_product_recommendation"/>
+        </service>
     </services>
 </container>

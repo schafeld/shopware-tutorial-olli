@@ -11,6 +11,14 @@ use Shopware\Core\Framework\Plugin\Context\UpdateContext;
 
 class LearningBundle extends Plugin
 {
+    /**
+     * Registers the migration namespace for this plugin.
+     */
+    public function getMigrationNamespace(): string
+    {
+        return 'Learning\\Bundle\\Migration';
+    }
+
     public function install(InstallContext $installContext): void
     {
         parent::install($installContext);
@@ -55,13 +63,7 @@ class LearningBundle extends Plugin
     {
     }
 
-    public function getMigrationNamespace(): string
-    {
-        return 'Learning\Bundle\Migration';
-    }
 
-    public function getMigrationPath(): string
-    {
-        return $this->getPath() . '/src/Migration';
-    }
+
+
 }

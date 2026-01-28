@@ -238,10 +238,59 @@ class ProductSessionEntity extends Entity
 
     protected string $sessionId;
     protected string $productId;
+    protected string $productVersionId;
     protected \DateTimeInterface $viewedAt;
     protected ?ProductEntity $product = null;
 
-    // Getters and setters...
+    public function getSessionId(): string
+    {
+        return $this->sessionId;
+    }
+
+    public function setSessionId(string $sessionId): void
+    {
+        $this->sessionId = $sessionId;
+    }
+
+    public function getProductId(): string
+    {
+        return $this->productId;
+    }
+
+    public function setProductId(string $productId): void
+    {
+        $this->productId = $productId;
+    }
+
+    public function getProductVersionId(): string
+    {
+        return $this->productVersionId;
+    }
+
+    public function setProductVersionId(string $productVersionId): void
+    {
+        $this->productVersionId = $productVersionId;
+    }
+
+    public function getViewedAt(): \DateTimeInterface
+    {
+        return $this->viewedAt;
+    }
+
+    public function setViewedAt(\DateTimeInterface $viewedAt): void
+    {
+        $this->viewedAt = $viewedAt;
+    }
+
+    public function getProduct(): ?ProductEntity
+    {
+        return $this->product;
+    }
+
+    public function setProduct(?ProductEntity $product): void
+    {
+        $this->product = $product;
+    }
 }
 ```
 

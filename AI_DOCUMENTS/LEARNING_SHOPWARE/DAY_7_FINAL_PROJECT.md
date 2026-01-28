@@ -216,6 +216,7 @@ bin/console database:migrate --all LearningBundle
 
 ## Part 3: Entity Definitions (60 minutes)
 
+
 ### Step 1: Create Product Session Entity
 
 Create the entity class, collection, and definition following Day 3 patterns:
@@ -293,6 +294,51 @@ class ProductSessionEntity extends Entity
     }
 }
 ```
+
+---
+
+### Step 1b: Add a Collection Class for Product Sessions
+
+To enable Shopware to work with groups of `ProductSessionEntity` objects, introduce a collection class:
+
+File: custom/plugins/LearningBundle/src/Core/Content/Recommendation/ProductSessionCollection.php
+
+**ProductSessionCollection.php:**
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Core\Content\Recommendation;
+
+use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
+
+class ProductSessionCollection extends EntityCollection
+{
+    /**
+     * Returns the class name of the entity this collection contains.
+     */
+    protected function getExpectedClass(): string
+    {
+        return ProductSessionEntity::class;
+    }
+}
+```
+
+> **Note:** This collection is referenced in your entity definition and is necessary for Shopware’s repository and data abstraction features.
+
+Now, update your entity definition to reference this collection:
+
+File: custom/plugins/LearningBundle/src/Core/Content/Recommendation/ProductSessionDefinition.php
+
+Add or update the following method:
+
+```php
+public function getCollectionClass(): string
+{
+    return ProductSessionCollection::class;
+}
+```
+
+---
 
 File: custom/plugins/LearningBundle/src/Core/Content/Recommendation/ProductSessionDefinition.php
 

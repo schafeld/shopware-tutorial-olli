@@ -311,5 +311,11 @@
             <argument type="service" id="learning_product_recommendation.repository"/>
             <argument type="service" id="logger"/>
         </service>
+
+        <service id="Learning\Bundle\Subscriber\RecommendationTrackingSubscriber">
+            <argument type="service" id="Learning\Bundle\Service\ProductRecommendationTrackingService"/>
+            <argument type="service" id="request_stack"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
     </services>
 </container>

@@ -135,6 +135,8 @@ You'll build a **Product Recommendation Engine** that:
 
 Create `Migration1700000010CreateRecommendationTables.php`:
 
+File: custom/plugins/LearningBundle/src/Migration/Migration1700000010CreateRecommendationTables.php
+
 ```php
 <?php declare(strict_types=1);
 
@@ -218,6 +220,8 @@ bin/console database:migrate --all LearningBundle
 
 Create the entity class, collection, and definition following Day 3 patterns:
 
+File: custom/plugins/LearningBundle/src/Core/Content/Recommendation/ProductSessionEntity.php
+
 **ProductSessionEntity.php:**
 ```php
 <?php declare(strict_types=1);
@@ -240,6 +244,8 @@ class ProductSessionEntity extends Entity
     // Getters and setters...
 }
 ```
+
+File: custom/plugins/LearningBundle/src/Core/Content/Recommendation/ProductSessionDefinition.php
 
 **ProductSessionDefinition.php:**
 ```php
@@ -294,9 +300,13 @@ class ProductSessionDefinition extends EntityDefinition
 
 ### Step 2: Create Product Recommendation Entity
 
+File: custom/plugins/LearningBundle/src/Core/Content/Recommendation/ProductRecommendationEntity.php
+
 Follow the same pattern for `ProductRecommendationEntity` and `ProductRecommendationDefinition`.
 
 Register both definitions in `services.xml`:
+
+File: custom/plugins/LearningBundle/src/Resources/config/services.xml
 
 ```xml
 <service id="Learning\Bundle\Core\Content\Recommendation\ProductSessionDefinition">
@@ -315,6 +325,8 @@ Register both definitions in `services.xml`:
 ### Create Recommendation Tracking Service
 
 Create `ProductRecommendationTrackingService.php`:
+
+File: custom/plugins/LearningBundle/src/Service/ProductRecommendationTrackingService.php
 
 ```php
 <?php declare(strict_types=1);
@@ -503,6 +515,8 @@ Register service:
 
 Create `RecommendationTrackingSubscriber.php`:
 
+File: custom/plugins/LearningBundle/src/Subscriber/RecommendationTrackingSubscriber.php
+
 ```php
 <?php declare(strict_types=1);
 
@@ -572,6 +586,8 @@ Register subscriber:
 ### Step 1: Store API Route
 
 Create `RecommendationRoute.php`:
+
+File: custom/plugins/LearningBundle/src/Core/Content/Recommendation/SalesChannel/RecommendationRoute.php
 
 ```php
 <?php declare(strict_types=1);
@@ -658,6 +674,8 @@ Create admin controller for analytics (similar to Day 4).
 
 Create `storefront/page/product-detail/recommendations.html.twig`:
 
+File: custom/plugins/LearningBundle/src/Resources/views/storefront/page/product-detail/recommendations.html.twig
+
 ```twig
 {% sw_extends '@Storefront/storefront/page/product-detail/index.html.twig' %}
 
@@ -714,6 +732,8 @@ Create `storefront/page/product-detail/recommendations.html.twig`:
 ### Step 2: Create Product Card Template (20 minutes)
 
 Create `storefront/component/product/recommendation-card.html.twig`:
+
+File: custom/plugins/LearningBundle/src/Resources/views/storefront/component/product/recommendation-card.html.twig
 
 ```twig
 {# Recommendation Product Card Template #}
@@ -791,6 +811,8 @@ Create `storefront/component/product/recommendation-card.html.twig`:
 ### Step 3: Create JavaScript Plugin (90 minutes)
 
 Create `src/Resources/app/storefront/src/plugin/recommendation/recommendation-carousel.plugin.js`:
+
+File: custom/plugins/LearningBundle/src/Resources/app/storefront/src/plugin/recommendation/recommendation-carousel.plugin.js
 
 ```javascript
 import Plugin from 'src/plugin-system/plugin.class';
@@ -1155,6 +1177,8 @@ export default class RecommendationCarouselPlugin extends Plugin {
 
 Register the plugin in `main.js`:
 
+File: custom/plugins/LearningBundle/src/Resources/app/storefront/src/main.js
+
 ```javascript
 import RecommendationCarouselPlugin from './plugin/recommendation/recommendation-carousel.plugin';
 
@@ -1165,6 +1189,8 @@ PluginManager.register('RecommendationCarousel', RecommendationCarouselPlugin, '
 ### Step 4: Create SCSS Styling (40 minutes)
 
 Create `src/Resources/app/storefront/src/scss/component/_recommendation-carousel.scss`:
+
+File: custom/plugins/LearningBundle/src/Resources/app/storefront/src/scss/component/_recommendation-carousel.scss
 
 ```scss
 // Recommendation Widget Styles
@@ -1446,6 +1472,8 @@ Import in your main SCSS file:
 
 Add translations in `src/Resources/snippet/en_GB/storefront.en-GB.json`:
 
+File: custom/plugins/LearningBundle/src/Resources/snippet/en_GB/storefront.en-GB.json
+
 ```json
 {
     "learning": {
@@ -1517,6 +1545,8 @@ bin/console cache:clear
 ### Add Caching to Recommendation Service
 
 Create cached wrapper service following Day 6 patterns:
+
+File: custom/plugins/LearningBundle/src/Service/CachedRecommendationService.php
 
 ```php
 <?php declare(strict_types=1);
@@ -1593,6 +1623,8 @@ class CachedRecommendationService
 
 Example test:
 
+File: custom/plugins/LearningBundle/tests/Integration/Service/RecommendationTrackingIntegrationTest.php
+
 ```php
 <?php declare(strict_types=1);
 
@@ -1656,6 +1688,8 @@ cd custom/plugins/LearningBundle
 ### Create Project Documentation
 
 Create `RECOMMENDATION_ENGINE.md`:
+
+File: custom/plugins/LearningBundle/RECOMMENDATION_ENGINE.md
 
 ```markdown
 # Product Recommendation Engine
@@ -1736,6 +1770,8 @@ bin/phpunit custom/plugins/LearningBundle
 
 Create the module directory structure:
 
+File: custom/plugins/LearningBundle/src/Resources/app/administration/src/module/learning-recommendations/
+
 ```
 src/Resources/app/administration/
 ├── src/
@@ -1763,12 +1799,16 @@ src/Resources/app/administration/
 
 Create `src/Resources/app/administration/src/main.js`:
 
+File: custom/plugins/LearningBundle/src/Resources/app/administration/src/main.js
+
 ```javascript
 // Main entry point for the administration module
 import './module/learning-recommendations';
 ```
 
 Create `src/Resources/app/administration/src/module/learning-recommendations/index.js`:
+
+File: custom/plugins/LearningBundle/src/Resources/app/administration/src/module/learning-recommendations/index.js
 
 ```javascript
 import './page/learning-recommendations-dashboard';
@@ -1823,6 +1863,8 @@ Module.register('learning-recommendations', {
 ### Step 3: Create Dashboard Page Component (30 minutes)
 
 Create `src/Resources/app/administration/src/module/learning-recommendations/page/learning-recommendations-dashboard/index.js`:
+
+File: custom/plugins/LearningBundle/src/Resources/app/administration/src/module/learning-recommendations/page/learning-recommendations-dashboard/index.js
 
 ```javascript
 const { Component, Mixin } = Shopware;
@@ -1979,6 +2021,8 @@ Component.register('learning-recommendations-dashboard', {
 
 Create `learning-recommendations-dashboard.html.twig`:
 
+File: custom/plugins/LearningBundle/src/Resources/app/administration/src/module/learning-recommendations/page/learning-recommendations-dashboard/learning-recommendations-dashboard.html.twig
+
 ```twig
 {% block learning_recommendations_dashboard %}
 <sw-page class="learning-recommendations-dashboard">
@@ -2087,6 +2131,8 @@ Create `learning-recommendations-dashboard.html.twig`:
 
 Create `src/Resources/app/administration/src/module/learning-recommendations/component/learning-stats-card/index.js`:
 
+File: custom/plugins/LearningBundle/src/Resources/app/administration/src/module/learning-recommendations/component/learning-stats-card/index.js
+
 ```javascript
 const { Component } = Shopware;
 
@@ -2135,6 +2181,8 @@ Component.register('learning-stats-card', {
 
 Create `learning-stats-card.html.twig`:
 
+File: custom/plugins/LearningBundle/src/Resources/app/administration/src/module/learning-recommendations/component/learning-stats-card/learning-stats-card.html.twig
+
 ```twig
 {% block learning_stats_card %}
 <div class="learning-stats-card" :style="cardStyles">
@@ -2152,6 +2200,8 @@ Create `learning-stats-card.html.twig`:
 ### Step 5: Create Chart Component (20 minutes)
 
 Create `src/Resources/app/administration/src/module/learning-recommendations/component/learning-recommendation-chart/index.js`:
+
+File: custom/plugins/LearningBundle/src/Resources/app/administration/src/module/learning-recommendations/component/learning-recommendation-chart/index.js
 
 ```javascript
 const { Component } = Shopware;
@@ -2201,6 +2251,8 @@ Component.register('learning-recommendation-chart', {
 
 Create `learning-recommendation-chart.html.twig`:
 
+File: custom/plugins/LearningBundle/src/Resources/app/administration/src/module/learning-recommendations/component/learning-recommendation-chart/learning-recommendation-chart.html.twig
+
 ```twig
 {% block learning_recommendation_chart %}
 <div class="learning-recommendation-chart">
@@ -2217,6 +2269,8 @@ Create `learning-recommendation-chart.html.twig`:
 ### Step 6: Add Translations (10 minutes)
 
 Create `src/Resources/app/administration/src/module/learning-recommendations/snippet/en-GB.json`:
+
+File: custom/plugins/LearningBundle/src/Resources/app/administration/src/module/learning-recommendations/snippet/en-GB.json
 
 ```json
 {
@@ -2249,6 +2303,8 @@ Create `de-DE.json` with German translations.
 ### Step 7: Add SCSS Styling (10 minutes)
 
 Create `src/Resources/app/administration/src/module/learning-recommendations/page/learning-recommendations-dashboard/learning-recommendations-dashboard.scss`:
+
+File: custom/plugins/LearningBundle/src/Resources/app/administration/src/module/learning-recommendations/page/learning-recommendations-dashboard/learning-recommendations-dashboard.scss
 
 ```scss
 .learning-recommendations-dashboard {
@@ -2375,6 +2431,8 @@ bin/console cache:clear
 
 Create `src/Resources/app/storefront/src/manifest.json`:
 
+File: custom/plugins/LearningBundle/src/Resources/app/storefront/src/manifest.json
+
 ```json
 {
     "name": "My Shop - Smart Recommendations",
@@ -2414,6 +2472,8 @@ Create `src/Resources/app/storefront/src/manifest.json`:
 ### Step 2: Create Service Worker (30 minutes)
 
 Create `src/Resources/app/storefront/src/service-worker/recommendation-sw.js`:
+
+File: custom/plugins/LearningBundle/src/Resources/app/storefront/src/service-worker/recommendation-sw.js
 
 ```javascript
 /**
@@ -2611,6 +2671,8 @@ console.log('[SW] Recommendation Service Worker loaded');
 
 Create `src/Resources/app/storefront/src/plugin/pwa/pwa-installer.plugin.js`:
 
+File: custom/plugins/LearningBundle/src/Resources/app/storefront/src/plugin/pwa/pwa-installer.plugin.js
+
 ```javascript
 import Plugin from 'src/plugin-system/plugin.class';
 
@@ -2761,6 +2823,8 @@ PluginManager.register('PwaInstaller', PwaInstallerPlugin, 'body');
 ### Step 4: Add PWA Install Banner Template (5 minutes)
 
 Create `storefront/layout/header/pwa-install-banner.html.twig`:
+
+File: custom/plugins/LearningBundle/src/Resources/views/storefront/layout/header/pwa-install-banner.html.twig
 
 ```twig
 {% block learning_pwa_install_banner %}

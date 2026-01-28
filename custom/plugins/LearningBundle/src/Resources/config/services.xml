@@ -305,5 +305,11 @@
         <service id="Learning\Bundle\Core\Content\Recommendation\ProductRecommendationDefinition">
             <tag name="shopware.entity.definition" entity="learning_product_recommendation"/>
         </service>
+
+        <service id="Learning\Bundle\Service\ProductRecommendationTrackingService">
+            <argument type="service" id="learning_product_session.repository"/>
+            <argument type="service" id="learning_product_recommendation.repository"/>
+            <argument type="service" id="logger"/>
+        </service>
     </services>
 </container>

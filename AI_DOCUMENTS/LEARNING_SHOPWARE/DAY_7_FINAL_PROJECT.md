@@ -100,7 +100,7 @@ You'll build a **Product Recommendation Engine** that:
 │       ↓                                          ↓                      │
 │  Cache Layer                               Analytics Service            │
 │       ↓                                          ↓                      │
-│  Recommendation Engine Service ←─────→ Database (Tracking + Scores)    │
+│  Recommendation Engine Service ←─────→ Database (Tracking + Scores)     │
 │       ↑                                                                 │
 │  Event Subscriber (Product Views)                                       │
 └─────────────────────────────────────────────────────────────────────────┘

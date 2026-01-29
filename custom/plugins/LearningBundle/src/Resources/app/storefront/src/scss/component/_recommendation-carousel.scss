@@ -46,17 +46,16 @@
 // Carousel Container
 .recommendations-carousel {
     position: relative;
-    overflow: visible; // Changed from hidden to allow hover effects
-    padding: 0 3rem;
+    overflow: visible; // Allow hover effects to expand
+    padding: 1.5rem 3rem 0; // Top padding prevents clipping, side padding for nav buttons
     margin: 2rem 0;
-    padding-top: 1rem; // Add top padding to prevent clipping on hover
 
     .carousel-track {
         display: flex;
         gap: 1.5rem;
         transition: transform 0.3s ease-in-out;
-        overflow: hidden; // Keep horizontal overflow hidden
-        padding-bottom: 1rem; // Add bottom padding for shadow
+        overflow: visible; // Changed: allow cards to expand on hover
+        padding-bottom: 3rem; // Space for pagination dots and shadow
     }
 }
 
@@ -64,16 +63,18 @@
 .recommendation-card {
     flex: 0 0 250px;
     width: 250px;
+    min-width: 250px; // Ensure cards don't shrink
     background: #fff;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    overflow: hidden;
+    overflow: visible; // Allow hover effects to extend beyond card
     transition: all 0.3s ease;
 
     &:hover {
         transform: translateY(-8px);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         border-color: #007bff;
+        z-index: 5; // Bring to front on hover
     }
 
     .recommendation-card-link {
@@ -204,11 +205,16 @@
         fill: currentColor;
     }
 
-    &:hover {
+    &:hover:not(:disabled) {
         background: #007bff;
         border-color: #007bff;
         color: white;
         transform: translateY(-50%) scale(1.1);
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
     }
 
     &.carousel-nav-prev,
@@ -222,12 +228,15 @@
     }
 }
 
-// Carousel Indicators
+// Carousel Indicators (positioned below the track)
 .carousel-indicators {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     gap: 0.5rem;
     justify-content: center;
-    margin-top: 1.5rem;
 
     .indicator {
         width: 8px;

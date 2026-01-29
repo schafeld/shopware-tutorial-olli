@@ -218,16 +218,20 @@ export default class RecommendationCarouselPlugin extends Plugin {
      * Initialize carousel navigation
      */
     initializeCarousel() {
-        const prevBtn = this.carousel.querySelector('[data-carousel-prev]');
-        const nextBtn = this.carousel.querySelector('[data-carousel-next]');
+        this.prevBtn = this.carousel.querySelector('[data-carousel-prev]');
+        this.nextBtn = this.carousel.querySelector('[data-carousel-next]');
+        this.track = this.carousel.querySelector('.carousel-track');
 
-        if(prevBtn) {
-            prevBtn.addEventListener('click', () => this.slideToPrev());
+        if(this.prevBtn) {
+            this.prevBtn.addEventListener('click', () => this.slideToPrev());
         }
 
-        if(nextBtn) {
-            nextBtn.addEventListener('click', () => this.slideToNext());
+        if(this.nextBtn) {
+            this.nextBtn.addEventListener('click', () => this.slideToNext());
         }
+
+        // Initialize button states
+        this.updateNavigationButtons();
 
         if(this.options.autoplay) {
             this.startAutoplay();
@@ -258,14 +262,46 @@ export default class RecommendationCarouselPlugin extends Plugin {
      * Update carousel visual position
      */
     updateCarouselPosition() {
-        const track = this.carousel.querySelector('.carousel-track');
-        const cardWidth = 250; // Assuming each card is 250px wide
-        const offset = -(this.currentIndex * cardWidth);
+        if (!this.track) return;
+        
+        const cardWidth = 250; // Card width in pixels
+        const gap = 24; // Gap between cards (1.5rem = 24px)
+        const offset = -(this.currentIndex * (cardWidth + gap));
 
-        track.style.transform = `translateX(${offset}px)`;
-        track.style.transition = `transform ${this.options.slideSpeed}ms ease-in-out`;
+        this.track.style.transform = `translateX(${offset}px)`;
+        this.track.style.transition = `transform ${this.options.slideSpeed}ms ease-in-out`;
 
         this.updateIndicators();
+        this.updateNavigationButtons();
+    }
+
+    /**
+     * Update navigation button states (disable at boundaries)
+     */
+    updateNavigationButtons() {
+        if (this.prevBtn) {
+            if (this.currentIndex === 0) {
+                this.prevBtn.disabled = true;
+                this.prevBtn.style.opacity = '0.5';
+                this.prevBtn.style.cursor = 'not-allowed';
+            } else {
+                this.prevBtn.disabled = false;
+                this.prevBtn.style.opacity = '1';
+                this.prevBtn.style.cursor = 'pointer';
+            }
+        }
+
+        if (this.nextBtn) {
+            if (this.currentIndex >= this.recommendations.length - 1) {
+                this.nextBtn.disabled = true;
+                this.nextBtn.style.opacity = '0.5';
+                this.nextBtn.style.cursor = 'not-allowed';
+            } else {
+                this.nextBtn.disabled = false;
+                this.nextBtn.style.opacity = '1';
+                this.nextBtn.style.cursor = 'pointer';
+            }
+        }
     }
 
     /**

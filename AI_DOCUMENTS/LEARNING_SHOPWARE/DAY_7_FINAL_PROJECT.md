@@ -1028,20 +1028,29 @@ File: custom/plugins/LearningBundle/src/Resources/config/services.xml
 
 ### Step 1: Create Twig Template Extension (30 minutes)
 
-Create `storefront/page/product-detail/recommendations.html.twig`:
+> **Important:** For CMS product detail pages, extend `page/content/product-detail.html.twig` instead of `page/product-detail/index.html.twig`
 
-File: custom/plugins/LearningBundle/src/Resources/views/storefront/page/product-detail/recommendations.html.twig
+Create `storefront/page/content/product-detail.html.twig`:
+
+File: custom/plugins/LearningBundle/src/Resources/views/storefront/page/content/product-detail.html.twig
 
 ```twig
-{% sw_extends '@Storefront/storefront/page/product-detail/index.html.twig' %}
+{% sw_extends '@Storefront/storefront/page/content/product-detail.html.twig' %}
 
-{% block page_product_detail_description_content_inner %}
+{# Add recommendations after product details #}
+{% block page_content %}
+    {# Keep original content #}
     {{ parent() }}
-    
+
+    {# Make sales channel access key available to JavaScript (REQUIRED for Store API) #}
+    <script>
+        window.salesChannelAccessKey = '{{ context.salesChannel.accessKey }}';
+    </script>
+
     {# Recommendations Widget #}
-    <div class="learning-recommendations-wrapper">
-        <div class="learning-recommendations" 
-             data-learning-recommendations="true"
+    <div class="container learning-recommendations-wrapper">
+        <div class="learning-recommendations"
+             data-learning-recommendation="true"
              data-product-id="{{ page.product.id }}">
             
             <div class="recommendations-header">
@@ -1061,8 +1070,8 @@ File: custom/plugins/LearningBundle/src/Resources/views/storefront/page/product-
                 <p>{{ "learning.recommendations.loading"|trans }}</p>
             </div>
 
-            {# Recommendations Container (populated by JavaScript) #}
-            <div class="recommendations-carousel" 
+            {# Recommendations Container (populated via JS) #}
+            <div class="recommendations-carousel"
                  data-recommendations-carousel="true">
                 {# Dynamically loaded content #}
             </div>
@@ -1221,25 +1230,50 @@ export default class RecommendationCarouselPlugin extends Plugin {
 
     /**
      * Load recommendations from API
+     * IMPORTANT: Store API requires sw-access-key header for authentication
      */
     async loadRecommendations() {
         try {
             this.showLoading();
             
             const url = `${this.options.recommendationsUrl}/${this.productId}?limit=${this.options.limit}`;
+            const accessKey = window.salesChannelAccessKey || this.el.dataset.accessKey || '';
+
+            // Use XMLHttpRequest for proper header control (Store API authentication)
+            const request = new XMLHttpRequest();
+            request.open('GET', url);
+            request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            request.setRequestHeader('Content-Type', 'application/json');
             
-            const response = await this.httpClient.get(url, (responseText) => {
-                return JSON.parse(responseText);
+            // REQUIRED: Add Store API authentication header
+            if (accessKey) {
+                request.setRequestHeader('sw-access-key', accessKey);
+            }
+
+            request.addEventListener('loadend', () => {
+                if (request.status === 200) {
+                    try {
+                        const responseData = JSON.parse(request.responseText);
+
+                        if (responseData.success && responseData.data && responseData.data.length > 0) {
+                            this.recommendations = responseData.data;
+                            this.renderRecommendations();
+                            this.initializeCarousel();
+                            this.registerQuickAddHandlers();
+                        } else {
+                            this.showEmpty();
+                        }
+                    } catch (parseError) {
+                        console.error('Error parsing response:', parseError);
+                        this.showError();
+                    }
+                } else {
+                    console.error('HTTP error:', request.status);
+                    this.showError();
+                }
             });
 
-            if (response.success && response.data && response.data.length > 0) {
-                this.recommendations = response.data;
-                this.renderRecommendations();
-                this.initializeCarousel();
-                this.registerQuickAddHandlers();
-            } else {
-                this.showEmpty();
-            }
+            request.send();
             
         } catch (error) {
             console.error('Failed to load recommendations:', error);
@@ -1261,14 +1295,14 @@ export default class RecommendationCarouselPlugin extends Plugin {
             <div class="carousel-track">
                 ${cardsHtml}
             </div>
-            <button class="carousel-nav carousel-nav-prev" data-carousel-prev>
-                <svg width="24" height="24">
-                    <use xlink:href="#icon-chevron-left"></use>
+            <button class="carousel-nav carousel-nav-prev" data-carousel-prev aria-label="Previous">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
             </button>
-            <button class="carousel-nav carousel-nav-next" data-carousel-next>
-                <svg width="24" height="24">
-                    <use xlink:href="#icon-chevron-right"></use>
+            <button class="carousel-nav carousel-nav-next" data-carousel-next aria-label="Next">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
             </button>
             <div class="carousel-indicators">
@@ -1281,28 +1315,34 @@ export default class RecommendationCarouselPlugin extends Plugin {
 
     /**
      * Create HTML for a single product card
+     * Note: API returns flat structure (not nested under .product)
      */
-    createProductCard(recommendation, index) {
-        const product = recommendation.product;
-        const score = recommendation.affinityScore;
+    createProductCard(product, index) {
+        // Handle both flat and nested response structures for compatibility
+        const productData = product.product || product;
+        const score = product.affinityScore || product.affinity_score;
+        
+        // Use optional chaining for compatibility with different response formats
+        const productName = productData.translated?.name || productData.name || 'Unknown Product';
+        const productId = productData.id;
         
         return `
             <div class="recommendation-card" 
                  data-index="${index}"
-                 data-product-id="${product.id}">
+                 data-product-id="${productId}">
                 
-                <a href="/detail/${product.id}" class="recommendation-card-image-link">
-                    ${this.createProductImage(product)}
-                    ${score ? `<span class="recommendation-badge">${Math.round(score)}% Match</span>` : ''}
+                <a href="/detail/${productId}" class="recommendation-card-link">
+                    ${this.createProductImage(productData)}
+                    ${score ? `<span class="recommendation-badge">${Math.round(score * 100)}% Match</span>` : ''}
                 </a>
 
                 <div class="recommendation-card-body">
-                    <a href="/detail/${product.id}" class="recommendation-card-title">
-                        ${product.translated.name}
+                    <a href="/detail/${productId}" class="recommendation-card-title">
+                        ${productName}
                     </a>
                     
                     <div class="recommendation-card-price">
-                        <span class="price">${this.formatPrice(product.calculatedPrice)}</span>
+                        <span class="price">${this.formatPrice(productData.price || productData.calculatedPrice)}</span>
                     </div>
 
                     <div class="recommendation-card-actions">
@@ -1501,8 +1541,18 @@ export default class RecommendationCarouselPlugin extends Plugin {
     // Helper methods
     formatPrice(priceObj) {
         if (!priceObj) return '';
-        // Simple formatting - adjust for your locale
-        return `$${priceObj.unitPrice.toFixed(2)}`;
+        
+        // Handle multiple price formats (unitPrice or gross/net)
+        const price = priceObj.unitPrice || priceObj.gross || priceObj.net;
+        const currency = priceObj.currency || priceObj.currencyId || 'EUR';
+        
+        if (!price) return '';
+        
+        // Format with currency symbol
+        return new Intl.NumberFormat('de-DE', {
+            style: 'currency',
+            currency: currency === 'EUR' ? 'EUR' : currency
+        }).format(price);
     }
 
     createIndicators() {
@@ -1554,6 +1604,7 @@ File: custom/plugins/LearningBundle/src/Resources/app/storefront/src/scss/compon
     margin: 3rem 0;
     padding: 2rem 0;
     border-top: 1px solid #e0e0e0;
+    overflow: visible; // Allow cards to expand upward on hover
 }
 
 .learning-recommendations {
@@ -1594,10 +1645,12 @@ File: custom/plugins/LearningBundle/src/Resources/app/storefront/src/scss/compon
 // Carousel Container
 .recommendations-carousel {
     position: relative;
-    overflow: hidden;
-    padding: 0 3rem; // Space for nav buttons
+    overflow: visible; // Allow cards to expand upward on hover
+    padding: 1rem 3rem 0; // Add top padding to prevent clipping on hover
 
     .carousel-track {
+        overflow: hidden; // Horizontal scroll only
+        padding-bottom: 1rem; // Space for box shadow
         display: flex;
         gap: 1.5rem;
         transition: transform 0.3s ease-in-out;
@@ -2087,6 +2140,28 @@ Stores calculated product relationships and affinity scores.
 
 No configuration needed - works out of the box!
 
+## Bulk Recommendation Generation
+
+Use the console command to prepopulate recommendations from existing session data:
+
+```bash
+# Generate recommendations with default settings (min 2 co-views, 60 min window)
+./bin/console learning:recommendations:generate
+
+# Generate with custom parameters
+./bin/console learning:recommendations:generate --min-views=1 --window=120
+
+# Clear existing recommendations and regenerate
+./bin/console learning:recommendations:generate --clear --min-views=1
+
+# Options:
+#   --min-views=N   Minimum co-views required (default: 2)
+#   --window=N      Time window in minutes to consider sessions related (default: 60)
+#   --clear         Delete all existing recommendations before generating new ones
+```
+
+The command analyzes your product session tracking data and automatically generates recommendations based on products that are frequently viewed together.
+
 ## Testing
 
 ```bash
@@ -2096,7 +2171,7 @@ bin/phpunit custom/plugins/LearningBundle
 ## Performance
 
 - Recommendations are cached for 30 minutes
-- Background job can recalculate scores (optional)
+- Use the console command to bulk-generate recommendations (recommended daily via cron)
 - Handles high traffic scenarios
 
 ## Future Enhancements
@@ -3551,6 +3626,115 @@ Before considering the project complete:
 - [ ] Documentation is complete
 - [ ] Code is clean and commented
 - [ ] Ready for code review
+
+---
+
+## Troubleshooting Common Issues
+
+### Widget Not Displaying
+
+**Issue:** Recommendation widget doesn't appear on product detail page.
+
+**Solutions:**
+1. **Check template location**: For CMS product detail pages, use `page/content/product-detail.html.twig` not `page/product-detail/index.html.twig`
+2. **Verify storefront build**: Run `./bin/build-storefront.sh` to compile assets
+3. **Clear cache**: `./bin/console cache:clear`
+4. **Check browser console**: Look for JavaScript errors
+
+### 401 Unauthorized Error
+
+**Issue:** API returns `401 Unauthorized` when loading recommendations.
+
+**Solutions:**
+1. **Add access key to template**: Ensure you have the script block:
+   ```twig
+   <script>
+       window.salesChannelAccessKey = '{{ context.salesChannel.accessKey }}';
+   </script>
+   ```
+2. **Verify header in JavaScript**: Check that XMLHttpRequest includes:
+   ```javascript
+   request.setRequestHeader('sw-access-key', accessKey);
+   ```
+
+### Navigation Arrows Not Visible
+
+**Issue:** Carousel navigation arrows are missing.
+
+**Solutions:**
+1. **Use inline SVG**: Replace `xlink:href` references with inline SVG polylines (see tutorial code)
+2. **Check CSS**: Verify `.carousel-nav` styles are applied
+3. **Rebuild storefront**: Run `./bin/build-storefront.sh`
+
+### Cards Clipped on Hover
+
+**Issue:** Recommendation cards get cut off at the top when hovering.
+
+**Solutions:**
+1. **Fix CSS overflow**: Set `overflow: visible` on parent containers:
+   ```scss
+   .learning-recommendations-wrapper {
+       overflow: visible; // Allow cards to expand upward on hover
+   }
+   .recommendations-carousel {
+       overflow: visible; // Allow cards to expand upward
+       padding-top: 1rem; // Add top padding to prevent clipping
+   }
+   .carousel-track {
+       overflow: hidden; // Horizontal scroll only
+   }
+   ```
+
+### No Recommendations Showing
+
+**Issue:** Widget displays "No recommendations available" message.
+
+**Solutions:**
+1. **Generate recommendations**: Run the console command:
+   ```bash
+   ./bin/console learning:recommendations:generate --clear --min-views=1
+   ```
+2. **View products**: Browse several product detail pages to generate session tracking data
+3. **Check database**: Verify records exist:
+   ```sql
+   SELECT COUNT(*) FROM learning_product_recommendation;
+   SELECT COUNT(*) FROM learning_product_session;
+   ```
+
+### Product Images Not Loading
+
+**Issue:** Recommendations show placeholder images instead of product photos.
+
+**Solutions:**
+1. **Verify API associations**: Check that `ProductRecommendationTrackingService` loads:
+   ```php
+   'recommendedProduct.cover.media'
+   ```
+2. **Check product data**: Ensure products have cover images assigned
+3. **Verify image path in response**: Check API response includes `cover.url`
+
+### Command Validation Errors
+
+**Issue:** `learning:recommendations:generate` fails with constraint violations.
+
+**Solutions:**
+1. **Use correct ID format**: Use `Uuid::randomHex()` not `Uuid::randomBytes()`
+2. **Cast types properly**: Cast view_count to int: `'viewCount' => (int) $pair['co_views']`
+3. **Match entity properties**: Use camelCase field names: `sourceProductId` not `source_product_id`
+
+### JavaScript Data Format Mismatch
+
+**Issue:** Product name/price not displaying, TypeError in console.
+
+**Solutions:**
+1. **Use optional chaining**: Access nested properties safely:
+   ```javascript
+   const productName = productData.translated?.name || productData.name;
+   ```
+2. **Handle multiple formats**: Support both `unitPrice` and `gross/net`:
+   ```javascript
+   const price = priceObj.unitPrice || priceObj.gross || priceObj.net;
+   ```
 
 ---
 

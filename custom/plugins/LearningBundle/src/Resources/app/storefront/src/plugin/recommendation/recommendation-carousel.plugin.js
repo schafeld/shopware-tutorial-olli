@@ -11,7 +11,7 @@ export default class RecommendationCarouselPlugin extends Plugin {
 
     static options = {
         // API endpoints
-        recommendationsUrl: '/store-api/learning/recommendations',
+        recommendationsUrl: '/store-api/recommendation',
         addToCartUrl: '/checkout/line-item/add',
 
         // Display options
@@ -31,13 +31,22 @@ export default class RecommendationCarouselPlugin extends Plugin {
     };
 
     init() {
+        console.log('[RecommendationCarousel] Plugin initialized');
         this.httpClient = new HttpClient();
         this.productId = this.el.dataset.productId;
+        console.log('[RecommendationCarousel] Product ID:', this.productId);
 
         this.carousel = this.el.querySelector(this.options.carouselSelector);
         this.loadingEl = this.el.querySelector(this.options.loadingSelector);
         this.errorEl = this.el.querySelector(this.options.errorSelector);
         this.emptyEl = this.el.querySelector(this.options.emptySelector);
+
+        console.log('[RecommendationCarousel] Elements found:', {
+            carousel: !!this.carousel,
+            loading: !!this.loadingEl,
+            error: !!this.errorEl,
+            empty: !!this.emptyEl
+        });
 
         this.currentIndex = 0;
         this.recommendations = [];
@@ -50,24 +59,58 @@ export default class RecommendationCarouselPlugin extends Plugin {
      */
     async loadRecommendations() {
         try {
+            console.log('[RecommendationCarousel] Starting to load recommendations...');
             this.showLoading();
 
             const url = `${this.options.recommendationsUrl}/${this.productId}?limit=${this.options.limit}`;
+            console.log('[RecommendationCarousel] API URL:', url);
 
-            const response = await this.httpClient.get(url, (responseText) => {
-                return JSON.parse(responseText);
+            const accessKey = window.salesChannelAccessKey || this.el.dataset.accessKey || '';
+            console.log('[RecommendationCarousel] Access key available:', !!accessKey);
+
+            // Create a configured XMLHttpRequest with Store API authentication
+            const request = new XMLHttpRequest();
+            request.open('GET', url);
+            request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            request.setRequestHeader('Content-Type', 'application/json');
+            
+            if (accessKey) {
+                request.setRequestHeader('sw-access-key', accessKey);
+            }
+
+            request.addEventListener('loadend', () => {
+                console.log('[RecommendationCarousel] Response status:', request.status);
+                console.log('[RecommendationCarousel] Raw response:', request.responseText);
+                
+                if (request.status === 200) {
+                    try {
+                        const responseData = JSON.parse(request.responseText);
+                        console.log('[RecommendationCarousel] Parsed response:', responseData);
+
+                        if (responseData.success && responseData.data && responseData.data.length > 0) {
+                            console.log('[RecommendationCarousel] Found', responseData.data.length, 'recommendations');
+                            this.recommendations = responseData.data;
+                            this.renderRecommendations();
+                            this.initializeCarousel();
+                            this.registerQuickAddHandlers();
+                        } else {
+                            console.log('[RecommendationCarousel] No recommendations found');
+                            this.showEmpty();
+                        }
+                    } catch (parseError) {
+                        console.error('[RecommendationCarousel] Error parsing response:', parseError);
+                        this.showError();
+                    }
+                } else {
+                    console.error('[RecommendationCarousel] HTTP error:', request.status);
+                    this.showError();
+                }
             });
 
-            if (response.success && response.data && response.data.length > 0) {
-                this.recommendations = response.data;
-                this.renderRecommendations();
-                this.initializeCarousel();
-                this.registerQuickAddHandlers();
-            } else {
-                this.showEmpty();
-            }
+            request.send();
+
         } catch (error) {
-            console.error('Error loading recommendations:', error);
+            console.error('[RecommendationCarousel] Error loading recommendations:', error);
             this.showError();
         } 
     }
@@ -86,14 +129,14 @@ export default class RecommendationCarouselPlugin extends Plugin {
             <div class="carousel-track">
                 ${cardsHtml}
             </div>
-            <button class="carousel-nav carousel-nav-prev" data-carousel-prev>
-                <svg width="24" height="24">
-                    <use xlink:href="#icon-chevron-left"></use>
+            <button class="carousel-nav carousel-nav-prev" data-carousel-prev aria-label="Previous">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
             </button>
-            <button class="carousel-nav carousel-nav-next" data-carousel-next>
-                <svg width="24" height="24">
-                    <use xlink:href="#icon-chevron-right"></use>
+            <button class="carousel-nav carousel-nav-next" data-carousel-next aria-label="Next">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
                 </svg>
             </button>
             <div class="carousel-indicators">
@@ -108,32 +151,37 @@ export default class RecommendationCarouselPlugin extends Plugin {
      * Create HTML for a single product card
      */
     createProductCard(recommendation, index) {
-        const product = recommendation.product;
-        const score = recommendation.affinityScore;
+        // Handle both nested product structure and flat API response
+        const product = recommendation.product || recommendation;
+        const score = recommendation.affinity_score || recommendation.affinityScore || 0;
+        const productId = product.id;
+        const productName = product.translated?.name || product.name;
+        const coverUrl = product.cover?.media?.url || product.cover?.url;
+        const price = product.calculatedPrice || product.price;
 
         return `
             <div class="recommendation-card"
                 data-index="${index}"
-                data-product-id="${product.id}">
+                data-product-id="${productId}">
 
-                <a href="/detail/${product.id}" class="recommendation-card-link">
+                <a href="/detail/${productId}" class="recommendation-card-link">
                     ${this.createProductImage(product)}
-                    ${score ? `<span class="recommendation-badge">${Math.round(score)}% Match</span>` : ''}
+                    ${score ? `<span class="recommendation-badge">${Math.round(score * 100)}% Match</span>` : ''}
                 </a>
 
                 <div class="recommendation-card-body">
-                    <a href="/detail/${product.id}" class="recommendation-card-title">
-                        ${product.translated.name}
+                    <a href="/detail/${productId}" class="recommendation-card-title">
+                        ${productName}
                     </a>
 
                     <div class="recommendation-card-price">
-                        <span class="price">${this.formatPrice(product.calculatedPrice)}</span>
+                        <span class="price">${this.formatPrice(price)}</span>
                     </div>
 
                     <div class="recommendation-card-actions">
                         <button type="button"
                             class="btn btn-sm btn-primary recommendation-quick-add"
-                            data-product-id="${product.id}"
+                            data-product-id="${productId}"
                             data-quick-add="true">
                             <span class="button-text">Add to Cart</span>
                             <span class="button-loading" style="display: none;">
@@ -150,9 +198,12 @@ export default class RecommendationCarouselPlugin extends Plugin {
      * Create product image HTML
      */
     createProductImage(product) {
-        if (product.cover && product.cover.media) {
-            return `<img src="${product.cover.media.url}"
-                alt="${product.translated.name}"
+        const coverUrl = product.cover?.media?.url || product.cover?.url;
+        const productName = product.translated?.name || product.name;
+        
+        if (coverUrl) {
+            return `<img src="${coverUrl}"
+                alt="${productName}"
                 class="recommendation-card-image" 
                 loading="lazy">`;
         }
@@ -326,13 +377,16 @@ export default class RecommendationCarouselPlugin extends Plugin {
     formatPrice(priceObj) {
         if (!priceObj) return '';
 
-        // // Simple formatting - adjust for your locale
-        // return `$${priceObj.unitPrice.toFixed(2)}`;
+        // Handle different price structures
+        const price = priceObj.unitPrice || priceObj.gross;
+        const currency = priceObj.currency || 'EUR';
+
+        if (!price) return '';
 
         return new Intl.NumberFormat('de-DE', {
             style: 'currency',
-            currency: priceObj.currency,
-        }).format(priceObj.unitPrice);
+            currency: currency,
+        }).format(price);
     }
 
     createIndicators() {

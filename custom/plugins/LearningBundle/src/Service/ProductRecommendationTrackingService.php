@@ -141,24 +141,42 @@ class ProductRecommendationTrackingService
     /**
      * Get recommendations for a product
      */
-    public function getRecommendations(string $productId, Context $context): array
+    public function getRecommendations(string $productId, int $limit, Context $context): array
     {
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('sourceProductId', $productId));
-        $criteria->addAssociation('recommendedProduct');
+        $criteria->addAssociation('recommendedProduct.cover.media');
+        $criteria->addAssociation('recommendedProduct.price');
+        $criteria->addAssociation('recommendedProduct.manufacturer');
         $criteria->addSorting( new FieldSorting('affinityScore', FieldSorting::DESCENDING));
-        $criteria->setLimit(5);
+        $criteria->setLimit($limit);
 
         $recommendations = $this->recommendationRepository->search($criteria, $context);
 
         $result = [];
         foreach ($recommendations as $recommendation) {
-            $result[] = [
-                'product_id' => $recommendation->getRecommendedProductId(),
-                'product_name' => $recommendation->getRecommendedProduct()?->getName(),
-                'affinity_score' => $recommendation->getAffinityScore(),
-                'view_count' => $recommendation->getViewCount(),
-            ];
+            $product = $recommendation->getRecommendedProduct();
+            if ($product) {
+                $cover = $product->getCover();
+                $media = $cover?->getMedia();
+                
+                $result[] = [
+                    'id' => $product->getId(),
+                    'name' => $product->getName(),
+                    'productNumber' => $product->getProductNumber(),
+                    'cover' => $media ? [
+                        'url' => $media->getUrl(),
+                        'alt' => $media->getAlt() ?? $product->getName(),
+                    ] : null,
+                    'price' => $product->getPrice() ? [
+                        'gross' => $product->getPrice()->first()?->getGross(),
+                        'net' => $product->getPrice()->first()?->getNet(),
+                    ] : null,
+                    'manufacturer' => $product->getManufacturer()?->getName(),
+                    'affinity_score' => $recommendation->getAffinityScore(),
+                    'view_count' => $recommendation->getViewCount(),
+                ];
+            }
         }
 
         return $result;

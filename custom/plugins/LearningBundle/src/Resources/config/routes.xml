@@ -7,6 +7,7 @@
     <!-- Store API Routes -->
     <import resource="../../Core/Content/ProductView/SalesChannel/*Route.php" type="attribute" />
     <import resource="../../Core/Content/Wishlist/SalesChannel/*Route.php" type="attribute" />
+    <import resource="../../Core/Content/Recommendation/SalesChannel/*Route.php" type="attribute" />
     
     <!-- Admin API Routes -->
     <import resource="../../Core/Api/*Controller.php" type="attribute" />

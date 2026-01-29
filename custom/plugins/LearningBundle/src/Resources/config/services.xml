@@ -322,5 +322,19 @@
             <argument type="service" id="Learning\Bundle\Service\ProductRecommendationTrackingService" />
             <tag name="controller.service_arguments" />
         </service>
+
+        <!-- Store API Route for Recommendations -->
+        <service id="Learning\Bundle\Core\Content\Recommendation\SalesChannel\RecommendationRoute">
+            <argument type="service" id="Learning\Bundle\Service\ProductRecommendationTrackingService" />
+            <tag name="controller.service_arguments" />
+        </service>
+
+        <!-- Generate Recommendations Command -->
+        <service id="Learning\Bundle\Command\GenerateRecommendationsCommand">
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <argument type="service" id="learning_product_recommendation.repository"/>
+            <argument type="service" id="logger"/>
+            <tag name="console.command"/>
+        </service>
     </services>
 </container>

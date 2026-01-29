@@ -7,11 +7,9 @@ use OpenApi\Annotations as OA;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
-/**
- * @Route(defaults={"_routeScope"={"store-api"}})
- */
+#[Route(defaults: ['_routeScope' => ['store-api']])]
 class RecommendationRoute
 {
     private ProductRecommendationTrackingService $trackingService;
@@ -40,12 +38,12 @@ class RecommendationRoute
      *  ),
      *  @OA\Response(response="200", description="Product recommendations")
      * )
-     * @Route(
-     *   "/store-api/recommendation/{productId}",
-     *   name="store-api.learning.recommendations",
-     *   methods={"GET"}
-     * )
      */
+    #[Route(
+        path: '/store-api/recommendation/{productId}',
+        name: 'store-api.learning.recommendations',
+        methods: ['GET']
+    )]
     public function getRecommendations(
         string $productId,
         Request $request,
@@ -55,6 +53,7 @@ class RecommendationRoute
 
         $recommendations = $this->trackingService->getRecommendations(
             $productId,
+            $limit,
             $context->getContext()
         );
 

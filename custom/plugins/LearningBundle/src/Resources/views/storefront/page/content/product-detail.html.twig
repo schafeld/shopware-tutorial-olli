@@ -1,25 +1,59 @@
 {% sw_extends '@Storefront/storefront/page/content/product-detail.html.twig' %}
 
-{# Add a custom banner above product details #}
+{# Add recommendations after product details #}
 {% block page_content %}
-    <div class="learning-product-banner alert alert-info">
-        <strong>🎉 Welcome!</strong> This is a custom banner added by LearningBundle plugin.
-    </div>
-
     {# Keep original content #}
     {{ parent() }}
-{% endblock %}
 
-{# data attribute binding for tracking #}
-{# The trackingUrl endpoint doesn't exist yet, so there'll be an error 404 #}
-{% block base_main_inner %}
-    <div data-product-view-tracker
-         data-product-id="{{ page.product.id }}"
-         data-product-view-tracker-options="{{ {
-             trackingUrl: 'store-api/learning/product-view',
-             trackingDelay: 2000
-             }|json_encode }}">
-             
-             {{ parent() }}
+    {# Make sales channel access key available to JavaScript #}
+    <script>
+        console.log('[Template] Setting access key from context.salesChannel.accessKey:', '{{ context.salesChannel.accessKey }}');
+        window.salesChannelAccessKey = '{{ context.salesChannel.accessKey }}';
+        console.log('[Template] window.salesChannelAccessKey is now:', window.salesChannelAccessKey);
+    </script>
+
+    {# Recommendations Widget #}
+    <div class="container learning-recommendations-wrapper">
+        <div class="learning-recommendations"
+            data-learning-recommendation="true"
+            data-product-id="{{ page.product.id }}">
+
+            <div class="recommendations-header">
+                <h3 class="recommendations-title">
+                    {{ "learning.recommendations.title"|trans }}
+                </h3>
+                <p class="recommendations-subtitle">
+                    {{ "learning.recommendations.subtitle"|trans }}
+                </p>
+            </div>
+
+            {# Loading State #}
+            <div class="recommendations-loading">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>{{ "learning.recommendations.loading"|trans }}</p>
+            </div>
+
+            {# Recommendations Container (populated via JS) #}
+            <div class="recommendations-carousel"
+                    data-recommendations-carousel="true">
+                    {# Dynamically loaded content #}
+            </div>
+
+            {# Error State #}
+            <div class="recommendations-error" style="display: none;">
+                <p class="text-muted">
+                    {{ "learning.recommendations.error"|trans }}
+                </p>
+            </div>
+
+            {# Empty State #}
+            <div class="recommendations-empty" style="display: none;">
+                <p class="text-muted">
+                    {{ "learning.recommendations.empty"|trans }}
+                </p>
+            </div>
+        </div>
     </div>
 {% endblock %}

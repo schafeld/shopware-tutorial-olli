@@ -163,4 +163,25 @@ class ProductRecommendationTrackingService
 
         return $result;
     }
+    /**
+     * Returns top recommended product pairs and statistics for analytics.
+     */
+    public function getRecommendationsStats(int $limit, Context $context): array
+    {
+        $criteria = new Criteria();
+        $criteria->addSorting(new FieldSorting('viewCount', FieldSorting::DESCENDING));
+        $criteria->setLimit($limit);
+
+        $recommendations = $this->recommendationRepository->search($criteria, $context);
+        $result = [];
+        foreach ($recommendations as $recommendation) {
+            $result[] = [
+                'productA' => $recommendation->getSourceProductId(),
+                'productB' => $recommendation->getRecommendedProductId(),
+                'count' => $recommendation->getViewCount(),
+                'affinityScore' => $recommendation->getAffinityScore(),
+            ];
+        }
+        return $result;
+    }
 }

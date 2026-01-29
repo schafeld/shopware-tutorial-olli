@@ -936,9 +936,91 @@ class RecommendationRoute
 }
 ```
 
+
 ### Step 2: Admin API Controller
 
-Create admin controller for analytics (similar to Day 4).
+Create an Admin API controller to provide analytics data for the recommendations engine:
+
+File: custom/plugins/LearningBundle/src/Core/Content/Recommendation/Api/RecommendationAnalyticsController.php
+
+**RecommendationAnalyticsController.php:**
+```php
+<?php declare(strict_types=1);
+
+namespace Learning\Bundle\Core\Content\Recommendation\Api;
+
+use Learning\Bundle\Service\ProductRecommendationTrackingService;
+use Shopware\Core\Framework\Context;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+
+/**
+ * @Route(defaults={"_routeScope"={"api"}})
+ */
+class RecommendationAnalyticsController extends AbstractController
+{
+    private ProductRecommendationTrackingService $trackingService;
+
+    public function __construct(ProductRecommendationTrackingService $trackingService)
+    {
+        $this->trackingService = $trackingService;
+    }
+
+    /**
+     * @Route("/api/_action/learning/recommendations/analytics", name="api.learning.recommendations.analytics", methods={"GET"})
+     */
+    public function analytics(Request $request, Context $context): JsonResponse
+    {
+        // Example: Return top recommended product pairs and stats
+        $limit = (int) $request->query->get('limit', 10);
+        $recommendations = $this->trackingService->getRecommendationsStats($limit, $context);
+
+        return new JsonResponse([
+            'success' => true,
+            'data' => $recommendations,
+        ]);
+    }
+}
+```
+
+Now, add the corresponding service method in your `ProductRecommendationTrackingService` (if not already present):
+
+```php
+// ...existing code...
+public function getRecommendationsStats(int $limit, Context $context): array
+{
+    // Example: Fetch top recommended product pairs by view count
+    $criteria = new \Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria();
+    $criteria->addSorting(new \Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting('viewCount', 'DESC'));
+    $criteria->setLimit($limit);
+    $result = $this->recommendationRepository->search($criteria, $context);
+
+    $stats = [];
+    foreach ($result as $entity) {
+        $stats[] = [
+            'sourceProductId' => $entity->getSourceProductId(),
+            'recommendedProductId' => $entity->getRecommendedProductId(),
+            'affinityScore' => $entity->getAffinityScore(),
+            'viewCount' => $entity->getViewCount(),
+        ];
+    }
+    return $stats;
+}
+// ...existing code...
+```
+
+Register the controller in your `services.xml`:
+
+File: custom/plugins/LearningBundle/src/Resources/config/services.xml
+
+```xml
+<service id="Learning\Bundle\Core\Content\Recommendation\Api\RecommendationAnalyticsController">
+    <argument type="service" id="Learning\Bundle\Service\ProductRecommendationTrackingService" />
+    <tag name="controller.service_arguments" />
+</service>
+```
 
 ---
 

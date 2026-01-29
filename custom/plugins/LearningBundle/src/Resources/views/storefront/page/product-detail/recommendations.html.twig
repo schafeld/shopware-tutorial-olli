@@ -1,0 +1,50 @@
+{% sw_extends '@Storefront/storefront/page/product-detail/index.html.twig' %}
+
+{% block page_product_detail_description_content_inner %}
+    {{ parent() }}
+
+    {# Recommendations Widget #}
+    <div class="learning-recommendations-wrapper">
+        <div class="learning-recommendations"
+            data-learning-recommendations="true"
+            data-product-id="{{ page.product.id }}">
+
+            <div class="recommendations-header">
+                <h3 class="recommendations-title">
+                    {{ "learning.recommendations.title"|trans }}
+                </h3>
+                <p class="recommendations-subtitle">
+                    {{ "learning.recommendations.subtitle"|trans }}
+                </p>
+            </div>
+
+            {# Loading State #}
+            <div class="recommendations-loading">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p{{ "learning.recommendations.loading"|trans }}</p>
+            </div>
+
+            {# Recommendations Container (populated via JS) #}
+            <div class="recommendations-carousel"
+                    data-recommendations-carousel="true">
+                    {# Dynamically loaded content #}
+            </div>
+
+            {# Error State #}
+            <div class="recommendations-error" style="display: none;">
+                <p class="text-muted">
+                    {{ "learning.recommendations.error"|trans }}
+                </p>
+            </div>
+
+            {# Empty State #}
+            <div class="recommendations-empty" style="display: none;">
+                <p class="text-muted">
+                    {{ "learning.recommendations.empty"|trans }}
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

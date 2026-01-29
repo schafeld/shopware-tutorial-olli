@@ -4,6 +4,7 @@
 import ProductComparePlugin from './plugin/product-compare.plugin';
 import PriceFilterPlugin from './plugin/price-filter.plugin';
 import GtmTrackingPlugin from './plugin/gtm/gtm-tracking.plugin';
+import RecommendationCarouselPlugin from './plugin/recommendation/recommendation-carousel.plugin';
 
 // Register plugins
 const PluginManager = window.PluginManager;
@@ -13,3 +14,6 @@ PluginManager.register('PriceFilter', PriceFilterPlugin, '[data-price-filter]');
 
 // GTM Tracking Plugin - auto-initialized on body
 PluginManager.register('GtmTracking', GtmTrackingPlugin, '[data-gtm-tracking]');
+
+// Recommendation Carousel Plugin
+PluginManager.register('RecommendationCarousel', RecommendationCarouselPlugin, '[data-learning-recommendation]');

@@ -1,0 +1,262 @@
+// Recommendation Widget Styles
+
+.learning-recommendations-wrapper {
+    margin: 3rem 0;
+    padding: 2rem 0;
+    border-top: 1px solid #e0e0e0;
+}
+
+.learning-recommendations {
+    position: relative;
+
+    .recommendations-header {
+        margin-bottom: 2rem;
+        text-align: center;
+
+        .recommendations-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+        }
+
+        .recommendations-subtitle {
+            font-size: 0.95rem;
+            color: #666666;
+        }
+    }
+
+    .recommendations-loading,
+    .recommendations-error,
+    .recommendations-empty {
+        text-align: center;
+        padding: 3rem 0;
+        color: #666;
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            margin-bottom: 1rem;
+        }
+    }
+}
+
+// Carousel Container
+.recommendations-carousel {
+    position: relative;
+    overflow: hidden;
+    padding: 0 3rem;
+
+    .carousel-track {
+        display: flex;
+        gap: 1.5rem;
+        transition: transform 0.3s ease-in-out;
+    }
+}
+
+// Individual Recommendation Card
+.recommendation-card {
+    flex: 0 0 250px;
+    width: 250px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        border-color: #007bff;
+    }
+
+    .recommendation-card-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    &:hover .recommendation-card-image {
+        transform: scale(1.05);
+    }
+
+    .recommendation-badge {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        animation: pulse 2s infinite;
+    }
+
+    .recommendation-card-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        color: #ccc;
+    }
+}
+
+.recommendation-card-body {
+    padding: 1rem;
+
+    .recommendation-card-title {
+        display: block;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #1a1a1a;
+        margin-bottom: 0.5rem;
+        text-decoration: none;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+
+        &:hover {
+            color: #007bff;
+        }
+    }
+
+    .recommendation-card-price {
+        margin-bottom: 1rem;
+
+        .price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #007bff;
+        }
+    }
+
+    .recommendation-card-actions {
+        display: flex;
+        gap: 0.5rem;
+
+        .recommendation-quick-add {
+            flex: 1;
+            position: relative;
+            transition: all 0.2s ease;
+
+            &:not(:disabled):hover {
+                transform: scale(1.05);
+            }
+
+            &.button-success {
+                background-color: #28a745;
+                border-color: #28a745;
+            }
+
+            &.button-danger {
+                background-color: #dc3545;
+                border-color: #dc3545;
+            }
+        }
+    }
+}
+
+
+// Carousel Navigation
+.carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+
+    &:hover {
+        background: #007bff;
+        border-color: #007bff;
+        color: white;
+    }
+
+    &.carousel-nav-prev {
+        left: 0;
+    }
+
+    &.carousel-nav-next {
+        right: 0;
+    }
+}
+
+// Carousel Indicators
+.carousel-indicators {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+
+    .indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #d0d0d0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &.active {
+            background: #007bff;
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        &:hover {
+            background: #999;
+        }
+    }
+}
+
+// Animations
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+    .recommendations-carousel {
+        padding: 0 2rem;
+    }
+
+    .recommendation-card {
+        flex: 0 0 200px;
+        width: 200px;
+    }
+
+    .carousel-nav {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+@media (max-width: 480px) {
+    .recommendations-carousel {
+        padding: 0 1rem;
+    }
+
+    .recommendation-card {
+        flex: 0 0 160px;
+        width: 160px;
+    }
+}

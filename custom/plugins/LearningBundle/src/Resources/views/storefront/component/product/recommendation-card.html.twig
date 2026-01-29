@@ -1,0 +1,71 @@
+{# Recommendation Product Card Template #}
+<div class="recommendation-card"
+    data-product-id="{{ product.id }}">
+    
+    {# Product Image with Link #}
+    <a href="{{ seoUrl('frontend.detail.page', {'productId': product.id}) }}"
+       class="recommendation-card-image-link">
+        {% if product.cover %}
+            <img src="{{ product.cover.media.url }}"
+                alt="{{ product.translated.name }}"
+                class="recommendation-card-image" 
+                loading="lazy"/>
+        {% else %}
+            <div class="recommendation-card-placeholder">
+                <svg width="48" height="48" fill="currentColor" >
+                    <use xlink:href="#icon-placeholder"></use>
+                </svg>
+            </div>
+        {% endif %}
+
+        {# Affinity Badge #}
+        {% if affinityScore %}
+            <span class="recommendation-badge">
+                {{ affinityScore|number_format(0) }}% Match
+            </span>
+        {% endif %}
+    </a>
+
+    {# Product Info #}
+    <div class="recommendation-card-body">
+        <a href="{{ seoUrl('frontend.detail.page', {'productId': product.id}) }}"
+           class="recommendation-card-title">
+            {{ product.translated.name }}
+        </a>
+        
+        {# Price Display #}
+        <div class="recommendation-card-price">
+            {% if product.calculatedPrice %}
+                <span class="price">
+                    {{ product.calculatedPrice.unitPrice|currency }}
+                </span>
+            {% endif %}
+        </div>
+
+        {# Quick Actions #}
+        <div class="recommendation-card-actions">
+            {# Quick View Button #}
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary recommendation-quick-view"
+                    data-quick-view-product-id="{{ product.id }}"
+                    title="{{ "learning.recommendations.quickView"|trans }}">
+                <svg width="16" height="16" >
+                    <use xlink:href="#icon-eye"></use>
+                </svg>
+            </button>
+
+        {# Quick Add to Cart Button #}
+            <button type="button"
+                    class="btn btn-sm btn-primary recommendation-quick-add"
+                    data-product-id="{{ product.id }}"
+                    data-quick-add="true">
+                <span class="btn-text">
+                    {{ "learning.recommendations.addToCart"|trans }}
+                </span>
+                <span class="button-loading" style="display: none;">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </span>
+            </button>
+        </div>
+    </div>
+</div>

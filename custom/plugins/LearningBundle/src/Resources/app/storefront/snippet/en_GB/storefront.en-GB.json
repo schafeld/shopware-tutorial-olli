@@ -1,0 +1,14 @@
+{
+    "learning": {
+        "recommendations": {
+            "title": "You May Also Like",
+            "subtitle": "Based on products viewed together",
+            "loading": "Loading recommendations...",
+            "error": "Could not load recommendations. Please try again later.",
+            "empty": "No recommendations available yet.",
+            "addToCart": "Add to Cart",
+            "quickView": "Quick View",
+            "viewDetails": "View Details"
+        }
+    }
+}

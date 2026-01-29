@@ -42,9 +42,9 @@ class ProductRecommendationDefinition extends EntityDefinition
         return new FieldCollection([
             (new IdField('id', 'id'))->addFlags(new Required(), new PrimaryKey()),
             (new FkField('source_product_id', 'sourceProductId', ProductDefinition::class))->addFlags(new Required()),
-            (new ReferenceVersionField(ProductDefinition::class, 'source_product_version_id', 'sourceProductVersionId'))->addFlags(new Required()),
+            (new ReferenceVersionField(ProductDefinition::class, 'source_product_version_id'))->addFlags(new Required()),
             (new FkField('recommended_product_id', 'recommendedProductId', ProductDefinition::class))->addFlags(new Required()),
-            (new ReferenceVersionField(ProductDefinition::class, 'recommended_product_version_id', 'recommendedProductVersionId'))->addFlags(new Required()),
+            (new ReferenceVersionField(ProductDefinition::class, 'recommended_product_version_id'))->addFlags(new Required()),
             (new FloatField('affinity_score', 'affinityScore'))->addFlags(new Required()),
             (new IntField('view_count', 'viewCount'))->addFlags(new Required()),
             (new DateTimeField('last_updated', 'lastUpdated'))->addFlags(new Required()),

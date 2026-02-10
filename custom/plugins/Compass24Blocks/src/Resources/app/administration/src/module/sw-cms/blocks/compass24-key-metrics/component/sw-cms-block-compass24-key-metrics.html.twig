@@ -1,0 +1,10 @@
+{% block sw_cms_block_compass24_key_metrics %}
+    <div class="sw-cms-block-compass24-key-metrics">
+        <slot name="metrics">
+            <sw-cms-slot
+                name="metrics"
+                :config="block.slots.metrics.config">
+            </sw-cms-slot>
+        </slot>
+    </div>
+{% endblock %}

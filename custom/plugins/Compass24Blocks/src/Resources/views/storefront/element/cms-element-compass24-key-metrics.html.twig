@@ -1,0 +1,79 @@
+{% block cms_element_compass24_key_metrics %}
+    {% set config = element.translated.config %}
+    
+    <div class="cms-element-compass24-key-metrics">
+        {% block cms_element_compass24_key_metrics_component %}
+            <div class="compass24-key-metrics-component">
+                {% block cms_element_compass24_key_metrics_section %}
+                    <section class="metrics-section" aria-label="Compass24 Schlüsselzahlen">
+                        {% block cms_element_compass24_key_metrics_container %}
+                            <div class="metrics-container" role="list">
+                                
+                                {% block cms_element_compass24_key_metrics_metric_1 %}
+                                    {# Metric 1 #}
+                                    <div class="metric-item" role="listitem">
+                                        <span class="metric-item__value" aria-label="{{ config.metric1Label.value }}">
+                                            {{ config.metric1Value.value }}
+                                        </span>
+                                        <span class="metric-item__label">
+                                            {{ config.metric1Label.value }}
+                                        </span>
+                                    </div>
+                                {% endblock %}
+                                
+                                {% block cms_element_compass24_key_metrics_metric_2 %}
+                                    {# Metric 2 #}
+                                    <div class="metric-item" role="listitem">
+                                        <span class="metric-item__value" aria-label="{{ config.metric2Label.value }}">
+                                            {{ config.metric2Value.value }}
+                                        </span>
+                                        <span class="metric-item__label">
+                                            {{ config.metric2Label.value }}
+                                        </span>
+                                    </div>
+                                {% endblock %}
+                                
+                                {% block cms_element_compass24_key_metrics_metric_3 %}
+                                    {# Metric 3 #}
+                                    <div class="metric-item" role="listitem">
+                                        <span class="metric-item__value" aria-label="{{ config.metric3Label.value }}">
+                                            {{ config.metric3Value.value }}
+                                        </span>
+                                        <span class="metric-item__label">
+                                            {{ config.metric3Label.value }}
+                                        </span>
+                                    </div>
+                                {% endblock %}
+                                
+                                {% block cms_element_compass24_key_metrics_metric_4 %}
+                                    {# Metric 4 #}
+                                    <div class="metric-item" role="listitem">
+                                        <span class="metric-item__value" aria-label="{{ config.metric4Label.value }}">
+                                            {{ config.metric4Value.value }}
+                                        </span>
+                                        <span class="metric-item__label">
+                                            {{ config.metric4Label.value }}
+                                        </span>
+                                    </div>
+                                {% endblock %}
+                                
+                                {% block cms_element_compass24_key_metrics_metric_5 %}
+                                    {# Metric 5 #}
+                                    <div class="metric-item" role="listitem">
+                                        <span class="metric-item__value" aria-label="{{ config.metric5Label.value }}">
+                                            {{ config.metric5Value.value }}
+                                        </span>
+                                        <span class="metric-item__label">
+                                            {{ config.metric5Label.value }}
+                                        </span>
+                                    </div>
+                                {% endblock %}
+                                
+                            </div>
+                        {% endblock %}
+                    </section>
+                {% endblock %}
+            </div>
+        {% endblock %}
+    </div>
+{% endblock %}

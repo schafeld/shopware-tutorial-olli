@@ -1,0 +1,25 @@
+{
+  "base": "/bundles/compass24blocks/administration/",
+  "entryPoints": {
+    "compass24-blocks": {
+      "css": [
+        "/bundles/compass24blocks/administration/assets/compass24-blocks-BOLnSbCQ.css"
+      ],
+      "dynamic": [],
+      "js": [
+        "/bundles/compass24blocks/administration/assets/compass24-blocks-D0WFkHw6.js"
+      ],
+      "legacy": false,
+      "preload": []
+    }
+  },
+  "legacy": false,
+  "metadatas": {},
+  "version": [
+    "7.1.0",
+    7,
+    1,
+    0
+  ],
+  "viteServer": null
+}

@@ -1,0 +1,11 @@
+{
+  "main.js": {
+    "file": "assets/compass24-blocks-D0WFkHw6.js",
+    "name": "compass24-blocks",
+    "src": "main.js",
+    "isEntry": true,
+    "css": [
+      "assets/compass24-blocks-BOLnSbCQ.css"
+    ]
+  }
+}

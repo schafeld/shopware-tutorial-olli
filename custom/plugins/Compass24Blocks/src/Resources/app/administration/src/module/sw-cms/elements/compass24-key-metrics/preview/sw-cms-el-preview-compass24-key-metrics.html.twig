@@ -1,0 +1,13 @@
+{% block sw_cms_element_preview_compass24_key_metrics %}
+    <div class="sw-cms-el-preview-compass24-key-metrics">
+        <div class="metrics-grid">
+            <div
+                v-for="(metric, index) in metrics"
+                :key="index"
+                class="metric-item">
+                <div class="metric-value">{{ metric.value }}</div>
+                <div class="metric-label">{{ metric.label }}</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

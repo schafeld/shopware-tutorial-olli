@@ -1,0 +1,33 @@
+.sw-cms-el-preview-compass24-key-metrics {
+    display: block;
+    width: 100%;
+    background: linear-gradient(135deg, #002244 0%, #003366 50%, #0066b3 100%);
+    padding: 20px;
+    color: white;
+    border-radius: 4px;
+    min-height: 120px;
+
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 15px;
+        align-items: center;
+    }
+
+    .metric-item {
+        text-align: center;
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            opacity: 0.95;
+            line-height: 1.4;
+        }
+    }
+}

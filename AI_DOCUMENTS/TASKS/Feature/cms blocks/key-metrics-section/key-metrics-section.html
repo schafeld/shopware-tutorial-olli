@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compass24 Key Metrics</title>
+</head>
+<!-- The HTML header above is for preview purposes (mobile emulator devtools) only. Do not copy to CMS content page. -->
+
+<!--
+  Compass24 Key Metrics Component - Full-Width Stats Banner
+  Version: 1.0.0 - February 2026
+  
+  A standalone, injectable key metrics banner displaying Compass24 statistics.
+  This file can be injected into existing CMS pages without affecting SEO or editability.
+  
+  Layout: Full-width banner with horizontal layout (1 row, 5 columns on desktop).
+  Stacks vertically on mobile devices for optimal readability.
+  Blue gradient background with white text for strong visual impact.
+  
+  CSS Variables Strategy:
+  - Uses Bootstrap/Shopware CSS variables from compass24.de (--bs-*, --font-size-*)
+  - Includes fallback values for standalone preview (when Bootstrap is not loaded)
+  - Matches Compass24 brand colors (primary blue #002856)
+  
+  Example: var(--bs-primary, #003366) uses site's primary color or falls back to #003366
+  
+  Usage: Inject this HTML into any container on the Compass24 website for preview in website context or open it stand-alone in a browser.
+  All styles are scoped under .compass24-key-metrics-component to prevent conflicts.
+
+  Purpose: This file should be transformed into a CMS block for easy reuse across the site, allowing editors to update the metrics as needed while maintaining consistent styling and layout.
+-->
+
+<style>
+/* ============================================
+   SCOPED DESIGN TOKENS & BASE STYLES
+   Uses Bootstrap variables from compass24.de with fallbacks for standalone viewing
+   ============================================ */
+.compass24-key-metrics-component {
+  /* 
+   * Colors - Use Bootstrap variables when available, with fallbacks
+   * Site primary: --bs-primary (#002856), fallback to #003366 for standalone
+   */
+  --c24-color-primary: var(--bs-primary, #003366);
+  --c24-color-primary-light: #0066b3;
+  --c24-color-primary-dark: #002244;
+  --c24-color-secondary: #0099cc;
+  --c24-color-white: var(--bs-white, #ffffff);
+  --c24-color-text-light: rgba(255, 255, 255, 0.95);
+  
+  /* Typography - Use site fonts when available */
+  --c24-font-family: var(--bs-body-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif);
+  --c24-font-size-sm: var(--font-size-sm, 0.875rem);
+  --c24-font-size-base: var(--font-size-base, 0.9375rem);
+  --c24-font-size-lg: 1.125rem;
+  --c24-font-size-xl: 1.25rem;
+  --c24-font-size-2xl: 1.5rem;
+  --c24-font-size-3xl: 1.75rem;
+  --c24-font-size-4xl: 2.25rem;
+  
+  /* Spacing */
+  --c24-space-4: 1rem;
+  --c24-space-6: 1.5rem;
+  --c24-space-8: 2rem;
+  --c24-space-10: 2.5rem;
+  --c24-space-12: 3rem;
+  --c24-space-16: 4rem;
+  
+  /* Transitions */
+  --c24-transition-base: 250ms ease-in-out;
+
+  /* Base Component Styles */
+  font-family: var(--c24-font-family);
+  font-size: var(--c24-font-size-base);
+  line-height: 1.6;
+  color: var(--c24-color-white);
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* ============================================
+     METRICS SECTION - FULL WIDTH BANNER
+     ============================================ */
+  .metrics-section {
+    position: relative;
+    width: 100%;
+    background: linear-gradient(135deg, var(--c24-color-primary-dark) 0%, var(--c24-color-primary) 50%, var(--c24-color-primary-light) 100%);
+    padding: var(--c24-space-4) var(--c24-space-4);
+    overflow: hidden;
+    
+    /* Optional: Add subtle pattern overlay */
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+      pointer-events: none;
+    }
+  }
+
+  /* ============================================
+     METRICS CONTAINER - RESPONSIVE GRID
+     ============================================ */
+  .metrics-container {
+    position: relative;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--c24-space-8);
+    z-index: 1;
+    
+    /* Tablet: 2 columns */
+    @media (min-width: 480px) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--c24-space-6);
+    }
+    
+    /* Desktop: 5 columns (one line) - lower breakpoint */
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(5, 1fr);
+      gap: var(--c24-space-4);
+    }
+    
+    /* Large desktop: more spacing */
+    @media (min-width: 1200px) {
+      gap: var(--c24-space-8);
+    }
+  }
+
+  /* ============================================
+     METRIC ITEM
+     ============================================ */
+  .metric-item {
+    text-align: center;
+    padding: var(--c24-space-4);
+    animation: compass24MetricFadeIn 0.6s ease-out both;
+    
+    /* Stagger animation delays */
+    &:nth-child(1) { animation-delay: 0.1s; }
+    &:nth-child(2) { animation-delay: 0.2s; }
+    &:nth-child(3) { animation-delay: 0.3s; }
+    &:nth-child(4) { animation-delay: 0.4s; }
+    &:nth-child(5) { animation-delay: 0.5s; }
+    
+    /* Subtle hover effect */
+    transition: transform var(--c24-transition-base);
+    
+    &:hover {
+      transform: translateY(-4px);
+      
+      @media (prefers-reduced-motion: reduce) {
+        transform: none;
+      }
+    }
+  }
+
+  /* ============================================
+     METRIC VALUE (Large Number)
+     ============================================ */
+  .metric-item__value {
+    display: block;
+    font-size: var(--c24-font-size-2xl);
+    font-weight: 800;
+    color: var(--c24-color-white);
+    line-height: 1.2;
+    /* margin-bottom: var(--c24-space-4); */
+    
+    /* Medium screens */
+    @media (min-width: 768px) {
+      font-size: var(--c24-font-size-3xl);
+    }
+    
+    /* Larger on wide desktop */
+    @media (min-width: 1200px) {
+      font-size: var(--c24-font-size-4xl);
+    }
+  }
+
+  /* ============================================
+     METRIC LABEL (Description Text)
+     ============================================ */
+  .metric-item__label {
+    display: block;
+    font-size: var(--c24-font-size-sm);
+    font-weight: 400;
+    color: var(--c24-color-text-light);
+    line-height: 1.5;
+    
+    /* Medium screens */
+    @media (min-width: 768px) {
+      font-size: var(--c24-font-size-base);
+    }
+    
+    /* Larger on wide desktop */
+    @media (min-width: 1200px) {
+      font-size: var(--c24-font-size-lg);
+    }
+  }
+
+  /* ============================================
+     DIVIDER BETWEEN METRICS (Optional)
+     ============================================ */
+  .metric-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 60%;
+    background: rgba(255, 255, 255, 0.2);
+    display: none;
+    
+    /* Show dividers on desktop only */
+    @media (min-width: 768px) {
+      display: block;
+    }
+  }
+  
+  .metric-item {
+    position: relative;
+  }
+
+  /* ============================================
+     UNIVERSAL BOX SIZING
+     ============================================ */
+  & *,
+  & *::before,
+  & *::after {
+    box-sizing: inherit;
+  }
+
+  /* ============================================
+     MOBILE RESPONSIVE (< 480px)
+     ============================================ */
+  @media (max-width: 479px) {
+    .metrics-section {
+      padding: var(--c24-space-8) var(--c24-space-4);
+    }
+    
+    .metrics-container {
+      gap: var(--c24-space-6);
+    }
+    
+    .metric-item__value {
+      font-size: var(--c24-font-size-2xl);
+    }
+    
+    .metric-item__label {
+      font-size: var(--c24-font-size-sm);
+    }
+  }
+
+  /* ============================================
+     ANIMATIONS
+     ============================================ */
+  @keyframes compass24MetricFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Disable animations if user prefers reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .metric-item {
+      animation: none;
+    }
+    
+    .metric-item:hover {
+      transform: none;
+    }
+  }
+}
+</style>
+
+<div class="compass24-key-metrics-component">
+  <section class="metrics-section" aria-label="Compass24 Schlüsselzahlen">
+    <div class="metrics-container" role="list">
+      
+      <!-- Metric 1: Gründungsjahr -->
+      <div class="metric-item" role="listitem">
+        <span class="metric-item__value" aria-label="Gründungsjahr 1979">1979</span>
+        <span class="metric-item__label">Gründungsjahr</span>
+      </div>
+      
+      <!-- Metric 2: Artikel -->
+      <div class="metric-item" role="listitem">
+        <span class="metric-item__value" aria-label="Über 42.000 Artikel">42.000+</span>
+        <span class="metric-item__label">Artikel</span>
+      </div>
+      
+      <!-- Metric 3: Katalog -->
+      <div class="metric-item" role="listitem">
+        <span class="metric-item__value" aria-label="Katalog mit über 400 Seiten">400+</span>
+        <span class="metric-item__label">Seiten Katalog</span>
+      </div>
+      
+      <!-- Metric 4: Pakete täglich -->
+      <div class="metric-item" role="listitem">
+        <span class="metric-item__value" aria-label="5.000 Pakete täglich im Versand">5.000</span>
+        <span class="metric-item__label">Pakete täglich</span>
+      </div>
+      
+      <!-- Metric 5: Länder -->
+      <div class="metric-item" role="listitem">
+        <span class="metric-item__value" aria-label="11 Länder weltweit">11</span>
+        <span class="metric-item__label">Länder weltweit</span>
+      </div>
+      
+    </div>
+  </section>
+</div>
+
+<!-- The HTML "footer" below is for preview purposes (mobile emulator devtools) only. Do not copy to CMS content page. -->
+</body>
+</html>

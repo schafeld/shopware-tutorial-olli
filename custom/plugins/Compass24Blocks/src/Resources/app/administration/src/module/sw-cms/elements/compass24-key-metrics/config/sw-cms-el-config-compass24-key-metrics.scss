@@ -1,0 +1,29 @@
+.sw-cms-el-config-compass24-key-metrics {
+    .description {
+        margin-bottom: 20px;
+        color: #52667a;
+        font-size: 14px;
+    }
+
+    .metric-config-group {
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #f9fafb;
+        border-radius: 4px;
+
+        h4 {
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .sw-text-field {
+            margin-bottom: 15px;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+}

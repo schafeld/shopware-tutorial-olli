@@ -1,0 +1,23 @@
+{% block sw_cms_element_compass24_job_offers %}
+    <div class="sw-cms-el-compass24-job-offers">
+        <div class="sw-cms-el-compass24-job-offers__wrapper">
+            <div class="sw-cms-el-compass24-job-offers__header">
+                <h3 class="sw-cms-el-compass24-job-offers__title">{{ headerTitle }}</h3>
+                <span class="sw-cms-el-compass24-job-offers__badge">{{ jobCount }} Stellen</span>
+            </div>
+            <div class="sw-cms-el-compass24-job-offers__preview-jobs">
+                <div v-for="job in previewJobs" :key="job.id" class="sw-cms-el-compass24-job-offers__job-item">
+                    <div class="sw-cms-el-compass24-job-offers__job-title">{{ job.title }}</div>
+                    <div class="sw-cms-el-compass24-job-offers__job-tags">
+                        <span class="tag tag--type">{{ job.employmentType }}</span>
+                        <span class="tag tag--dept">{{ job.department }}</span>
+                        <span class="tag tag--loc">📍 {{ job.location }}</span>
+                    </div>
+                </div>
+                <div v-if="jobCount > 3" class="sw-cms-el-compass24-job-offers__more">
+                    … und {{ jobCount - 3 }} weitere
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

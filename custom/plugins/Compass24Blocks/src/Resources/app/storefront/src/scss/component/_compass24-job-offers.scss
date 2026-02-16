@@ -1,0 +1,636 @@
+/* ============================================================
+   Compass24 Job Widget – Storefront Styles
+   Extracted from the standalone job-widget.html
+   ============================================================ */
+
+/* ============================================
+   SCOPED DESIGN TOKENS & BASE STYLES
+   Uses Bootstrap variables from compass24.de with fallbacks for standalone viewing
+   ============================================ */
+.compass24-job-widget-component {
+  /* Colors */
+  --c24-color-primary: var(--bs-primary, #003366);
+  --c24-color-primary-light: #0066b3;
+  --c24-color-primary-dark: #002244;
+  --c24-color-secondary: #0099cc;
+  --c24-color-accent: var(--bs-danger, #cc0000);
+  --c24-color-white: var(--bs-white, #ffffff);
+  --c24-color-gray-50: var(--bs-gray-100, #f9fafb);
+  --c24-color-gray-100: var(--bs-secondary-bg, #f3f4f6);
+  --c24-color-gray-200: #e5e7eb;
+  --c24-color-gray-500: var(--bs-gray, #6b7280);
+  --c24-color-gray-600: var(--bs-secondary-color, #4b5563);
+  --c24-color-gray-900: var(--bs-body-color, #111827);
+
+  /* Typography */
+  --c24-font-family: var(--bs-body-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif);
+  --c24-font-size-xs: 0.75rem;
+  --c24-font-size-sm: var(--font-size-sm, 0.875rem);
+  --c24-font-size-base: var(--font-size-base, 1rem);
+  --c24-font-size-lg: var(--font-size-lg, 1.125rem);
+  --c24-font-size-xl: 1.25rem;
+  --c24-font-size-2xl: 1.5rem;
+
+  /* Spacing */
+  --c24-space-1: 0.25rem;
+  --c24-space-2: 0.5rem;
+  --c24-space-3: 0.75rem;
+  --c24-space-4: 1rem;
+  --c24-space-5: 1.25rem;
+  --c24-space-6: 1.5rem;
+  --c24-space-8: 2rem;
+  --c24-space-10: 2.5rem;
+  --c24-space-12: 3rem;
+
+  /* Borders & Shadows */
+  --c24-border-radius-sm: 0.25rem;
+  --c24-border-radius-md: 0.375rem;
+  --c24-border-radius-lg: 0.5rem;
+  --c24-border-radius-xl: 0.75rem;
+  --c24-border-radius-full: 9999px;
+  --c24-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --c24-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --c24-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --c24-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Transitions */
+  --c24-transition-base: 250ms ease-in-out;
+
+  /* Base Component Styles */
+  font-family: var(--c24-font-family);
+  font-size: var(--c24-font-size-base);
+  line-height: 1.6;
+  color: var(--c24-color-gray-900);
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Universal box-sizing */
+.compass24-job-widget-component *,
+.compass24-job-widget-component *::before,
+.compass24-job-widget-component *::after {
+  box-sizing: inherit;
+}
+
+/* ============================================
+   SECTION LAYOUT
+   ============================================ */
+.job-widget-section {
+  padding: var(--c24-space-8) var(--c24-space-4);
+  background-color: var(--c24-color-gray-50);
+}
+
+.job-widget-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto var(--c24-space-8);
+}
+
+.job-widget-header__title {
+  font-size: var(--c24-font-size-2xl);
+  font-weight: 700;
+  color: var(--c24-color-primary);
+  margin: 0 0 var(--c24-space-2);
+}
+
+.job-widget-header__subtitle {
+  font-size: var(--c24-font-size-base);
+  color: var(--c24-color-gray-600);
+  margin: 0;
+}
+
+/* ============================================
+   FILTER BAR
+   ============================================ */
+.job-filter-bar {
+  max-width: 900px;
+  margin: 0 auto var(--c24-space-8);
+  background-color: var(--c24-color-white);
+  border-radius: var(--c24-border-radius-xl);
+  padding: var(--c24-space-5);
+  box-shadow: var(--c24-shadow-md);
+}
+
+.job-filter-bar__search {
+  position: relative;
+  margin-bottom: var(--c24-space-4);
+}
+
+.job-filter-bar__search-icon {
+  position: absolute;
+  left: var(--c24-space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--c24-font-size-lg);
+  color: var(--c24-color-gray-500);
+  pointer-events: none;
+  line-height: 1;
+}
+
+.job-filter-bar__search-input {
+  width: 100%;
+  padding: var(--c24-space-3) var(--c24-space-4) var(--c24-space-3) 2.75rem;
+  border: 2px solid var(--c24-color-gray-200);
+  border-radius: var(--c24-border-radius-lg);
+  font-family: inherit;
+  font-size: var(--c24-font-size-base);
+  color: var(--c24-color-gray-900);
+  transition: border-color var(--c24-transition-base);
+  outline: none;
+  background-color: var(--c24-color-white);
+}
+
+.job-filter-bar__search-input::placeholder {
+  color: var(--c24-color-gray-500);
+}
+
+.job-filter-bar__search-input:focus {
+  border-color: var(--c24-color-primary-light);
+}
+
+.job-filter-bar__selects {
+  display: flex;
+  gap: var(--c24-space-3);
+  flex-wrap: wrap;
+}
+
+.job-filter-bar__select {
+  flex: 1 1 180px;
+  padding: var(--c24-space-3) var(--c24-space-4);
+  border: 2px solid var(--c24-color-gray-200);
+  border-radius: var(--c24-border-radius-lg);
+  font-family: inherit;
+  font-size: var(--c24-font-size-sm);
+  color: var(--c24-color-gray-900);
+  cursor: pointer;
+  transition: border-color var(--c24-transition-base);
+  outline: none;
+  background-color: var(--c24-color-white);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8.825a.7.7 0 0 1-.5-.2L1.675 4.8a.7.7 0 0 1 0-1 .7.7 0 0 1 1 0L6 7.125l3.325-3.3a.7.7 0 0 1 1 0 .7.7 0 0 1 0 1L6.5 8.625a.7.7 0 0 1-.5.2Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
+}
+
+.job-filter-bar__select:focus {
+  border-color: var(--c24-color-primary-light);
+}
+
+.job-filter-bar__active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--c24-space-2);
+  margin-top: var(--c24-space-4);
+  align-items: center;
+}
+
+.job-filter-bar__active-label {
+  font-size: var(--c24-font-size-sm);
+  color: var(--c24-color-gray-600);
+  font-weight: 500;
+}
+
+.job-filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--c24-space-1);
+  padding: var(--c24-space-1) var(--c24-space-3);
+  background-color: #e8f4ff;
+  color: var(--c24-color-primary);
+  border-radius: var(--c24-border-radius-full);
+  font-size: var(--c24-font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: background-color var(--c24-transition-base);
+}
+
+.job-filter-tag:hover {
+  background-color: #d0e8ff;
+}
+
+.job-filter-tag__remove {
+  font-size: var(--c24-font-size-sm);
+  line-height: 1;
+  margin-left: var(--c24-space-1);
+}
+
+.job-filter-bar__reset {
+  font-size: var(--c24-font-size-xs);
+  color: var(--c24-color-gray-500);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: underline;
+  padding: var(--c24-space-1) var(--c24-space-2);
+  transition: color var(--c24-transition-base);
+}
+
+.job-filter-bar__reset:hover {
+  color: var(--c24-color-primary);
+}
+
+/* ============================================
+   RESULTS COUNT
+   ============================================ */
+.job-widget-results {
+  max-width: 900px;
+  margin: 0 auto var(--c24-space-4);
+  font-size: var(--c24-font-size-sm);
+  color: var(--c24-color-gray-600);
+  padding: 0 var(--c24-space-1);
+}
+
+/* ============================================
+   ACCORDION CONTAINER
+   ============================================ */
+.job-accordion {
+  max-width: 900px;
+  margin: 0 auto;
+  --bs-accordion-border-color: unset !important;
+}
+
+/* ============================================
+   ACCORDION ITEM (SINGLE JOB)
+   ============================================ */
+.job-accordion-item {
+  background-color: var(--c24-color-white);
+  border-radius: var(--c24-border-radius-xl);
+  box-shadow: var(--c24-shadow-md);
+  margin-bottom: var(--c24-space-6);
+  overflow: hidden;
+  transition: all var(--c24-transition-base);
+  animation: compass24FadeInUp 0.6s ease-out both;
+}
+
+.job-accordion-item:hover {
+  box-shadow: var(--c24-shadow-lg);
+}
+
+.job-accordion-item:nth-child(1) { animation-delay: 0.05s; }
+.job-accordion-item:nth-child(2) { animation-delay: 0.1s; }
+.job-accordion-item:nth-child(3) { animation-delay: 0.15s; }
+.job-accordion-item:nth-child(4) { animation-delay: 0.2s; }
+.job-accordion-item:nth-child(5) { animation-delay: 0.25s; }
+.job-accordion-item:nth-child(6) { animation-delay: 0.3s; }
+
+/* Border-radius overrides */
+.job-accordion-item:first-of-type {
+  border-top-left-radius: var(--c24-border-radius-xl) !important;
+  border-top-right-radius: var(--c24-border-radius-xl) !important;
+}
+
+.job-accordion-item:last-of-type {
+  border-bottom-left-radius: var(--c24-border-radius-xl) !important;
+  border-bottom-right-radius: var(--c24-border-radius-xl) !important;
+}
+
+/* ============================================
+   ACCORDION TRIGGER (SUMMARY)
+   ============================================ */
+.job-accordion-trigger {
+  padding: var(--c24-space-6);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--c24-space-4);
+  font-family: inherit;
+  font-size: var(--c24-font-size-lg);
+  font-weight: 600;
+  color: var(--c24-color-primary);
+  text-align: left;
+  transition: all var(--c24-transition-base);
+  list-style: none;
+  outline: none !important;
+}
+
+.job-accordion-trigger:hover {
+  background-color: var(--c24-color-gray-50);
+}
+
+.job-accordion-trigger:focus {
+  background-color: var(--c24-color-gray-100);
+  outline: none !important;
+}
+
+.job-accordion-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.job-accordion-trigger::marker {
+  display: none;
+  content: '';
+}
+
+.job-accordion-trigger__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.job-accordion-trigger__title {
+  margin: 0 0 var(--c24-space-2);
+  font-size: var(--c24-font-size-lg);
+  font-weight: 600;
+  color: var(--c24-color-primary);
+  line-height: 1.3;
+}
+
+.job-accordion-trigger__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--c24-space-2);
+}
+
+.job-tag {
+  display: inline-block;
+  padding: var(--c24-space-1) var(--c24-space-3);
+  border-radius: var(--c24-border-radius-full);
+  font-size: var(--c24-font-size-xs);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.job-tag--employment {
+  background-color: #e8f4ff;
+  color: var(--c24-color-primary-light);
+}
+
+.job-tag--department {
+  background-color: #eef9ee;
+  color: #2d7a2d;
+}
+
+.job-tag--location {
+  background-color: #fff3e0;
+  color: #b36b00;
+}
+
+.job-accordion-trigger__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--c24-font-size-lg);
+  color: var(--c24-color-primary-dark);
+  flex-shrink: 0;
+  margin-top: var(--c24-space-1);
+  transition: transform var(--c24-transition-base);
+}
+
+.job-accordion-trigger__icon::after {
+  content: '▼';
+}
+
+.job-accordion-item[open] .job-accordion-trigger__icon::after {
+  content: '▲';
+}
+
+/* ============================================
+   ACCORDION CONTENT
+   ============================================ */
+.job-accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--c24-transition-base);
+  opacity: 0;
+}
+
+.job-accordion-item[open] .job-accordion-content {
+  max-height: 3000px;
+  opacity: 1;
+  transition: max-height var(--c24-transition-base), opacity var(--c24-transition-base);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .job-accordion-content {
+    transition: none;
+  }
+}
+
+.job-accordion-content__inner {
+  padding: 0 var(--c24-space-6) var(--c24-space-6);
+  border-top: 1px solid var(--c24-color-gray-200);
+}
+
+/* ============================================
+   JOB DETAILS META
+   ============================================ */
+.job-details-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--c24-space-6);
+  padding: var(--c24-space-6) 0;
+  border-bottom: 1px solid var(--c24-color-gray-200);
+  margin-bottom: var(--c24-space-6);
+}
+
+.job-detail-item {
+  display: flex;
+  align-items: center;
+  gap: var(--c24-space-3);
+}
+
+.job-detail-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.job-detail-label {
+  font-size: var(--c24-font-size-sm);
+  color: var(--c24-color-gray-600);
+  font-weight: 500;
+}
+
+.job-accordion-content__description {
+  font-size: var(--c24-font-size-base);
+  color: var(--c24-color-gray-600);
+  line-height: 1.8;
+  margin: var(--c24-space-6) 0;
+}
+
+/* Description lists for job detail sections */
+.job-accordion-content__list {
+  font-size: var(--c24-font-size-base);
+  color: var(--c24-color-gray-600);
+  line-height: 1.8;
+  margin: var(--c24-space-4) 0;
+}
+
+.job-accordion-content__list dt {
+  font-weight: 600;
+  color: var(--c24-color-primary);
+  margin-top: var(--c24-space-4);
+}
+
+.job-accordion-content__list dt:first-child {
+  margin-top: 0;
+}
+
+.job-accordion-content__list dd {
+  margin: 0 0 var(--c24-space-3) var(--c24-space-4);
+}
+
+.job-accordion-content__list li {
+  margin-bottom: var(--c24-space-2);
+}
+
+/* ============================================
+   CTA BUTTON
+   ============================================ */
+.job-cta {
+  display: inline-block;
+  margin-top: var(--c24-space-6);
+  padding: var(--c24-space-3) var(--c24-space-6);
+  background: linear-gradient(135deg, var(--c24-color-primary-light), var(--c24-color-primary));
+  color: var(--c24-color-white);
+  border: none;
+  border-radius: var(--c24-border-radius-lg);
+  font-family: inherit;
+  font-size: var(--c24-font-size-base);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: box-shadow var(--c24-transition-base), background var(--c24-transition-base);
+  box-shadow: var(--c24-shadow-md);
+}
+
+.job-cta:hover {
+  box-shadow: var(--c24-shadow-lg);
+  background: linear-gradient(135deg, var(--c24-color-primary), var(--c24-color-primary-dark));
+  color: var(--c24-color-white);
+  text-decoration: none;
+}
+
+.job-cta:focus {
+  outline: 2px solid var(--c24-color-primary);
+  outline-offset: 2px;
+}
+
+.job-cta:active {
+  box-shadow: var(--c24-shadow-md);
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.job-widget-empty {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+  padding: var(--c24-space-12) var(--c24-space-4);
+  background-color: var(--c24-color-white);
+  border-radius: var(--c24-border-radius-xl);
+  box-shadow: var(--c24-shadow-md);
+}
+
+.job-widget-empty__icon {
+  font-size: 3rem;
+  margin-bottom: var(--c24-space-4);
+}
+
+.job-widget-empty__title {
+  font-size: var(--c24-font-size-lg);
+  font-weight: 600;
+  color: var(--c24-color-primary);
+  margin: 0 0 var(--c24-space-2);
+}
+
+.job-widget-empty__text {
+  font-size: var(--c24-font-size-sm);
+  color: var(--c24-color-gray-600);
+  margin: 0;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes compass24FadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .job-accordion-item {
+    animation: none;
+  }
+
+  .job-accordion-item:hover {
+    box-shadow: var(--c24-shadow-md);
+  }
+
+  .job-cta:hover {
+    box-shadow: var(--c24-shadow-md);
+  }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 767px) {
+  .job-widget-section {
+    padding: var(--c24-space-6) var(--c24-space-4);
+  }
+
+  .job-widget-header__title {
+    font-size: var(--c24-font-size-xl);
+  }
+
+  .job-filter-bar {
+    padding: var(--c24-space-4);
+  }
+
+  .job-filter-bar__selects {
+    flex-direction: column;
+  }
+
+  .job-filter-bar__select {
+    flex: 1 1 auto;
+  }
+
+  .job-accordion-trigger {
+    padding: var(--c24-space-4);
+    font-size: var(--c24-font-size-base);
+  }
+
+  .job-accordion-trigger__title {
+    font-size: var(--c24-font-size-base);
+  }
+
+  .job-accordion-content__inner {
+    padding: 0 var(--c24-space-4) var(--c24-space-4);
+  }
+
+  .job-details-meta {
+    gap: var(--c24-space-4);
+    padding: var(--c24-space-4) 0;
+    margin-bottom: var(--c24-space-4);
+  }
+
+  .job-detail-label {
+    font-size: var(--c24-font-size-sm);
+  }
+
+  .job-accordion-content__description {
+    margin: var(--c24-space-4) 0;
+  }
+
+  .job-accordion-item {
+    margin-bottom: var(--c24-space-4);
+  }
+
+  .compass24-job-widget-component .job-accordion-item ul {
+    padding-left: 0;
+  }
+}

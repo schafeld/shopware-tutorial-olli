@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compass24 - Stellenangebote</title>
+</head>
+<body>
+<!-- The HTML header above is for preview purposes (DevTools mobile emulator). Do not copy to CMS content page. -->
+
+
+<!--
+Compass24 Job Widget Component
+Interactive, filterable job listings using Petite Vue 0.4.1 (inlined, no external dependencies).
+Renders job accordions from embedded JSON data.
+
+Date: 2026-02-13
+Version: 1.2.4
+
+Features:
+- Text search filter by job title
+- Filter by department (Bereich), employment type, and location
+- Animated accordion expand/collapse using native <details>/<summary>
+- Responsive layout (mobile-first)
+- Accessible (ARIA labels, keyboard navigation)
+- Zero external dependencies (Petite Vue ~6KB inlined vs Vue 3 ~40KB CDN)
+
+Data: Structured JSON embedded in <script> tag below.
+
+Important: 
+- Shopware uses double curly braces for Twig templating, so we need to use double square brackets [[ ]] for Vue interpolation.
+- In PROD the script needs to be delivered in two HTML containers to avoid some "net::ERR_QUIC_PROTOCOL_ERROR". 
+  So just insert the CSS in the first, the rest in a second block. On stage it works in one block.
+
+TODO: When the final combination of components is established, consider merging common styles into a shared CSS file.
+-->
+
+
+<!-- Compass24 Job Widget Component – PROD: Block 1/2 -->
+<style>
+  /* ============================================
+     SCOPED DESIGN TOKENS & BASE STYLES
+     Uses Bootstrap variables from compass24.de with fallbacks for standalone viewing
+     ============================================ */
+  .compass24-job-widget-component {
+    /*
+     * Colors - Use Bootstrap variables when available, with fallbacks
+     * Site primary: --bs-primary (#002856)
+     */
+    --c24-color-primary: var(--bs-primary, #003366);
+    --c24-color-primary-light: #0066b3;
+    --c24-color-primary-dark: #002244;
+    --c24-color-secondary: #0099cc;
+    --c24-color-accent: var(--bs-danger, #cc0000);
+    --c24-color-white: var(--bs-white, #ffffff);
+    --c24-color-gray-50: var(--bs-gray-100, #f9fafb);
+    --c24-color-gray-100: var(--bs-secondary-bg, #f3f4f6);
+    --c24-color-gray-200: #e5e7eb;
+    --c24-color-gray-500: var(--bs-gray, #6b7280);
+    --c24-color-gray-600: var(--bs-secondary-color, #4b5563);
+    --c24-color-gray-900: var(--bs-body-color, #111827);
+
+    /* Typography - Use site fonts when available */
+    --c24-font-family: var(--bs-body-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif);
+    --c24-font-size-xs: 0.75rem;
+    --c24-font-size-sm: var(--font-size-sm, 0.875rem);
+    --c24-font-size-base: var(--font-size-base, 1rem);
+    --c24-font-size-lg: var(--font-size-lg, 1.125rem);
+    --c24-font-size-xl: 1.25rem;
+    --c24-font-size-2xl: 1.5rem;
+
+    /* Spacing */
+    --c24-space-1: 0.25rem;
+    --c24-space-2: 0.5rem;
+    --c24-space-3: 0.75rem;
+    --c24-space-4: 1rem;
+    --c24-space-5: 1.25rem;
+    --c24-space-6: 1.5rem;
+    --c24-space-8: 2rem;
+    --c24-space-10: 2.5rem;
+    --c24-space-12: 3rem;
+
+    /* Borders & Shadows */
+    --c24-border-radius-sm: 0.25rem;
+    --c24-border-radius-md: 0.375rem;
+    --c24-border-radius-lg: 0.5rem;
+    --c24-border-radius-xl: 0.75rem;
+    --c24-border-radius-full: 9999px;
+    --c24-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --c24-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --c24-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --c24-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    /* Transitions */
+    --c24-transition-base: 250ms ease-in-out;
+
+    /* Base Component Styles */
+    font-family: var(--c24-font-family);
+    font-size: var(--c24-font-size-base);
+    line-height: 1.6;
+    color: var(--c24-color-gray-900);
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Universal box-sizing */
+  .compass24-job-widget-component *,
+  .compass24-job-widget-component *::before,
+  .compass24-job-widget-component *::after {
+    box-sizing: inherit;
+  }
+
+  /* ============================================
+     SECTION LAYOUT
+     ============================================ */
+  .job-widget-section {
+    padding: var(--c24-space-8) var(--c24-space-4);
+    background-color: var(--c24-color-gray-50);
+  }
+
+  .job-widget-header {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto var(--c24-space-8);
+  }
+
+  .job-widget-header__title {
+    font-size: var(--c24-font-size-2xl);
+    font-weight: 700;
+    color: var(--c24-color-primary);
+    margin: 0 0 var(--c24-space-2);
+  }
+
+  .job-widget-header__subtitle {
+    font-size: var(--c24-font-size-base);
+    color: var(--c24-color-gray-600);
+    margin: 0;
+  }
+
+  /* ============================================
+     FILTER BAR
+     ============================================ */
+  .job-filter-bar {
+    max-width: 900px;
+    margin: 0 auto var(--c24-space-8);
+    background-color: var(--c24-color-white);
+    border-radius: var(--c24-border-radius-xl);
+    padding: var(--c24-space-5);
+    box-shadow: var(--c24-shadow-md);
+  }
+
+  .job-filter-bar__search {
+    position: relative;
+    margin-bottom: var(--c24-space-4);
+  }
+
+  .job-filter-bar__search-icon {
+    position: absolute;
+    left: var(--c24-space-4);
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: var(--c24-font-size-lg);
+    color: var(--c24-color-gray-500);
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  .job-filter-bar__search-input {
+    width: 100%;
+    padding: var(--c24-space-3) var(--c24-space-4) var(--c24-space-3) 2.75rem;
+    border: 2px solid var(--c24-color-gray-200);
+    border-radius: var(--c24-border-radius-lg);
+    font-family: inherit;
+    font-size: var(--c24-font-size-base);
+    color: var(--c24-color-gray-900);
+    transition: border-color var(--c24-transition-base);
+    outline: none;
+    background-color: var(--c24-color-white);
+  }
+
+  .job-filter-bar__search-input::placeholder {
+    color: var(--c24-color-gray-500);
+  }
+
+  .job-filter-bar__search-input:focus {
+    border-color: var(--c24-color-primary-light);
+  }
+
+  .job-filter-bar__selects {
+    display: flex;
+    gap: var(--c24-space-3);
+    flex-wrap: wrap;
+  }
+
+  .job-filter-bar__select {
+    flex: 1 1 180px;
+    padding: var(--c24-space-3) var(--c24-space-4);
+    border: 2px solid var(--c24-color-gray-200);
+    border-radius: var(--c24-border-radius-lg);
+    font-family: inherit;
+    font-size: var(--c24-font-size-sm);
+    color: var(--c24-color-gray-900);
+    cursor: pointer;
+    transition: border-color var(--c24-transition-base);
+    outline: none;
+    background-color: var(--c24-color-white);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8.825a.7.7 0 0 1-.5-.2L1.675 4.8a.7.7 0 0 1 0-1 .7.7 0 0 1 1 0L6 7.125l3.325-3.3a.7.7 0 0 1 1 0 .7.7 0 0 1 0 1L6.5 8.625a.7.7 0 0 1-.5.2Z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2rem;
+  }
+
+  .job-filter-bar__select:focus {
+    border-color: var(--c24-color-primary-light);
+  }
+
+  .job-filter-bar__active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--c24-space-2);
+    margin-top: var(--c24-space-4);
+    align-items: center;
+  }
+
+  .job-filter-bar__active-label {
+    font-size: var(--c24-font-size-sm);
+    color: var(--c24-color-gray-600);
+    font-weight: 500;
+  }
+
+  .job-filter-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--c24-space-1);
+    padding: var(--c24-space-1) var(--c24-space-3);
+    background-color: #e8f4ff;
+    color: var(--c24-color-primary);
+    border-radius: var(--c24-border-radius-full);
+    font-size: var(--c24-font-size-xs);
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    transition: background-color var(--c24-transition-base);
+  }
+
+  .job-filter-tag:hover {
+    background-color: #d0e8ff;
+  }
+
+  .job-filter-tag__remove {
+    font-size: var(--c24-font-size-sm);
+    line-height: 1;
+    margin-left: var(--c24-space-1);
+  }
+
+  .job-filter-bar__reset {
+    font-size: var(--c24-font-size-xs);
+    color: var(--c24-color-gray-500);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: underline;
+    padding: var(--c24-space-1) var(--c24-space-2);
+    transition: color var(--c24-transition-base);
+  }
+
+  .job-filter-bar__reset:hover {
+    color: var(--c24-color-primary);
+  }
+
+  /* ============================================
+     RESULTS COUNT
+     ============================================ */
+  .job-widget-results {
+    max-width: 900px;
+    margin: 0 auto var(--c24-space-4);
+    font-size: var(--c24-font-size-sm);
+    color: var(--c24-color-gray-600);
+    padding: 0 var(--c24-space-1);
+  }
+
+  /* ============================================
+     ACCORDION CONTAINER
+     ============================================ */
+  .job-accordion {
+    max-width: 900px;
+    margin: 0 auto;
+    --bs-accordion-border-color: unset !important;
+  }
+
+  /* ============================================
+     ACCORDION ITEM (SINGLE JOB)
+     ============================================ */
+  .job-accordion-item {
+    background-color: var(--c24-color-white);
+    border-radius: var(--c24-border-radius-xl);
+    box-shadow: var(--c24-shadow-md);
+    margin-bottom: var(--c24-space-6);
+    overflow: hidden;
+    transition: all var(--c24-transition-base);
+    animation: compass24FadeInUp 0.6s ease-out both;
+  }
+
+  .job-accordion-item:hover {
+    box-shadow: var(--c24-shadow-lg);
+  }
+
+  .job-accordion-item:nth-child(1) { animation-delay: 0.05s; }
+  .job-accordion-item:nth-child(2) { animation-delay: 0.1s; }
+  .job-accordion-item:nth-child(3) { animation-delay: 0.15s; }
+  .job-accordion-item:nth-child(4) { animation-delay: 0.2s; }
+  .job-accordion-item:nth-child(5) { animation-delay: 0.25s; }
+  .job-accordion-item:nth-child(6) { animation-delay: 0.3s; }
+
+  /* Border-radius overrides */
+  .job-accordion-item:first-of-type {
+    border-top-left-radius: var(--c24-border-radius-xl) !important;
+    border-top-right-radius: var(--c24-border-radius-xl) !important;
+  }
+
+  .job-accordion-item:last-of-type {
+    border-bottom-left-radius: var(--c24-border-radius-xl) !important;
+    border-bottom-right-radius: var(--c24-border-radius-xl) !important;
+  }
+
+  /* ============================================
+     ACCORDION TRIGGER (SUMMARY)
+     ============================================ */
+  .job-accordion-trigger {
+    padding: var(--c24-space-6);
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--c24-space-4);
+    font-family: inherit;
+    font-size: var(--c24-font-size-lg);
+    font-weight: 600;
+    color: var(--c24-color-primary);
+    text-align: left;
+    transition: all var(--c24-transition-base);
+    list-style: none;
+    outline: none !important;
+  }
+
+  .job-accordion-trigger:hover {
+    background-color: var(--c24-color-gray-50);
+  }
+
+  .job-accordion-trigger:focus {
+    background-color: var(--c24-color-gray-100);
+    outline: none !important;
+  }
+
+  .job-accordion-trigger::-webkit-details-marker {
+    display: none;
+  }
+
+  .job-accordion-trigger::marker {
+    display: none;
+    content: '';
+  }
+
+  .job-accordion-trigger__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .job-accordion-trigger__title {
+    margin: 0 0 var(--c24-space-2);
+    font-size: var(--c24-font-size-lg);
+    font-weight: 600;
+    color: var(--c24-color-primary);
+    line-height: 1.3;
+  }
+
+  .job-accordion-trigger__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--c24-space-2);
+  }
+
+  .job-tag {
+    display: inline-block;
+    padding: var(--c24-space-1) var(--c24-space-3);
+    border-radius: var(--c24-border-radius-full);
+    font-size: var(--c24-font-size-xs);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .job-tag--employment {
+    background-color: #e8f4ff;
+    color: var(--c24-color-primary-light);
+  }
+
+  .job-tag--department {
+    background-color: #eef9ee;
+    color: #2d7a2d;
+  }
+
+  .job-tag--location {
+    background-color: #fff3e0;
+    color: #b36b00;
+  }
+
+  .job-accordion-trigger__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--c24-font-size-lg);
+    color: var(--c24-color-primary-dark);
+    flex-shrink: 0;
+    margin-top: var(--c24-space-1);
+    transition: transform var(--c24-transition-base);
+  }
+
+  .job-accordion-trigger__icon::after {
+    content: '▼';
+  }
+
+  .job-accordion-item[open] .job-accordion-trigger__icon::after {
+    content: '▲';
+  }
+
+  /* ============================================
+     ACCORDION CONTENT
+     ============================================ */
+  .job-accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--c24-transition-base);
+    opacity: 0;
+  }
+
+  .job-accordion-item[open] .job-accordion-content {
+    max-height: 3000px;
+    opacity: 1;
+    transition: max-height var(--c24-transition-base), opacity var(--c24-transition-base);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .job-accordion-content {
+      transition: none;
+    }
+  }
+
+  .job-accordion-content__inner {
+    padding: 0 var(--c24-space-6) var(--c24-space-6);
+    border-top: 1px solid var(--c24-color-gray-200);
+  }
+
+  /* ============================================
+     JOB DETAILS META
+     ============================================ */
+  .job-details-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--c24-space-6);
+    padding: var(--c24-space-6) 0;
+    border-bottom: 1px solid var(--c24-color-gray-200);
+    margin-bottom: var(--c24-space-6);
+  }
+
+  .job-detail-item {
+    display: flex;
+    align-items: center;
+    gap: var(--c24-space-3);
+  }
+
+  .job-detail-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  .job-detail-label {
+    font-size: var(--c24-font-size-sm);
+    color: var(--c24-color-gray-600);
+    font-weight: 500;
+  }
+
+  .job-accordion-content__description {
+    font-size: var(--c24-font-size-base);
+    color: var(--c24-color-gray-600);
+    line-height: 1.8;
+    margin: var(--c24-space-6) 0;
+  }
+
+  /* Description lists for job detail sections */
+  .job-accordion-content__list {
+    font-size: var(--c24-font-size-base);
+    color: var(--c24-color-gray-600);
+    line-height: 1.8;
+    margin: var(--c24-space-4) 0;
+  }
+
+  .job-accordion-content__list dt {
+    font-weight: 600;
+    color: var(--c24-color-primary);
+    margin-top: var(--c24-space-4);
+  }
+
+  .job-accordion-content__list dt:first-child {
+    margin-top: 0;
+  }
+
+  .job-accordion-content__list dd {
+    margin: 0 0 var(--c24-space-3) var(--c24-space-4);
+  }
+
+  .job-accordion-content__list li {
+    margin-bottom: var(--c24-space-2);
+  }
+
+  /* ============================================
+     CTA BUTTON
+     ============================================ */
+  .job-cta {
+    display: inline-block;
+    margin-top: var(--c24-space-6);
+    padding: var(--c24-space-3) var(--c24-space-6);
+    background: linear-gradient(135deg, var(--c24-color-primary-light), var(--c24-color-primary));
+    color: var(--c24-color-white);
+    border: none;
+    border-radius: var(--c24-border-radius-lg);
+    font-family: inherit;
+    font-size: var(--c24-font-size-base);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: box-shadow var(--c24-transition-base), background var(--c24-transition-base);
+    box-shadow: var(--c24-shadow-md);
+  }
+
+  .job-cta:hover {
+    box-shadow: var(--c24-shadow-lg);
+    background: linear-gradient(135deg, var(--c24-color-primary), var(--c24-color-primary-dark));
+  }
+
+  .job-cta:focus {
+    outline: 2px solid var(--c24-color-primary);
+    outline-offset: 2px;
+  }
+
+  .job-cta:active {
+    box-shadow: var(--c24-shadow-md);
+  }
+
+  /* ============================================
+     EMPTY STATE
+     ============================================ */
+  .job-widget-empty {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+    padding: var(--c24-space-12) var(--c24-space-4);
+    background-color: var(--c24-color-white);
+    border-radius: var(--c24-border-radius-xl);
+    box-shadow: var(--c24-shadow-md);
+  }
+
+  .job-widget-empty__icon {
+    font-size: 3rem;
+    margin-bottom: var(--c24-space-4);
+  }
+
+  .job-widget-empty__title {
+    font-size: var(--c24-font-size-lg);
+    font-weight: 600;
+    color: var(--c24-color-primary);
+    margin: 0 0 var(--c24-space-2);
+  }
+
+  .job-widget-empty__text {
+    font-size: var(--c24-font-size-sm);
+    color: var(--c24-color-gray-600);
+    margin: 0;
+  }
+
+  /* ============================================
+     ANIMATIONS
+     ============================================ */
+  @keyframes compass24FadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .job-accordion-item {
+      animation: none;
+    }
+
+    .job-accordion-item:hover {
+      box-shadow: var(--c24-shadow-md);
+    }
+
+    .job-cta:hover {
+      box-shadow: var(--c24-shadow-md);
+    }
+  }
+
+  /* ============================================
+     RESPONSIVE DESIGN
+     ============================================ */
+  @media (max-width: 767px) {
+    .job-widget-section {
+      padding: var(--c24-space-6) var(--c24-space-4);
+    }
+
+    .job-widget-header__title {
+      font-size: var(--c24-font-size-xl);
+    }
+
+    .job-filter-bar {
+      padding: var(--c24-space-4);
+    }
+
+    .job-filter-bar__selects {
+      flex-direction: column;
+    }
+
+    .job-filter-bar__select {
+      flex: 1 1 auto;
+    }
+
+    .job-accordion-trigger {
+      padding: var(--c24-space-4);
+      font-size: var(--c24-font-size-base);
+    }
+
+    .job-accordion-trigger__title {
+      font-size: var(--c24-font-size-base);
+    }
+
+    .job-accordion-content__inner {
+      padding: 0 var(--c24-space-4) var(--c24-space-4);
+    }
+
+    .job-details-meta {
+      gap: var(--c24-space-4);
+      padding: var(--c24-space-4) 0;
+      margin-bottom: var(--c24-space-4);
+    }
+
+    .job-detail-label {
+      font-size: var(--c24-font-size-sm);
+    }
+
+    .job-accordion-content__description {
+      font-size: var(--c24-font-size-m);
+      margin: var(--c24-space-4) 0;
+    }
+
+    .job-accordion-item {
+      margin-bottom: var(--c24-space-4);
+    }
+
+    .compass24-job-widget-component .job-accordion-item ul {
+      padding-left: 0;
+    }
+  }
+</style>
+
+
+
+<!-- Compass24 Job Widget Component – PROD: Block 2/2 -->
+<div id="job-widget-app" class="compass24-job-widget-component">
+  <section class="job-widget-section" aria-labelledby="job-widget-title">
+
+    <header class="job-widget-header">
+      <h2 id="job-widget-title" class="job-widget-header__title">Aktuelle Stellenangebote</h2>
+      <p class="job-widget-header__subtitle">Finde deinen Platz im Compass24-Team – Festanstellungen und Ausbildungsplätze</p>
+    </header>
+
+    <!-- Filter Bar -->
+    <div class="job-filter-bar" role="search" aria-label="Stellenangebote filtern">
+      <div class="job-filter-bar__search">
+        <span class="job-filter-bar__search-icon" aria-hidden="true">🔍</span>
+        <input
+          v-model="searchQuery"
+          type="search"
+          class="job-filter-bar__search-input"
+          placeholder="Stellenbezeichnung suchen…"
+          aria-label="Stellenbezeichnung suchen"
+        >
+      </div>
+      <div class="job-filter-bar__selects">
+        <select
+          v-model="filterDepartment"
+          class="job-filter-bar__select"
+          aria-label="Bereich filtern"
+        >
+          <option value="">Alle Bereiche</option>
+          <option v-for="dept in departments" :key="dept" :value="dept">[[ dept ]]</option>
+        </select>
+
+        <select
+          v-model="filterEmployment"
+          class="job-filter-bar__select"
+          aria-label="Beschäftigungsart filtern"
+        >
+          <option value="">Alle Beschäftigungsarten</option>
+          <option v-for="emp in employmentTypes" :key="emp" :value="emp">[[ emp ]]</option>
+        </select>
+
+        <select
+          v-model="filterLocation"
+          class="job-filter-bar__select"
+          aria-label="Standort filtern"
+        >
+          <option value="">Alle Standorte</option>
+          <option v-for="loc in locations" :key="loc" :value="loc">[[ loc ]]</option>
+        </select>
+      </div>
+
+      <!-- Active filters display -->
+      <div v-if="hasActiveFilters" class="job-filter-bar__active-filters">
+        <span class="job-filter-bar__active-label">Aktive Filter:</span>
+        <button
+          v-if="searchQuery"
+          class="job-filter-tag"
+          @click="searchQuery = ''"
+          :aria-label="'Filter entfernen: ' + searchQuery"
+        >
+          „[[ searchQuery ]]"
+          <span class="job-filter-tag__remove" aria-hidden="true">&times;</span>
+        </button>
+        <button
+          v-if="filterDepartment"
+          class="job-filter-tag"
+          @click="filterDepartment = ''"
+          :aria-label="'Filter entfernen: ' + filterDepartment"
+        >
+          [[ filterDepartment ]]
+          <span class="job-filter-tag__remove" aria-hidden="true">&times;</span>
+        </button>
+        <button
+          v-if="filterEmployment"
+          class="job-filter-tag"
+          @click="filterEmployment = ''"
+          :aria-label="'Filter entfernen: ' + filterEmployment"
+        >
+          [[ filterEmployment ]]
+          <span class="job-filter-tag__remove" aria-hidden="true">&times;</span>
+        </button>
+        <button
+          v-if="filterLocation"
+          class="job-filter-tag"
+          @click="filterLocation = ''"
+          :aria-label="'Filter entfernen: ' + filterLocation"
+        >
+          [[ filterLocation ]]
+          <span class="job-filter-tag__remove" aria-hidden="true">&times;</span>
+        </button>
+        <button class="job-filter-bar__reset" @click="resetFilters">Alle Filter zurücksetzen</button>
+      </div>
+    </div>
+
+    <!-- Results count -->
+    <div class="job-widget-results" aria-live="polite">
+      [[ filteredJobs.length ]] [[ filteredJobs.length === 1 ? 'Stelle' : 'Stellen' ]] gefunden
+    </div>
+
+    <!-- Job Accordions -->
+    <div class="job-accordion" role="region" aria-label="Stellenangebote">
+      <details
+        v-for="(job, index) in filteredJobs"
+        :key="job.id"
+        class="job-accordion-item"
+        :style="{ animationDelay: (index * 0.05 + 0.05) + 's' }"
+      >
+        <summary class="job-accordion-trigger">
+          <div class="job-accordion-trigger__info">
+            <h3 class="job-accordion-trigger__title">[[ job.title ]]</h3>
+            <div class="job-accordion-trigger__tags">
+              <span class="job-tag job-tag--employment">[[ job.employmentType ]]</span>
+              <span class="job-tag job-tag--department">[[ job.department ]]</span>
+              <span class="job-tag job-tag--location">📍 [[ job.location ]]</span>
+            </div>
+          </div>
+          <span class="job-accordion-trigger__icon" aria-hidden="true"></span>
+        </summary>
+
+        <div class="job-accordion-content">
+          <div class="job-accordion-content__inner">
+
+            <!-- Meta row -->
+            <div class="job-details-meta">
+              <div class="job-detail-item">
+                <span class="job-detail-icon" aria-hidden="true">⏰</span>
+                <span class="job-detail-label">[[ job.employmentType ]]</span>
+              </div>
+              <div class="job-detail-item">
+                <span class="job-detail-icon" aria-hidden="true">📍</span>
+                <span class="job-detail-label">[[ job.location ]]</span>
+              </div>
+              <div class="job-detail-item">
+                <span class="job-detail-icon" aria-hidden="true">📅</span>
+                <span class="job-detail-label">[[ job.startDate ]]</span>
+              </div>
+              <div v-if="job.workModel" class="job-detail-item">
+                <span class="job-detail-icon" aria-hidden="true">🏠</span>
+                <span class="job-detail-label">[[ job.workModel ]]</span>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <p class="job-accordion-content__description">[[ job.description ]]</p>
+
+            <!-- Sections (tasks, profile, benefits) -->
+            <dl class="job-accordion-content__list">
+              <template v-for="(section, sIdx) in job.sections" :key="sIdx">
+                <dt>[[ section.heading ]]</dt>
+                <dd>
+                  <ul>
+                    <li v-for="(item, iIdx) in section.items" :key="iIdx">[[ item ]]</li>
+                  </ul>
+                </dd>
+              </template>
+            </dl>
+
+            <a
+              :href="'mailto:sekretariat@compass24.de?subject=Bewerbung: ' + encodeURIComponent(job.title)"
+              class="job-cta"
+            >
+              Jetzt bewerben
+            </a>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- Empty state -->
+    <div v-if="filteredJobs.length === 0" class="job-widget-empty">
+      <div class="job-widget-empty__icon" aria-hidden="true">🔎</div>
+      <h3 class="job-widget-empty__title">Keine passenden Stellen gefunden</h3>
+      <p class="job-widget-empty__text">
+        Versuche andere Suchbegriffe oder Filter. Du kannst dich auch
+        <a href="mailto:sekretariat@compass24.de?subject=Initiativbewerbung">initiativ bewerben</a>.
+      </p>
+    </div>
+
+  </section>
+</div>
+
+
+<!--
+  Petite Vue 0.4.1 (inlined IIFE, ~6KB gzipped) – no external dependencies
+  
+  Petite Vue License (MIT):
+  
+  The MIT License (MIT)
+
+  Copyright (c) 2021-present, Yuxi (Evan) You
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
+  
+  Source: https://github.com/vuejs/petite-vue?tab=MIT-1-ov-file (MIT License)
+-->
+<script>
+var pn=Object.defineProperty,hn=(e,t,n)=>t in e?pn(e,t,{enumerable:!0,configurable:!0,writable:!0,value:n}):e[t]=n,C=(e,t,n)=>(hn(e,"symbol"!=typeof t?t+"":t,n),n),PetiteVue=function(e){"use strict";function t(e){if(a(e)){const n={};for(let s=0;s<e.length;s++){const i=e[s],o=d(i)?r(i):t(i);if(o)for(const e in o)n[e]=o[e]}return n}return d(e)||g(e)?e:void 0}const n=/;(?![^(]*\))/g,s=/:(.+)/;function r(e){const t={};return e.split(n).forEach((e=>{if(e){const n=e.split(s);n.length>1&&(t[n[0].trim()]=n[1].trim())}})),t}function i(e){let t="";if(d(e))t=e;else if(a(e))for(let n=0;n<e.length;n++){const s=i(e[n]);s&&(t+=s+" ")}else if(g(e))for(const n in e)e[n]&&(t+=n+" ");return t.trim()}function o(e,t){if(e===t)return!0;let n=h(e),s=h(t);if(n||s)return!(!n||!s)&&e.getTime()===t.getTime();if(n=a(e),s=a(t),n||s)return!(!n||!s)&&function(e,t){if(e.length!==t.length)return!1;let n=!0;for(let s=0;n&&s<e.length;s++)n=o(e[s],t[s]);return n}(e,t);if(n=g(e),s=g(t),n||s){if(!n||!s)return!1;if(Object.keys(e).length!==Object.keys(t).length)return!1;for(const n in e){const s=e.hasOwnProperty(n),r=t.hasOwnProperty(n);if(s&&!r||!s&&r||!o(e[n],t[n]))return!1}}return String(e)===String(t)}function c(e,t){return e.findIndex((e=>o(e,t)))}const l=Object.assign,f=Object.prototype.hasOwnProperty,u=(e,t)=>f.call(e,t),a=Array.isArray,p=e=>"[object Map]"===y(e),h=e=>e instanceof Date,d=e=>"string"==typeof e,m=e=>"symbol"==typeof e,g=e=>null!==e&&"object"==typeof e,v=Object.prototype.toString,y=e=>v.call(e),b=e=>d(e)&&"NaN"!==e&&"-"!==e[0]&&""+parseInt(e,10)===e,x=e=>{const t=Object.create(null);return n=>t[n]||(t[n]=e(n))},_=/-(\w)/g,w=x((e=>e.replace(_,((e,t)=>t?t.toUpperCase():"")))),$=/\B([A-Z])/g,k=x((e=>e.replace($,"-$1").toLowerCase())),O=e=>{const t=parseFloat(e);return isNaN(t)?e:t};function S(e,t){(t=t||undefined)&&t.active&&t.effects.push(e)}const E=e=>{const t=new Set(e);return t.w=0,t.n=0,t},j=e=>(e.w&N)>0,A=e=>(e.n&N)>0,P=new WeakMap;let R=0,N=1;const T=[];let M;const B=Symbol(""),L=Symbol("");class W{constructor(e,t=null,n){this.fn=e,this.scheduler=t,this.active=!0,this.deps=[],S(this,n)}run(){if(!this.active)return this.fn();if(!T.includes(this))try{return T.push(M=this),F.push(V),V=!0,N=1<<++R,R<=30?(({deps:e})=>{if(e.length)for(let t=0;t<e.length;t++)e[t].w|=N})(this):I(this),this.fn()}finally{R<=30&&(e=>{const{deps:t}=e;if(t.length){let n=0;for(let s=0;s<t.length;s++){const r=t[s];j(r)&&!A(r)?r.delete(e):t[n++]=r,r.w&=~N,r.n&=~N}t.length=n}})(this),N=1<<--R,z(),T.pop();const e=T.length;M=e>0?T[e-1]:void 0}}stop(){this.active&&(I(this),this.onStop&&this.onStop(),this.active=!1)}}function I(e){const{deps:t}=e;if(t.length){for(let n=0;n<t.length;n++)t[n].delete(e);t.length=0}}function K(e){e.effect.stop()}let V=!0;const F=[];function z(){const e=F.pop();V=void 0===e||e}function H(e,t,n){if(!V||void 0===M)return;let s=P.get(e);s||P.set(e,s=new Map);let r=s.get(n);r||s.set(n,r=E()),function(e,t){let n=!1;R<=30?A(e)||(e.n|=N,n=!j(e)):n=!e.has(M),n&&(e.add(M),M.deps.push(e))}(r)}function J(e,t,n,s,r,i){const o=P.get(e);if(!o)return;let c=[];if("clear"===t)c=[...o.values()];else if("length"===n&&a(e))o.forEach(((e,t)=>{("length"===t||t>=s)&&c.push(e)}));else switch(void 0!==n&&c.push(o.get(n)),t){case"add":a(e)?b(n)&&c.push(o.get("length")):(c.push(o.get(B)),p(e)&&c.push(o.get(L)));break;case"delete":a(e)||(c.push(o.get(B)),p(e)&&c.push(o.get(L)));break;case"set":p(e)&&c.push(o.get(B))}if(1===c.length)c[0]&&Z(c[0]);else{const e=[];for(const t of c)t&&e.push(...t);Z(E(e))}}function Z(e,t){for(const n of a(e)?e:[...e])(n!==M||n.allowRecurse)&&(n.scheduler?n.scheduler():n.run())}const q=function(e,t){const n=Object.create(null),s=e.split(",");for(let r=0;r<s.length;r++)n[s[r]]=!0;return t?e=>!!n[e.toLowerCase()]:e=>!!n[e]}("__proto__,__v_isRef,__isVue"),D=new Set(Object.getOwnPropertyNames(Symbol).map((e=>Symbol[e])).filter(m)),G=X(),U=X(!0),Q=function(){const e={};return["includes","indexOf","lastIndexOf"].forEach((t=>{e[t]=function(...e){const n=le(this);for(let t=0,r=this.length;t<r;t++)H(n,0,t+"");const s=n[t](...e);return-1===s||!1===s?n[t](...e.map(le)):s}})),["push","pop","shift","unshift","splice"].forEach((t=>{e[t]=function(...e){F.push(V),V=!1;const n=le(this)[t].apply(this,e);return z(),n}})),e}();function X(e=!1,t=!1){return function(n,s,r){if("__v_isReactive"===s)return!e;if("__v_isReadonly"===s)return e;if("__v_raw"===s&&r===(e?t?re:se:t?ne:te).get(n))return n;const i=a(n);if(!e&&i&&u(Q,s))return Reflect.get(Q,s,r);const o=Reflect.get(n,s,r);return(m(s)?D.has(s):q(s))||(e||H(n,0,s),t)?o:fe(o)?i&&b(s)?o:o.value:g(o)?e?function(e){return ce(e,!0,ee,null,se)}(o):oe(o):o}}const Y={get:G,set:function(e=!1){return function(t,n,s,r){let i=t[n];if(!e&&!function(e){return!(!e||!e.__v_isReadonly)}(s)&&(s=le(s),i=le(i),!a(t)&&fe(i)&&!fe(s)))return i.value=s,!0;const o=a(t)&&b(n)?Number(n)<t.length:u(t,n),c=Reflect.set(t,n,s,r);return t===le(r)&&(o?((e,t)=>!Object.is(e,t))(s,i)&&J(t,"set",n,s):J(t,"add",n,s)),c}}(),deleteProperty:function(e,t){const n=u(e,t);e[t];const s=Reflect.deleteProperty(e,t);return s&&n&&J(e,"delete",t,void 0),s},has:function(e,t){const n=Reflect.has(e,t);return(!m(t)||!D.has(t))&&H(e,0,t),n},ownKeys:function(e){return H(e,0,a(e)?"length":B),Reflect.ownKeys(e)}},ee={get:U,set:(e,t)=>!0,deleteProperty:(e,t)=>!0},te=new WeakMap,ne=new WeakMap,se=new WeakMap,re=new WeakMap;function ie(e){return e.__v_skip||!Object.isExtensible(e)?0:function(e){switch(e){case"Object":case"Array":return 1;case"Map":case"Set":case"WeakMap":case"WeakSet":return 2;default:return 0}}((e=>y(e).slice(8,-1))(e))}function oe(e){return e&&e.__v_isReadonly?e:ce(e,!1,Y,null,te)}function ce(e,t,n,s,r){if(!g(e)||e.__v_raw&&(!t||!e.__v_isReactive))return e;const i=r.get(e);if(i)return i;const o=ie(e);if(0===o)return e;const c=new Proxy(e,2===o?s:n);return r.set(e,c),c}function le(e){const t=e&&e.__v_raw;return t?le(t):e}function fe(e){return Boolean(e&&!0===e.__v_isRef)}Promise.resolve();let ue=!1;const ae=[],pe=Promise.resolve(),he=e=>pe.then(e),de=e=>{ae.includes(e)||ae.push(e),ue||(ue=!0,he(me))},me=()=>{for(const e of ae)e();ae.length=0,ue=!1},ge=/^(spellcheck|draggable|form|list|type)$/,ve=({el:e,get:t,effect:n,arg:s,modifiers:r})=>{let i;"class"===s&&(e._class=e.className),n((()=>{let n=t();if(s)(null==r?void 0:r.camel)&&(s=w(s)),ye(e,s,n,i);else{for(const t in n)ye(e,t,n[t],i&&i[t]);for(const t in i)(!n||!(t in n))&&ye(e,t,null)}i=n}))},ye=(e,n,s,r)=>{if("class"===n)e.setAttribute("class",i(e._class?[e._class,s]:s)||"");else if("style"===n){s=t(s);const{style:n}=e;if(s)if(d(s))s!==r&&(n.cssText=s);else{for(const e in s)xe(n,e,s[e]);if(r&&!d(r))for(const e in r)null==s[e]&&xe(n,e,"")}else e.removeAttribute("style")}else e instanceof SVGElement||!(n in e)||ge.test(n)?"true-value"===n?e._trueValue=s:"false-value"===n?e._falseValue=s:null!=s?e.setAttribute(n,s):e.removeAttribute(n):(e[n]=s,"value"===n&&(e._value=s))},be=/\s*!important$/,xe=(e,t,n)=>{a(n)?n.forEach((n=>xe(e,t,n))):t.startsWith("--")?e.setProperty(t,n):be.test(n)?e.setProperty(k(t),n.replace(be,""),"important"):e[t]=n},_e=(e,t)=>{const n=e.getAttribute(t);return null!=n&&e.removeAttribute(t),n},we=(e,t,n,s)=>{e.addEventListener(t,n,s)},$e=/^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/,ke=["ctrl","shift","alt","meta"],Oe={stop:e=>e.stopPropagation(),prevent:e=>e.preventDefault(),self:e=>e.target!==e.currentTarget,ctrl:e=>!e.ctrlKey,shift:e=>!e.shiftKey,alt:e=>!e.altKey,meta:e=>!e.metaKey,left:e=>"button"in e&&0!==e.button,middle:e=>"button"in e&&1!==e.button,right:e=>"button"in e&&2!==e.button,exact:(e,t)=>ke.some((n=>e[`${n}Key`]&&!t[n]))},Se=({el:e,get:t,exp:n,arg:s,modifiers:r})=>{if(!s)return;let i=$e.test(n)?t(`(e => ${n}(e))`):t(`($event => { ${n} })`);if("vue:mounted"!==s){if("vue:unmounted"===s)return()=>i();if(r){"click"===s&&(r.right&&(s="contextmenu"),r.middle&&(s="mouseup"));const e=i;i=t=>{if(!("key"in t)||k(t.key)in r){for(const e in r){const n=Oe[e];if(n&&n(t,r))return}return e(t)}}}we(e,s,i,r)}else he(i)},Ee=({el:e,get:t,effect:n})=>{n((()=>{e.textContent=Ce(t())}))},Ce=e=>null==e?"":g(e)?JSON.stringify(e,null,2):String(e),je=e=>"_value"in e?e._value:e.value,Ae=(e,t)=>{const n=t?"_trueValue":"_falseValue";return n in e?e[n]:t},Pe=e=>{e.target.composing=!0},Re=e=>{const t=e.target;t.composing&&(t.composing=!1,Ne(t,"input"))},Ne=(e,t)=>{const n=document.createEvent("HTMLEvents");n.initEvent(t,!0,!0),e.dispatchEvent(n)},Te=Object.create(null),Me=(e,t,n)=>Be(e,`return(${t})`,n),Be=(e,t,n)=>{const s=Te[t]||(Te[t]=Le(t));try{return s(e,n)}catch(r){console.error(r)}},Le=e=>{try{return new Function("$data","$el",`with($data){${e}}`)}catch(t){return console.error(`${t.message} in expression: ${e}`),()=>{}}},We={bind:ve,on:Se,show:({el:e,get:t,effect:n})=>{const s=e.style.display;n((()=>{e.style.display=t()?s:"none"}))},text:Ee,html:({el:e,get:t,effect:n})=>{n((()=>{e.innerHTML=t()}))},model:({el:e,exp:t,get:n,effect:s,modifiers:r})=>{const i=e.type,l=n(`(val) => { ${t} = val }`),{trim:f,number:u="number"===i}=r||{};if("SELECT"===e.tagName){const t=e;we(e,"change",(()=>{const e=Array.prototype.filter.call(t.options,(e=>e.selected)).map((e=>u?O(je(e)):je(e)));l(t.multiple?e:e[0])})),s((()=>{const e=n(),s=t.multiple;for(let n=0,r=t.options.length;n<r;n++){const r=t.options[n],i=je(r);if(s)a(e)?r.selected=c(e,i)>-1:r.selected=e.has(i);else if(o(je(r),e))return void(t.selectedIndex!==n&&(t.selectedIndex=n))}!s&&-1!==t.selectedIndex&&(t.selectedIndex=-1)}))}else if("checkbox"===i){let t;we(e,"change",(()=>{const t=n(),s=e.checked;if(a(t)){const n=je(e),r=c(t,n),i=-1!==r;if(s&&!i)l(t.concat(n));else if(!s&&i){const e=[...t];e.splice(r,1),l(e)}}else l(Ae(e,s))})),s((()=>{const s=n();a(s)?e.checked=c(s,je(e))>-1:s!==t&&(e.checked=o(s,Ae(e,!0))),t=s}))}else if("radio"===i){let t;we(e,"change",(()=>{l(je(e))})),s((()=>{const s=n();s!==t&&(e.checked=o(s,je(e)))}))}else{const t=e=>f?e.trim():u?O(e):e;we(e,"compositionstart",Pe),we(e,"compositionend",Re),we(e,(null==r?void 0:r.lazy)?"change":"input",(()=>{e.composing||l(t(e.value))})),f&&we(e,"change",(()=>{e.value=e.value.trim()})),s((()=>{if(e.composing)return;const s=e.value,r=n();document.activeElement===e&&t(s)===r||s!==r&&(e.value=r)}))}},effect:({el:e,ctx:t,exp:n,effect:s})=>{he((()=>s((()=>Be(t.scope,n,e)))))}},Ie=/([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/,Ke=/,([^,\}\]]*)(?:,([^,\}\]]*))?$/,Ve=/^\(|\)$/g,Fe=/^[{[]\s*((?:[\w_$]+\s*,?\s*)+)[\]}]$/,ze=(e,t,n)=>{const s=t.match(Ie);if(!s)return;const r=e.nextSibling,i=e.parentElement,o=new Text("");i.insertBefore(o,e),i.removeChild(e);const c=s[2].trim();let l,f,u,p,h=s[1].trim().replace(Ve,"").trim(),d=!1,m="key",v=e.getAttribute(m)||e.getAttribute(m=":key")||e.getAttribute(m="v-bind:key");v&&(e.removeAttribute(m),"key"===m&&(v=JSON.stringify(v))),(p=h.match(Ke))&&(h=h.replace(Ke,"").trim(),f=p[1].trim(),p[2]&&(u=p[2].trim())),(p=h.match(Fe))&&(l=p[1].split(",").map((e=>e.trim())),d="["===h[0]);let y,b,x,_=!1;const w=(e,t,s,r)=>{const i={};l?l.forEach(((e,n)=>i[e]=t[d?n:e])):i[h]=t,r?(f&&(i[f]=r),u&&(i[u]=s)):f&&(i[f]=s);const o=et(n,i),c=v?Me(o.scope,v):s;return e.set(c,s),o.key=c,o},$=(t,n)=>{const s=new nt(e,t);return s.key=t.key,s.insert(i,n),s};return n.effect((()=>{const e=Me(n.scope,c),t=x;if([b,x]=(e=>{const t=new Map,n=[];if(a(e))for(let s=0;s<e.length;s++)n.push(w(t,e[s],s));else if("number"==typeof e)for(let s=0;s<e;s++)n.push(w(t,s+1,s));else if(g(e)){let s=0;for(const r in e)n.push(w(t,e[r],s++,r))}return[n,t]})(e),_){for(let t=0;t<y.length;t++)x.has(y[t].key)||y[t].remove();const e=[];let n,s,r=b.length;for(;r--;){const c=b[r],l=t.get(c.key);let f;null==l?f=$(c,n?n.el:o):(f=y[l],Object.assign(f.ctx.scope,c.scope),l!==r&&(y[l+1]!==n||s===n)&&(s=f,f.insert(i,n?n.el:o))),e.unshift(n=f)}y=e}else y=b.map((e=>$(e,o))),_=!0})),r},He=({el:e,ctx:{scope:{$refs:t}},get:n,effect:s})=>{let r;return s((()=>{const s=n();t[s]=e,r&&s!==r&&delete t[r],r=s})),()=>{r&&delete t[r]}},Je=/^(?:v-|:|@)/,Ze=/\.([\w-]+)/g;let qe=!1;const De=(e,t)=>{const n=e.nodeType;if(1===n){const n=e;if(n.hasAttribute("v-pre"))return;let s;if(_e(n,"v-cloak"),s=_e(n,"v-if"))return((e,t,n)=>{const s=e.parentElement,r=new Comment("v-if");s.insertBefore(r,e);const i=[{exp:t,el:e}];let o,c;for(;(o=e.nextElementSibling)&&(c=null,""===_e(o,"v-else")||(c=_e(o,"v-else-if")));)s.removeChild(o),i.push({exp:c,el:o});const l=e.nextSibling;s.removeChild(e);let f,u=-1;const a=()=>{f&&(s.insertBefore(r,f.el),f.remove(),f=void 0)};return n.effect((()=>{for(let e=0;e<i.length;e++){const{exp:t,el:o}=i[e];if(!t||Me(n.scope,t))return void(e!==u&&(a(),f=new nt(o,n),f.insert(s,r),s.removeChild(r),u=e))}u=-1,a()})),l})(n,s,t);if(s=_e(n,"v-for"))return ze(n,s,t);if((s=_e(n,"v-scope"))||""===s){const e=s?Me(t.scope,s):{};t=et(t,e),e.$template&&Xe(n,e.$template)}const r=null!=_e(n,"v-once");r&&(qe=!0),(s=_e(n,"ref"))&&Qe(n,He,`"${s}"`,t),Ge(n,t);const i=[];for(const{name:e,value:o}of[...n.attributes])Je.test(e)&&"v-cloak"!==e&&("v-model"===e?i.unshift([e,o]):"@"===e[0]||/^v-on\b/.test(e)?i.push([e,o]):Ue(n,e,o,t));for(const[e,o]of i)Ue(n,e,o,t);r&&(qe=!1)}else if(3===n){const n=e.data;if(n.includes(t.delimiters[0])){let s,r=[],i=0;for(;s=t.delimitersRE.exec(n);){const e=n.slice(i,s.index);e&&r.push(JSON.stringify(e)),r.push(`$s(${s[1]})`),i=s.index+s[0].length}i<n.length&&r.push(JSON.stringify(n.slice(i))),Qe(e,Ee,r.join("+"),t)}}else 11===n&&Ge(e,t)},Ge=(e,t)=>{let n=e.firstChild;for(;n;)n=De(n,t)||n.nextSibling},Ue=(e,t,n,s)=>{let r,i,o;if(":"===(t=t.replace(Ze,((e,t)=>((o||(o={}))[t]=!0,""))))[0])r=ve,i=t.slice(1);else if("@"===t[0])r=Se,i=t.slice(1);else{const e=t.indexOf(":"),n=e>0?t.slice(2,e):t.slice(2);r=We[n]||s.dirs[n],i=e>0?t.slice(e+1):void 0}r&&(r===ve&&"ref"===i&&(r=He),Qe(e,r,n,s,i,o),e.removeAttribute(t))},Qe=(e,t,n,s,r,i)=>{const o=t({el:e,get:(t=n)=>Me(s.scope,t,e),effect:s.effect,ctx:s,exp:n,arg:r,modifiers:i});o&&s.cleanups.push(o)},Xe=(e,t)=>{if("#"!==t[0])e.innerHTML=t;else{const n=document.querySelector(t);e.appendChild(n.content.cloneNode(!0))}},Ye=e=>{const t={delimiters:["{{","}}"],delimitersRE:/\{\{([^]+?)\}\}/g,...e,scope:e?e.scope:oe({}),dirs:e?e.dirs:{},effects:[],blocks:[],cleanups:[],effect:e=>{if(qe)return de(e),e;const n=function(e,t){e.effect&&(e=e.effect.fn);const n=new W(e);t&&(l(n,t),t.scope&&S(n,t.scope)),(!t||!t.lazy)&&n.run();const s=n.run.bind(n);return s.effect=n,s}(e,{scheduler:()=>de(n)});return t.effects.push(n),n}};return t},et=(e,t={})=>{const n=e.scope,s=Object.create(n);Object.defineProperties(s,Object.getOwnPropertyDescriptors(t)),s.$refs=Object.create(n.$refs);const r=oe(new Proxy(s,{set:(e,t,s,i)=>i!==r||e.hasOwnProperty(t)?Reflect.set(e,t,s,i):Reflect.set(n,t,s)}));return tt(r),{...e,scope:r}},tt=e=>{for(const t of Object.keys(e))"function"==typeof e[t]&&(e[t]=e[t].bind(e))};class nt{constructor(e,t,n=!1){C(this,"template"),C(this,"ctx"),C(this,"key"),C(this,"parentCtx"),C(this,"isFragment"),C(this,"start"),C(this,"end"),this.isFragment=e instanceof HTMLTemplateElement,n?this.template=e:this.isFragment?this.template=e.content.cloneNode(!0):this.template=e.cloneNode(!0),n?this.ctx=t:(this.parentCtx=t,t.blocks.push(this),this.ctx=Ye(t)),De(this.template,this.ctx)}get el(){return this.start||this.template}insert(e,t=null){if(this.isFragment)if(this.start){let n,s=this.start;for(;s&&(n=s.nextSibling,e.insertBefore(s,t),s!==this.end);)s=n}else this.start=new Text(""),this.end=new Text(""),e.insertBefore(this.end,t),e.insertBefore(this.start,this.end),e.insertBefore(this.template,this.end);else e.insertBefore(this.template,t)}remove(){if(this.parentCtx&&((e,t)=>{const n=e.indexOf(t);n>-1&&e.splice(n,1)})(this.parentCtx.blocks,this),this.start){const e=this.start.parentNode;let t,n=this.start;for(;n&&(t=n.nextSibling,e.removeChild(n),n!==this.end);)n=t}else this.template.parentNode.removeChild(this.template);this.teardown()}teardown(){this.ctx.blocks.forEach((e=>{e.teardown()})),this.ctx.effects.forEach(K),this.ctx.cleanups.forEach((e=>e()))}}const st=e=>e.replace(/[-.*+?^${}()|[\]\/\\]/g,"\\$&"),rt=e=>{const t=Ye();if(e&&(t.scope=oe(e),tt(t.scope),e.$delimiters)){const[n,s]=t.delimiters=e.$delimiters;t.delimitersRE=new RegExp(st(n)+"([^]+?)"+st(s),"g")}let n;return t.scope.$s=Ce,t.scope.$nextTick=he,t.scope.$refs=Object.create(null),{directive(e,n){return n?(t.dirs[e]=n,this):t.dirs[e]},mount(e){if("string"==typeof e&&!(e=document.querySelector(e)))return;let s;return s=(e=e||document.documentElement).hasAttribute("v-scope")?[e]:[...e.querySelectorAll("[v-scope]")].filter((e=>!e.matches("[v-scope] [v-scope]"))),s.length||(s=[e]),n=s.map((e=>new nt(e,t,!0))),this},unmount(){n.forEach((e=>e.teardown()))}}},it=document.currentScript;return it&&it.hasAttribute("init")&&rt().mount(),e.createApp=rt,e.nextTick=he,e.reactive=oe,Object.defineProperty(e,"__esModule",{value:!0}),e[Symbol.toStringTag]="Module",e}({});
+</script>
+
+
+<script>
+/**
+ * Compass24 Job Widget
+ * Interactive, filterable job listings rendered from embedded JSON data.
+ * Uses Petite Vue (inlined) – no external script dependencies.
+ */
+const jobsData = [
+  {
+    id: 1,
+    title: "Full Stack Entwickler Shopware 6 PHP JavaScript (m/w/d)",
+    department: "IT & E-Commerce",
+    employmentType: "Vollzeit",
+    location: "Ascheberg",
+    workModel: "Hybrid (3 Tage vor Ort, 2 Tage remote)",
+    startDate: "Ab sofort",
+    description: "Das inhabergeführte Familienunternehmen Compass Yachtzubehör ist seit über 40 Jahren im Versandhandel für Segel und Wassersport-Ausrüstung tätig. Mit dem Fashion-Katalog SEALAND bieten wir hochwertige und funktionale Mode für Best Ager im DACH-Raum. Wir suchen für unser Team einen Full Stack Entwickler Shopware 6 PHP JavaScript (m/w/d).",
+    sections: [
+      {
+        heading: "Deine Aufgaben:",
+        items: [
+          "Entwicklung und Weiterentwicklung unserer internationalen Webshops auf Basis von Shopware 6 im Frontend und Backend",
+          "Entwicklung und Anpassung von Shopware 6 Plugins in PHP inklusive Backend Logik, Events und Services",
+          "Arbeit mit Shopware APIs und externen REST APIs zur Anbindung von Drittsystemen",
+          "Umsetzung moderner, responsiver Oberflächen mit Twig, HTML, CSS und JavaScript",
+          "Analyse und Umsetzung von Anforderungen auf Datenbankebene inklusive SQL Abfragen und Datenstrukturen",
+          "Optimierung von Performance, Ladezeiten und technischer Qualität im gesamten Shop Stack",
+          "Unterstützung bei SEO, Tracking und Analytics Anforderungen wie GA4 und Google Tag Manager",
+          "Testing, Debugging und Qualitätssicherung über alle Schichten hinweg",
+          "Enge Zusammenarbeit mit Marketing, Produktmanagement und IT bei der Konzeption und Umsetzung neuer Features"
+        ]
+      },
+      {
+        heading: "Dein Profil:",
+        items: [
+          "Abgeschlossene Ausbildung oder Studium im IT Umfeld oder vergleichbare praktische Erfahrung in der Webentwicklung",
+          "Gute PHP Kenntnisse und Verständnis für objektorientierte Entwicklung",
+          "Gute Kenntnisse in HTML, CSS und JavaScript sowie Erfahrung mit responsiven Frontends",
+          "Erfahrung mit Shopware 6 ist Voraussetzung",
+          "Sicherer Umgang mit REST APIs sowie grundlegendes Verständnis von Datenbanken und SQL",
+          "Interesse daran, fachliche Anforderungen technisch ganzheitlich zu durchdringen und umzusetzen",
+          "Strukturierte, selbstständige Arbeitsweise und Freude daran, Verantwortung für eigene Features zu übernehmen",
+          "Sehr gute Deutschkenntnisse in Wort und Schrift sowie gute Englischkenntnisse"
+        ]
+      },
+      {
+        heading: "Deine Vorteile:",
+        items: [
+          "Arbeiten in flachen Hierarchien mit kurzen Entscheidungswegen und echter Gestaltungsmöglichkeit",
+          "Direkter Austausch und enge Zusammenarbeit mit der Geschäftsführung",
+          "Flexible Arbeitszeiten und die Möglichkeit, mobil zu arbeiten",
+          "30 Tage Urlaub für Erholung, neue Inspiration und persönliche Auszeiten",
+          "13. Gehalt als Anerkennung für deinen Einsatz",
+          "Sicherer Arbeitsplatz in einem inhabergeführten Familienunternehmen mit langfristiger Perspektive",
+          "Wertschätzendes, kollegiales Umfeld mit Raum für Kreativität und Eigenverantwortung",
+          "Moderne Arbeitsausstattung"
+        ]
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: "Softwareentwickler PHP Node.js im eCommerce (m/w/d)",
+    department: "IT & E-Commerce",
+    employmentType: "Vollzeit",
+    location: "Ascheberg",
+    workModel: "Hybrid (3 Tage vor Ort, 2 Tage remote)",
+    startDate: "Ab sofort",
+    description: "Das inhabergeführte Familienunternehmen Compass Yachtzubehör ist seit über 40 Jahren im Versandhandel für Segel und Wassersport-Ausrüstung tätig. Wir suchen für unser Team einen Softwareentwickler PHP Node.js im eCommerce (m/w/d).",
+    sections: [
+      {
+        heading: "Deine Aufgaben:",
+        items: [
+          "Entwicklung und Weiterentwicklung unserer E-Commerce Plattformen und internen Anwendungen mit PHP und JavaScript/Node.js",
+          "Mitarbeit an der Backend und Plugin Entwicklung im Shopware Umfeld",
+          "Umsetzung und Erweiterung von Geschäftslogik in Services, Modulen und Schnittstellen",
+          "Anbindung externer Systeme über REST APIs sowie Pflege und Weiterentwicklung bestehender Integrationen",
+          "Unterstützung bei der Entwicklung und dem Ausbau eines internen Node.js Portals für interne Prozesse und Tools",
+          "Analyse von Anforderungen auf Datenbankebene inklusive SQL-Abfragen und Optimierungen",
+          "Mitarbeit an technischen Konzepten, Refactorings und Performance Optimierungen",
+          "Testing, Debugging und Sicherstellung der Code Qualität",
+          "Enge Zusammenarbeit mit E-Commerce, Marketing und IT bei der Umsetzung neuer Features und interner Tools"
+        ]
+      },
+      {
+        heading: "Dein Profil:",
+        items: [
+          "Abgeschlossene Ausbildung oder Studium im IT-Umfeld oder vergleichbare praktische Erfahrung als Softwareentwickler",
+          "Gute Kenntnisse in PHP sowie in JavaScript idealerweise mit Node.js",
+          "Erfahrung in der Backend Entwicklung und Interesse an ganzheitlichen technischen Zusammenhängen",
+          "Sicherer Umgang mit REST APIs und grundlegendes Verständnis von Datenbanken und SQL",
+          "Strukturierte und lösungsorientierte Arbeitsweise sowie Bereitschaft, sich in neue Themen einzuarbeiten",
+          "Freude daran, als Allrounder Verantwortung zu übernehmen und technische Themen aktiv mitzugestalten",
+          "Sehr gute Deutschkenntnisse in Wort und Schrift sowie gute Englischkenntnisse"
+        ]
+      },
+      {
+        heading: "Deine Vorteile:",
+        items: [
+          "Arbeiten in flachen Hierarchien mit kurzen Entscheidungswegen und echter Gestaltungsmöglichkeit",
+          "Direkter Austausch und enge Zusammenarbeit mit der Geschäftsführung",
+          "Flexible Arbeitszeiten und die Möglichkeit, mobil zu arbeiten",
+          "30 Tage Urlaub für Erholung, neue Inspiration und persönliche Auszeiten",
+          "13. Gehalt als Anerkennung für deinen Einsatz",
+          "Sicherer Arbeitsplatz in einem inhabergeführten Familienunternehmen mit langfristiger Perspektive",
+          "Wertschätzendes, kollegiales Umfeld mit Raum für Kreativität und Eigenverantwortung",
+          "Moderne Arbeitsausstattung"
+        ]
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: "Grafiker Fashion / Textil (m/w/d)",
+    department: "Marketing",
+    employmentType: "Vollzeit",
+    location: "Ascheberg",
+    workModel: "Hybrid (3 Tage vor Ort, 2 Tage remote)",
+    startDate: "Ab sofort",
+    description: "Compass Yachtzubehör ist ein inhabergeführtes Familienunternehmen mit über 40 Jahren Leidenschaft für Wassersport. Für unsere Fashion-Marke SEALAND suchen wir dich als Grafiker Fashion / Textil (m/w/d) – mit kreativer Handschrift, ausgeprägtem Modeverständnis und professioneller grafischer Expertise.",
+    sections: [
+      {
+        heading: "Deine Aufgaben:",
+        items: [
+          "Grafische Begleitung der Kollektionen entlang des gesamten Entstehungsprozesses – von Sortiments- und Kollektionsbesprechungen über Farb- und Gestaltungskonzepte bis zur Produktionsfreigabe",
+          "Gestaltung, Aufbau und kontinuierliche Weiterentwicklung des Sealand-Katalogs (Layout, Bild-Text-Komposition, Dramaturgie)",
+          "Enge Zusammenarbeit mit Einkauf und Produktmanagement während Musterung und Umsetzung",
+          "Vorbereitung und Mitwirkung bei Fotoproduktionen",
+          "Konzeptionelle Gestaltung der Kollektionen sowie Erstellung begleitender grafischer Inhalte für Print und Online"
+        ]
+      },
+      {
+        heading: "Dein Profil:",
+        items: [
+          "Abgeschlossene Ausbildung oder Studium im Bereich Mode-, Textil- oder Grafikdesign",
+          "Mehrjährige Erfahrung in der Gestaltung von Textil-Printkatalogen",
+          "Hohes gestalterisches Qualitätsbewusstsein sowie sehr gutes Gespür für Layout, Farben und Bildwelten",
+          "Kreative, strukturierte und teamorientierte Arbeitsweise",
+          "Ausgeprägtes Trendbewusstsein und Begeisterung für Fashion und Lifestyle",
+          "Sehr gute Kenntnisse in Adobe InDesign und Photoshop",
+          "Sicherer Umgang mit der Microsoft-Office-Umgebung",
+          "Erste Erfahrungen mit Automatisierung und KI-Tools von Vorteil"
+        ]
+      },
+      {
+        heading: "Deine Vorteile:",
+        items: [
+          "Arbeiten in flachen Hierarchien mit kurzen Entscheidungswegen und echter Gestaltungsmöglichkeit",
+          "Direkter Austausch und enge Zusammenarbeit mit der Geschäftsführung",
+          "Flexible Arbeitszeiten und die Möglichkeit, mobil zu arbeiten",
+          "30 Tage Urlaub für Erholung, neue Inspiration und persönliche Auszeiten",
+          "13. Gehalt als Anerkennung für deinen Einsatz",
+          "Sicherer Arbeitsplatz in einem inhabergeführten Familienunternehmen mit langfristiger Perspektive",
+          "Wertschätzendes, kollegiales Umfeld mit Raum für Kreativität und Eigenverantwortung",
+          "Moderne Arbeitsausstattung"
+        ]
+      }
+    ]
+  },
+  {
+    id: 4,
+    title: "Kaufmann/-frau im Einzelhandel (m/w/d)",
+    department: "Vertrieb",
+    employmentType: "Ausbildungsplatz",
+    location: "Ascheberg",
+    workModel: null,
+    startDate: "August 2026",
+    description: "Starte deine Karriere im maritimen Einzelhandel! Du lernst alles über Warenpräsentation, Kundenberatung und Verkauf bei Europas größtem Wassersport-Versandhaus. Wir bilden dich zum Experten für Bootszubehör und Wassersportartikel aus.",
+    sections: [
+      {
+        heading: "Deine Aufgaben:",
+        items: [
+          "Kundenberatung und Verkauf im Bereich Bootszubehör und Wassersportartikel",
+          "Verwaltung von Kundenaufträgen und Rechnungsbearbeitung",
+          "Warenpräsentation und Sortimentspflege",
+          "Korrespondenz mit Geschäftspartnern und Lieferanten",
+          "Unterstützung im Rechnungswesen und allgemeine Verwaltungsaufgaben"
+        ]
+      },
+      {
+        heading: "Das bringst du mit:",
+        items: [
+          "Guter Schulabschluss (Realschule oder höher)",
+          "Interesse an Handel, Verkauf und Kundenberatung",
+          "Sorgfältige und zuverlässige Arbeitsweise",
+          "Teamfähigkeit und Freude am Umgang mit Menschen",
+          "Idealerweise Begeisterung für Wassersport und maritime Themen"
+        ]
+      },
+      {
+        heading: "Wir bieten:",
+        items: [
+          "Qualifizierte Ausbildung in einem modernen Unternehmen",
+          "Übernahmemöglichkeiten nach der Ausbildung",
+          "Attraktive Ausbildungsvergütung",
+          "30 Tage Urlaub pro Jahr",
+          "Tolle Kolleginnen und Kollegen mit Wassersport-Passion",
+          "Moderne Arbeitsumgebung"
+        ]
+      }
+    ]
+  },
+  {
+    id: 5,
+    title: "Verkäufer/-in (m/w/d)",
+    department: "Vertrieb",
+    employmentType: "Ausbildungsplatz",
+    location: "Ascheberg",
+    workModel: null,
+    startDate: "August 2026",
+    description: "2-jährige Ausbildung mit Fokus auf Verkauf und Kundenservice. Perfekt für alle, die schnell ins Berufsleben einsteigen möchten und Freude am Umgang mit Menschen haben. Bei uns lernst du den Einzelhandel mit maritimem Flair kennen.",
+    sections: [
+      {
+        heading: "Deine Aufgaben:",
+        items: [
+          "Aktive Kundenberatung und Verkauf",
+          "Wareneingangskontrolle und Warenpräsentation",
+          "Kassieren und Abwicklung von Zahlungsvorgängen",
+          "Lagerhaltung und Bestandskontrolle",
+          "Unterstützung bei Inventuren und Sonderaktionen"
+        ]
+      },
+      {
+        heading: "Das bringst du mit:",
+        items: [
+          "Mindestens Hauptschulabschluss",
+          "Freude am Umgang mit Kunden",
+          "Zuverlässigkeit und Pünktlichkeit",
+          "Teamgeist und Hilfsbereitschaft",
+          "Interesse an Wassersport oder Bootszubehör ist ein Plus"
+        ]
+      },
+      {
+        heading: "Wir bieten:",
+        items: [
+          "2-jährige Ausbildung mit Option zur Verlängerung zum Kaufmann/-frau im Einzelhandel",
+          "Praxisnahe Ausbildung in einem erfahrenen Team",
+          "Attraktive Ausbildungsvergütung",
+          "30 Tage Urlaub pro Jahr",
+          "Team mit Wassersport-Passion",
+          "Moderne Einrichtungen"
+        ]
+      }
+    ]
+  },
+  {
+    id: 6,
+    title: "Lagermitarbeiter (m/w/d)",
+    department: "Logistik",
+    employmentType: "Vollzeit",
+    location: "Ascheberg",
+    workModel: null,
+    startDate: "Ab sofort",
+    description: "Compass24 sucht motivierte Lagermitarbeiter (m/w/d) zur Unterstützung unseres Lagerbetriebs. Du packst gerne an und sorgst dafür, dass alle Produkte sicher gelagert und schnell versendet werden? Dann bist du bei uns genau richtig!",
+    sections: [
+      {
+        heading: "Deine Aufgaben:",
+        items: [
+          "Wareneingangskontrolle und Einlagerung",
+          "Kommissionierung und Verpackung von Bestellungen",
+          "Wartung des Lagersystems und Bestandsverwaltung",
+          "Sicherheit und Ordnung im Lager",
+          "Unterstützung beim Versand von bis zu 5.000 Paketen täglich"
+        ]
+      },
+      {
+        heading: "Das bringst du mit:",
+        items: [
+          "Berufserfahrung in Logistik oder Lagerwirtschaft",
+          "Physische Belastbarkeit und Teamfähigkeit",
+          "Zuverlässigkeit und Genauigkeit",
+          "Gültige Fahrerlaubnis (Gabelstapler von Vorteil)"
+        ]
+      },
+      {
+        heading: "Wir bieten:",
+        items: [
+          "Tarifgerechte Bezahlung",
+          "30 Tage Urlaub pro Jahr",
+          "Team mit Wassersport-Passion",
+          "Moderne Einrichtungen und Lagertechnik",
+          "Sicherer Arbeitsplatz in einem wachsenden Unternehmen"
+        ]
+      }
+    ]
+  },
+  {
+    id: 7,
+    title: "Kundenberater im Bereich Wassersport (m/w/d)",
+    department: "Kundenservice",
+    employmentType: "Vollzeit",
+    location: "Ascheberg",
+    workModel: "Hybrid (3 Tage vor Ort, 2 Tage remote)",
+    startDate: "Ab sofort",
+    description: "Du liebst Wassersport und hast Freude am Umgang mit Menschen? Als Kundenberater (m/w/d) bei Compass24 berätst du unsere Kunden telefonisch und per E-Mail zu unserem Sortiment mit über 42.000 Produkten rund um Bootszubehör und Segelbedarf.",
+    sections: [
+      {
+        heading: "Deine Aufgaben:",
+        items: [
+          "Telefonische und schriftliche Beratung unserer Kunden zu Produkten und Bestellungen",
+          "Bearbeitung von Anfragen, Reklamationen und Retouren",
+          "Pflege der Kundendaten im CRM-System",
+          "Enge Zusammenarbeit mit Vertrieb, Logistik und Einkauf",
+          "Mitwirkung an der Optimierung unserer Service-Prozesse"
+        ]
+      },
+      {
+        heading: "Das bringst du mit:",
+        items: [
+          "Kaufmännische Ausbildung oder vergleichbare Erfahrung",
+          "Erfahrung im Kundenservice oder Vertrieb",
+          "Gute Kommunikationsfähigkeiten und Serviceorientierung",
+          "Sicherer Umgang mit MS Office und idealerweise CRM-Systemen",
+          "Begeisterung für Wassersport ist ein großes Plus"
+        ]
+      },
+      {
+        heading: "Wir bieten:",
+        items: [
+          "Arbeiten in flachen Hierarchien mit kurzen Entscheidungswegen",
+          "Flexible Arbeitszeiten und Home-Office-Möglichkeiten",
+          "30 Tage Urlaub pro Jahr",
+          "13. Gehalt",
+          "Sicherer Arbeitsplatz in einem inhabergeführten Familienunternehmen",
+          "Kollegiales Umfeld mit echten Wassersport-Enthusiasten"
+        ]
+      }
+    ]
+  },
+  {
+    id: 8,
+    title: "Praktikum im Bereich E-Commerce / Online-Marketing (m/w/d)",
+    department: "IT & E-Commerce",
+    employmentType: "Praktikum",
+    location: "Ascheberg",
+    workModel: null,
+    startDate: "Nach Vereinbarung",
+    description: "Du studierst im Bereich E-Commerce, Marketing oder Wirtschaftsinformatik und möchtest praktische Erfahrung im Online-Handel sammeln? Bei Compass24 bekommst du Einblicke in den Betrieb eines der führenden Wassersport-Onlineshops in Europa.",
+    sections: [
+      {
+        heading: "Deine Aufgaben:",
+        items: [
+          "Unterstützung bei der Pflege und Optimierung des Online-Shops",
+          "Mitarbeit bei der Erstellung von Online-Marketing-Kampagnen",
+          "Auswertung von Performance-Daten und KPIs",
+          "Unterstützung bei SEO- und SEA-Maßnahmen",
+          "Recherche zu aktuellen E-Commerce-Trends"
+        ]
+      },
+      {
+        heading: "Das bringst du mit:",
+        items: [
+          "Eingeschriebener Student (m/w/d) im Bereich BWL, Marketing, E-Commerce o.ä.",
+          "Interesse an digitalem Handel und Online-Marketing",
+          "Gute analytische Fähigkeiten und sicherer Umgang mit Excel",
+          "Eigeninitiative und strukturierte Arbeitsweise",
+          "Gute Deutsch- und Englischkenntnisse"
+        ]
+      },
+      {
+        heading: "Wir bieten:",
+        items: [
+          "Praxisnahe Einblicke in ein erfolgreiches E-Commerce-Unternehmen",
+          "Betreuung durch erfahrene Kolleginnen und Kollegen",
+          "Flexible Arbeitszeiten, abgestimmt auf dein Studium",
+          "Angemessene Praktikumsvergütung",
+          "Möglichkeit zur Übernahme als Werkstudent oder Festanstellung"
+        ]
+      }
+    ]
+  }
+];
+
+/**
+ * Robust initialization with fallback for various CMS injection scenarios
+ * Handles async DOM loading and context isolation issues in Shopware CMS
+ */
+function initJobWidget() {
+  const appEl = document.getElementById('job-widget-app');
+  
+  if (!appEl) {
+    console.warn('Compass24 Job Widget: #job-widget-app element not found in DOM');
+    return;
+  }
+  
+  try {
+    const app = PetiteVue.createApp({
+      $delimiters: ['[[', ']]'],
+      jobs: jobsData,
+      searchQuery: '',
+      filterDepartment: '',
+      filterEmployment: '',
+      filterLocation: '',
+
+      get departments() {
+        return [...new Set(this.jobs.map(j => j.department))].sort();
+      },
+
+      get employmentTypes() {
+        return [...new Set(this.jobs.map(j => j.employmentType))].sort();
+      },
+
+      get locations() {
+        return [...new Set(this.jobs.map(j => j.location))].sort();
+      },
+
+      get hasActiveFilters() {
+        return this.searchQuery || this.filterDepartment || this.filterEmployment || this.filterLocation;
+      },
+
+      get filteredJobs() {
+        const query = this.searchQuery.toLowerCase().trim();
+        return this.jobs.filter(job => {
+          if (query && !job.title.toLowerCase().includes(query)) return false;
+          if (this.filterDepartment && job.department !== this.filterDepartment) return false;
+          if (this.filterEmployment && job.employmentType !== this.filterEmployment) return false;
+          if (this.filterLocation && job.location !== this.filterLocation) return false;
+          return true;
+        });
+      },
+
+      resetFilters() {
+        this.searchQuery = '';
+        this.filterDepartment = '';
+        this.filterEmployment = '';
+        this.filterLocation = '';
+      }
+    });
+    
+    app.mount('#job-widget-app');
+    console.log('Compass24 Job Widget: Successfully mounted with ' + jobsData.length + ' jobs');
+  } catch (error) {
+    console.error('Compass24 Job Widget: Initialization error', error);
+  }
+}
+
+// Ensure DOM is fully loaded before initialization
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initJobWidget);
+} else {
+  // DOM is already loaded (script is deferred or at end of body)
+  initJobWidget();
+}
+</script>
+
+
+
+<!-- The HTML footer below is for preview purposes (DevTools mobile emulator). -->
+</body>
+</html>

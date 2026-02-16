@@ -1,0 +1,40 @@
+.sw-cms-el-preview-compass24-job-offers {
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 6px;
+    font-family: inherit;
+
+    .preview-header {
+        font-size: 13px;
+        font-weight: 700;
+        color: #003366;
+        margin-bottom: 8px;
+        text-align: center;
+    }
+
+    .preview-job {
+        background: #fff;
+        border-radius: 4px;
+        padding: 6px 8px;
+        margin-bottom: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .preview-title {
+        font-size: 10px;
+        font-weight: 600;
+        color: #003366;
+    }
+
+    .preview-tag {
+        font-size: 8px;
+        padding: 1px 6px;
+        border-radius: 10px;
+        background: #e8f4ff;
+        color: #0066b3;
+        font-weight: 600;
+    }
+}

@@ -1,0 +1,341 @@
+/* =============================================
+   Compass24 Job Offers – CMS Element Config Styles
+   ============================================= */
+
+.sw-cms-el-config-compass24-job-offers {
+    padding: 0 4px;
+
+    /* ---------- Section grouping ---------- */
+    .config-section {
+        margin-bottom: 24px;
+
+        &__title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin: 0 0 12px;
+        }
+
+        &__count {
+            font-weight: 400;
+            color: #808080;
+        }
+
+        &__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+    }
+
+    /* ---------- Job cards ---------- */
+    .job-card {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        overflow: hidden;
+        background: #fff;
+
+        &__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            cursor: pointer;
+            background: #f9fafb;
+            border-bottom: 1px solid transparent;
+            transition: background 150ms;
+
+            &:hover {
+                background: #f3f4f6;
+            }
+        }
+
+        &__header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        &__header-text {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        &__number {
+            font-size: 11px;
+            font-weight: 700;
+            color: #6b7280;
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            background: #e5e7eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        &__title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a1a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        &__dept {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        &__header-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        &__icon-btn {
+            background: none;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            width: 26px;
+            height: 26px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            transition: all 150ms;
+
+            &:hover {
+                background: #e5e7eb;
+                color: #1a1a1a;
+            }
+        }
+
+        &__chevron {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-left: 4px;
+        }
+
+        &__body {
+            padding: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        &__footer {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+    }
+
+    /* ---------- Form layout ---------- */
+    .form-group {
+        margin-bottom: 20px;
+
+        &__title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin: 0 0 10px;
+        }
+
+        &__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+    }
+
+    .form-row {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 4px;
+
+        &__col {
+            flex: 1;
+            min-width: 0;
+        }
+    }
+
+    /* ---------- Section blocks (tasks / profile / benefits) ---------- */
+    .section-block {
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 12px;
+        margin-bottom: 10px;
+        background: #fafbfc;
+
+        &__header {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+
+            .sw-text-field {
+                flex: 1;
+            }
+        }
+
+        &__remove {
+            background: none;
+            border: none;
+            color: #dc2626;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 6px;
+            margin-top: 22px;
+            border-radius: 4px;
+
+            &:hover {
+                background: #fee2e2;
+            }
+        }
+
+        &__items {
+            margin-top: 8px;
+            padding-left: 4px;
+        }
+    }
+
+    .section-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 4px;
+
+        .c24-input {
+            flex: 1;
+        }
+
+        &__remove {
+            background: none;
+            border: none;
+            color: #dc2626;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            flex-shrink: 0;
+
+            &:hover {
+                background: #fee2e2;
+            }
+        }
+    }
+
+    /* ---------- Native form elements (admin-styled) ---------- */
+    .c24-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 500;
+        color: #6b7280;
+        margin-bottom: 6px;
+    }
+
+    .c24-select,
+    .c24-input {
+        width: 100%;
+        padding: 7px 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        font-size: 13px;
+        font-family: inherit;
+        color: #1a1a1a;
+        background: #fff;
+        outline: none;
+        transition: border-color 150ms;
+
+        &:focus {
+            border-color: #189eff;
+        }
+    }
+
+    .c24-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0h10L5 6z' fill='%239ca3af'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        padding-right: 28px;
+        cursor: pointer;
+    }
+
+    /* ---------- Buttons ---------- */
+    .c24-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 14px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 500;
+        font-family: inherit;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 150ms;
+
+        &--primary {
+            background: #189eff;
+            color: #fff;
+            border-color: #189eff;
+
+            &:hover {
+                background: #0d7fe5;
+            }
+        }
+
+        &--danger {
+            background: #dc2626;
+            color: #fff;
+            border-color: #dc2626;
+
+            &:hover {
+                background: #b91c1c;
+            }
+        }
+
+        &--ghost {
+            background: none;
+            color: #189eff;
+            border-color: #d1d5db;
+
+            &:hover {
+                background: #f0f7ff;
+            }
+        }
+
+        &--small {
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+    }
+
+    /* ---------- Empty states ---------- */
+    .config-empty {
+        text-align: center;
+        padding: 24px 16px;
+        color: #6b7280;
+        background: #f9fafb;
+        border-radius: 8px;
+        border: 1px dashed #d1d5db;
+
+        p {
+            margin: 0 0 4px;
+            font-size: 13px;
+        }
+
+        &--small {
+            padding: 12px;
+        }
+    }
+}

@@ -1,0 +1,10 @@
+{% block sw_cms_block_compass24_job_offers %}
+    <div class="sw-cms-block-compass24-job-offers">
+        <slot name="jobOffers">
+            <sw-cms-slot
+                name="jobOffers"
+                :config="block.slots.jobOffers.config">
+            </sw-cms-slot>
+        </slot>
+    </div>
+{% endblock %}

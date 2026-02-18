@@ -23,6 +23,34 @@ A full-width banner displaying 5 key company metrics with a blue gradient backgr
 4. **5.000** - Pakete täglich
 5. **11** - Länder weltweit
 
+### 2. Job Offers Widget (Stellenangebote)
+
+An interactive job board widget powered by Petite Vue, allowing visitors to browse, search, and filter open positions. Jobs are fully manageable through the Shopware Administration CMS editor.
+
+**Features:**
+- Real-time search across job titles, descriptions, and departments
+- Filter by department and employment type (dropdown filters)
+- Accordion-style job detail expansion
+- "Apply Now" call-to-action linked to a configurable email address
+- Responsive design with mobile-optimized layout
+- Smooth animations and transitions
+- Multiple instances supported on the same page (unique element IDs)
+- Petite Vue client-side rendering (no server round-trips for search/filter)
+
+**Configurable Fields (per element):**
+- **Header Title** — e.g., "Aktuelle Stellenangebote"
+- **Header Subtitle** — e.g., "Finde deinen Platz im Compass24-Team"
+- **Application Email** — used in the "Jetzt bewerben" mailto link
+- **Jobs** — full CRUD management of individual job listings
+
+**Per-Job Fields:**
+- Title, Department, Employment Type, Location, Start Date, Work Model, Description
+- Expandable sections with heading + bullet point items (e.g., "Deine Aufgaben", "Dein Profil", "Deine Vorteile")
+
+**Default Jobs:**
+1. **Full Stack Entwickler Shopware 6** — IT & E-Commerce, Vollzeit, Hybrid
+2. **Kaufmann/-frau im Einzelhandel** — Vertrieb, Ausbildungsplatz
+
 ---
 
 ## Installation
@@ -83,7 +111,9 @@ bin/watch-storefront.sh
 1. Log into your Shopware Administration panel
 2. Navigate to **Content** → **Shopping Experiences**
 3. Create a new layout or edit an existing one
-4. Look for **"Compass24 Key Metrics"** in the block selection panel under the **Commerce** category
+4. Look for the blocks in the block selection panel under the **Commerce** category:
+   - **"Compass24 Key Metrics"**
+   - **"Compass24 Stellenangebote"** (Job Offers)
 
 ---
 
@@ -126,6 +156,50 @@ bin/watch-storefront.sh
 3. **Mobile-first**: Check mobile appearance - text should be readable on small screens
 4. **Accessibility**: The block includes ARIA labels, but ensure your values are meaningful
 
+### Adding the Job Offers Block to a Page
+
+1. **Open the Shopping Experience Editor**
+   - Go to **Content** → **Shopping Experiences**
+   - Click **"Create new layout"** or edit an existing layout
+
+2. **Add the Block**
+   - In the block selection sidebar, find the **Commerce** category
+   - Look for **"Compass24 Stellenangebote"**
+   - Drag and drop it into a **full-width section**
+
+3. **Configure General Settings**
+   - Click on the element and open the configuration panel
+   - Set the **Header Title** (e.g., "Aktuelle Stellenangebote")
+   - Set the **Header Subtitle** (e.g., "Finde deinen Platz im Compass24-Team")
+   - Set the **Application Email** (used for the "Jetzt bewerben" button)
+
+4. **Manage Job Listings**
+   - In the config panel, scroll to **Stellenangebote (Jobs)**
+   - Click **"+ Stelle hinzufügen"** to add a new job
+   - For each job, fill in:
+     - **Title**: Job title (e.g., "Full Stack Entwickler")
+     - **Department**: Select from predefined list (IT & E-Commerce, Vertrieb, etc.)
+     - **Employment Type**: Vollzeit, Teilzeit, Ausbildungsplatz, etc.
+     - **Location**, **Start Date**, **Work Model**, **Description**
+   - **Add Sections**: Each job can have multiple collapsible sections (e.g., tasks, requirements, benefits)
+     - Click **"+ Abschnitt"** to add a section with a heading
+     - Click **"+"** within a section to add bullet point items
+   - Use **↑ / ↓** buttons to reorder jobs
+   - Use the **duplicate** button to copy an existing job as a template
+   - Use the **delete** button to remove a job
+
+5. **Save and Publish**
+   - Click **"Save"** in the top right
+   - Preview the storefront — visitors will see the interactive job board with search, filters, and expandable details
+
+### Job Offers Editing Tips
+
+- **Sections are key**: Use sections (Aufgaben, Profil, Vorteile) to structure each job listing clearly
+- **Departments & types**: These power the dropdown filters on the storefront — keep naming consistent
+- **Email address**: The "Jetzt bewerben" button opens the visitor's email client with the configured address
+- **Duplicate to save time**: Use the duplicate button when adding similar positions
+- **Live preview**: The storefront widget updates instantly — no rebuild needed after content changes
+
 ---
 
 ## Technical Documentation
@@ -136,6 +210,8 @@ bin/watch-storefront.sh
 Compass24Blocks/
 ├── composer.json
 ├── README.md
+├── DOCUMENTATION.md                                  # Detailed English documentation
+├── DOKUMENTATION-de.md                               # German documentation
 ├── src/
 │   ├── Compass24Blocks.php                           # Main plugin class
 │   └── Resources/
@@ -145,23 +221,38 @@ Compass24Blocks/
 │       │   ├── administration/src/                   # Admin panel (Vue.js)
 │       │   │   ├── main.js                          # Entry point
 │       │   │   └── module/sw-cms/
-│       │   │       ├── blocks/compass24-key-metrics/     # Block definition
-│       │   │       │   ├── index.js                      # Block registration
-│       │   │       │   ├── component/                    # Block component
-│       │   │       │   └── preview/                      # Preview component
-│       │   │       └── elements/compass24-key-metrics/   # Element definition
-│       │   │           ├── index.js                      # Element registration
-│       │   │           ├── component/                    # Element wrapper
-│       │   │           ├── config/                       # Configuration UI
-│       │   │           └── preview/                      # Live preview
+│       │   │       ├── blocks/
+│       │   │       │   ├── compass24-key-metrics/        # Key Metrics block
+│       │   │       │   │   ├── index.js
+│       │   │       │   │   ├── component/
+│       │   │       │   │   └── preview/
+│       │   │       │   └── compass24-job-offers/         # Job Offers block
+│       │   │       │       ├── index.js
+│       │   │       │       ├── component/
+│       │   │       │       └── preview/
+│       │   │       └── elements/
+│       │   │           ├── compass24-key-metrics/        # Key Metrics element
+│       │   │           │   ├── index.js
+│       │   │           │   ├── component/
+│       │   │           │   ├── config/
+│       │   │           │   └── preview/
+│       │   │           └── compass24-job-offers/         # Job Offers element
+│       │   │               ├── index.js                 # Default config + registration
+│       │   │               ├── component/               # Admin element wrapper
+│       │   │               ├── config/                  # Full CRUD job editor UI
+│       │   │               └── preview/                 # Block picker preview
 │       │   └── storefront/src/                      # Frontend styles
 │       │       └── scss/
 │       │           ├── base.scss                    # Main SCSS entry
 │       │           └── component/
-│       │               └── _compass24-key-metrics.scss
+│       │               ├── _compass24-key-metrics.scss
+│       │               └── _compass24-job-offers.scss   # ~580 lines of widget styles
 │       └── views/storefront/                        # Frontend templates
+│           ├── block/
+│           │   └── cms-block-compass24-job-offers.html.twig
 │           └── element/
-│               └── cms-element-compass24-key-metrics.html.twig
+│               ├── cms-element-compass24-key-metrics.html.twig
+│               └── cms-element-compass24-job-offers.html.twig  # Petite Vue widget
 ```
 
 ### CMS Architecture
@@ -171,10 +262,12 @@ Compass24Blocks/
 - **CMS Element**: Individual content unit with configuration
 
 This plugin creates:
-- 1 Block: `compass24-key-metrics`
-- 1 Element: `compass24-key-metrics` (contained within the block)
+- 2 Blocks: `compass24-key-metrics`, `compass24-job-offers`
+- 2 Elements: `compass24-key-metrics`, `compass24-job-offers`
 
 ### Configuration Schema
+
+#### Key Metrics
 
 Each metric has two config fields:
 
@@ -192,6 +285,49 @@ Each metric has two config fields:
 ```
 
 Where X is 1-5 for the five metrics.
+
+#### Job Offers
+
+The element stores complex nested data as a JSON string:
+
+```javascript
+{
+    headerTitle:      { source: 'static', value: 'Aktuelle Stellenangebote' },
+    headerSubtitle:   { source: 'static', value: 'Finde deinen Platz...' },
+    applicationEmail: { source: 'static', value: 'sekretariat@compass24.de' },
+    jobs:             { source: 'static', value: '<JSON string>' }
+}
+```
+
+The `jobs` value is a JSON-serialized array of job objects:
+
+```javascript
+{
+    id: 1,
+    title: 'Full Stack Entwickler...',
+    department: 'IT & E-Commerce',       // Powers filter dropdown
+    employmentType: 'Vollzeit',          // Powers filter dropdown
+    location: 'Ascheberg',
+    workModel: 'Hybrid (3 Tage vor Ort, 2 Tage remote)',
+    startDate: 'Ab sofort',
+    description: '...',
+    sections: [
+        {
+            heading: 'Deine Aufgaben:',
+            items: ['Item 1', 'Item 2', '...']
+        }
+    ]
+}
+```
+
+### Petite Vue Integration
+
+The Job Offers widget uses [Petite Vue](https://github.com/vuejs/petite-vue) (v0.4.1, ~6KB) for client-side interactivity:
+
+- **Delimiter conflict**: Petite Vue defaults to `{{ }}` which conflicts with Twig. The widget uses `[[ ]]` delimiters instead.
+- **Library inlining**: The Petite Vue IIFE is embedded directly in the template, wrapped in `{% verbatim %}` to prevent Twig from parsing the library's internal `{{ }}` references.
+- **Data injection**: Job data is passed from Twig to Petite Vue via a `<script type="application/json">` tag, parsed at initialization.
+- **Multiple instances**: Each element uses Shopware's `element.id` (UUID) to scope DOM selectors, allowing multiple job boards on the same page.
 
 ### Styling
 
@@ -230,31 +366,38 @@ These integrate with Shopware's Bootstrap variables when available, with fallbac
 
 ## Customization
 
-### Extending the Block
+### Extending the Blocks
 
-If you need to customize the block appearance or behavior:
+If you need to customize block appearance or behavior:
 
-1. **Twig Template Override**: Override the template in your theme
+1. **Twig Template Override**: Override templates in your theme
 
    ```
    MyTheme/src/Resources/views/storefront/element/cms-element-compass24-key-metrics.html.twig
+   MyTheme/src/Resources/views/storefront/element/cms-element-compass24-job-offers.html.twig
    ```
 
 2. **SCSS Customization**: Override styles in your theme
 
    ```scss
-   // In your theme's main.scss
+   // Key Metrics
    .compass24-key-metrics-component {
        .metrics-section {
            background: linear-gradient(135deg, #your-color-1, #your-color-2);
        }
+   }
+
+   // Job Offers — uses CSS custom properties for easy theming
+   .c24-careers-widget {
+       --c24-accent: #0066b3;
+       --c24-accent-hover: #004d8c;
+       --c24-accent-bg: rgba(0, 51, 102, 0.06);
    }
    ```
 
 3. **JavaScript Enhancement**: Add custom JavaScript in your theme
 
    ```javascript
-   // Register a plugin for additional functionality
    import Plugin from 'src/plugin-system/plugin.class';
    
    export default class KeyMetricsPlugin extends Plugin {
@@ -271,6 +414,14 @@ To support more than 5 metrics, modify:
 1. `elements/compass24-key-metrics/index.js` - Add config fields
 2. `elements/compass24-key-metrics/config/index.js` - Add UI fields
 3. Template - Add metric blocks
+
+### Adding Job Fields
+
+To add new fields to job listings (e.g., salary range), modify:
+
+1. `elements/compass24-job-offers/index.js` - Add field to `defaultJobs` objects
+2. `elements/compass24-job-offers/config/` - Add input field to the config template
+3. `views/storefront/element/cms-element-compass24-job-offers.html.twig` - Render the new field
 
 ---
 
@@ -356,8 +507,9 @@ bin/watch-storefront.sh
 
 ### Version 1.0.0 (February 2026)
 - Initial release
-- Key Metrics Banner block
-- Responsive design with 5 metrics
+- **Key Metrics Banner** block — 5 editable metrics with animated gradient banner
+- **Job Offers Widget** block — interactive Petite Vue job board with search, filters, and full CRUD admin UI
+- Responsive design for both blocks
 - Full administration UI integration
 - Accessibility support
 - Animation effects
@@ -367,7 +519,7 @@ bin/watch-storefront.sh
 ## Credits
 
 **Developed for**: Compass24  
-**Based on**: Original HTML widget (key-metrics-section.html)  
+**Based on**: Original HTML widgets (key-metrics-section.html, job-widget.html)  
 **Shopware Version**: 6.7.0+  
 **License**: MIT
 

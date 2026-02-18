@@ -54,6 +54,15 @@ Added [SonarQube trial](https://sonarcloud.io/summary/overall?id=schafeld_shopwa
 
 If you're learning Shopware you'll find the [tutorial series](https://github.com/schafeld/shopware-tutorial-olli/tree/main/AI_DOCUMENTS/LEARNING_SHOPWARE) included in this repo helpful. Do not be fooled by the the concept of calling the lessons "Day 1" to "Day 7". Time estimates by AI are very unreliable and much too optimistic. If you are new to Shopware and its tech stack and you type the listings by hand in order to learn, the required time will be 2 to 3 times more than "a day". The AI time estimates for the exercises are ludicrous for a junior developer – just look at the included solutions. 😉
 
+#### Plugin Compass24 CMS Blocks
+
+The [Compass24Blocks plugin](custom/plugins/Compass24Blocks) provides reusable CMS blocks for the Shopware Shopping Experiences editor:
+
+- **Key Metrics Banner** — Full-width gradient banner displaying 5 editable company metrics with animated appearance
+- **Job Offers Widget (Stellenangebote)** — Interactive job board powered by Petite Vue with search, department/type filters, accordion details, and full CRUD job management through the admin UI
+
+See the [plugin README](custom/plugins/Compass24Blocks/README.md) for installation, usage, and technical details.
+
 #### Plugin Shopware Order Data Export to Google API
 
 There is a [prototype for a Shopware plugin "GotoWebinarGoogleSheetsExport"](https://github.com/schafeld/shopware-tutorial-olli/tree/main/custom/plugins/GotoWebinarGoogleSheetsExport) that allows eporting specified category order data to a Google Sheet (see [documentation](https://github.com/schafeld/shopware-tutorial-olli/tree/main/custom/plugins/GotoWebinarGoogleSheetsExport/docs) for details).

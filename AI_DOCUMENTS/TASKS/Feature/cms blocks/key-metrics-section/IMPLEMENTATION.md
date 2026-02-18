@@ -210,7 +210,7 @@ To use this block:
 4. ✅ Configure metric values for your needs
 5. ✅ Assign layouts to pages
 
-For detailed documentation, see the main [README.md](../../../../Compass24Blocks/README.md) in the plugin folder.
+For detailed documentation, see the main [README.md](../../../../../custom/plugins/Compass24Blocks/README.md) in the Compass24Blocks plugin folder.
 
 ---
 

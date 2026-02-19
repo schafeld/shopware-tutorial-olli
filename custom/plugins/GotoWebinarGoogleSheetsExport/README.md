@@ -17,7 +17,7 @@ And the originally [planned schema (Visio)](../../../documentation/assets/extens
 
 ![Webinar export schema](../../../documentation/assets/extension--export-category-items-to-google-sheet/Compass-Blauwasser-Weninar-Registrierung.png)
 
-**Note:** This was _not_ implemented in production for technical reasons.
+**Note:** This was _not_ implemented in production for technical reasons (and privacy/security might have posed an issue/challenge).
 
 ## Overview
 

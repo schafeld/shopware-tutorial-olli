@@ -7,6 +7,16 @@
 
 ---
 
+## Schema and Demo
+
+Here is a [demo video](../../../documentation/assets/extension--export-category-items-to-google-sheet/Shopware-to-Google-Category-Export--%202026-01-14.mov).
+
+![Screenshot video (no sound), demonstrating category item export to Google Sheet](../../../documentation/assets/extension--export-category-items-to-google-sheet/Shopware-to-Google-Category-Export--%202026-01-14.png)
+
+And the originally [planned schema (Visio)](../../../documentation/assets/extension--export-category-items-to-google-sheet/Compass-Blauwasser-Weninar-Registrierung.vsdx):
+
+![Webinar export schema](../../../documentation/assets/extension--export-category-items-to-google-sheet/Compass-Blauwasser-Weninar-Registrierung.png)
+
 ## Overview
 
 This Shopware 6 plugin automatically exports order data to Google Sheets when customers purchase products from a configurable category (default: "GotoWebinar"). The plugin supports both scheduled automatic exports and manual on-demand exports.
